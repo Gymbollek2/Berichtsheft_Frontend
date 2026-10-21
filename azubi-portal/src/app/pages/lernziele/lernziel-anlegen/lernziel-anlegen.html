@@ -1,49 +1,73 @@
-<div class="page-card" style="max-width: 720px">
-  <div class="page-title">{{ isEdit() ? 'Lernziel bearbeiten' : 'Neues Lernziel anlegen' }}</div>
-  <div class="page-subtitle">
-    Neue Lernziele werden automatisch allen Azubis und dualen Studierenden zugewiesen.
+<div class="page" style="max-width: 760px">
+  <div class="page-header">
+    <div>
+      <a routerLink="/lernziel-view-all" class="small d-inline-block mb-2"><i class="fa-solid fa-arrow-left me-1"></i>Alle Lernziele</a>
+      <h1 class="page-title">{{ isEdit() ? 'Lernziel bearbeiten' : 'Lernziel anlegen' }}</h1>
+      <p class="page-subtitle">
+        Richtlernziele stehen ganz oben. Darunter folgen Groblernziele, darunter Feinlernziele.
+        Neue Lernziele werden allen Azubis zugewiesen.
+      </p>
+    </div>
   </div>
 
   @if (error()) {
-    <div class="alert alert-danger">{{ error() }}</div>
+    <div class="alert alert-danger" role="alert">{{ error() }}</div>
   }
 
-  <form (ngSubmit)="speichern()">
+  <form class="panel" (ngSubmit)="speichern()" novalidate>
+    <fieldset class="mb-4">
+      <legend class="form-label">Art *</legend>
+      <div class="kind-choice">
+        @for (k of kindOptions; track k[0]) {
+          <label class="kind-option" [class.selected]="kind() === k[0]" [class.disabled]="kindLocked() && kind() !== k[0]">
+            <input type="radio" name="kind" class="visually-hidden" [value]="k[0]" [ngModel]="kind()" (ngModelChange)="kind.set($event)" [disabled]="kindLocked() && kind() !== k[0]" />
+            <span class="kind kind-{{ k[0] }}">{{ k[1] }}</span>
+            <span class="hint">
+              @switch (k[0]) {
+                @case ('KIND_GENERAL') { oberste Ebene }
+                @case ('KIND_BROAD') { gehört zu einem Richtlernziel }
+                @case ('KIND_SPECIFIC') { gehört zu einem Groblernziel }
+              }
+            </span>
+          </label>
+        }
+      </div>
+      @if (kindLocked()) {
+        <div class="form-text">Die Art ist gesperrt, weil {{ anzahlUntergeordnet() }} Unterziele zugeordnet sind.</div>
+      }
+    </fieldset>
+
+    @if (parentKind(); as pk) {
+      <div class="mb-4">
+        <label class="form-label" for="parent">Übergeordnetes {{ kindLabels[pk] }} *</label>
+        <select id="parent" class="form-select" name="parentId" [ngModel]="parentId()" (ngModelChange)="parentId.set($event)" required>
+          <option [ngValue]="null" disabled>{{ kindLabels[pk] }} wählen</option>
+          @for (l of parentOptions(); track l.id) {
+            <option [ngValue]="l.id">{{ l.title }}</option>
+          }
+        </select>
+        @if (parentOptions().length === 0) {
+          <div class="form-text">Es gibt noch kein {{ kindLabels[pk] }}. Lege zuerst eines an.</div>
+        }
+      </div>
+    }
+
     <div class="mb-3">
       <label class="form-label" for="title">Bezeichnung *</label>
-      <input id="title" class="form-control" name="title" [ngModel]="title()" (ngModelChange)="title.set($event)" maxlength="255" required placeholder="z. B. Unit-Tests mit JUnit schreiben" />
+      <input id="title" class="form-control" name="title" [ngModel]="title()" (ngModelChange)="title.set($event)" maxlength="255" required
+        placeholder="z. B. Unit-Tests mit JUnit schreiben" />
     </div>
 
-    <div class="mb-3">
+    <div class="mb-4">
       <label class="form-label" for="description">Beschreibung</label>
       <textarea id="description" class="form-control" name="description" rows="3" maxlength="2000" [ngModel]="description()" (ngModelChange)="description.set($event)"></textarea>
-    </div>
-
-    <div class="row g-3 mb-3">
-      <div class="col-md-5">
-        <label class="form-label" for="kind">Art *</label>
-        <select id="kind" class="form-select" name="kind" [ngModel]="kind()" (ngModelChange)="kind.set($event)">
-          @for (k of kindOptions; track k[0]) {
-            <option [value]="k[0]">{{ k[1] }}</option>
-          }
-        </select>
-      </div>
-      <div class="col-md-7">
-        <label class="form-label" for="parent">Übergeordnetes Lernziel</label>
-        <select id="parent" class="form-select" name="parentId" [ngModel]="parentId()" (ngModelChange)="parentId.set($event)">
-          <option [ngValue]="null">– keines (oberste Ebene) –</option>
-          @for (l of parentOptions(); track l.id) {
-            <option [ngValue]="l.id">{{ kindLabels[l.kind] }}: {{ l.title }}</option>
-          }
-        </select>
-      </div>
     </div>
 
     <div class="d-flex justify-content-end gap-2">
       <a class="btn btn-outline-secondary" routerLink="/lernziel-view-all">Abbrechen</a>
       <button type="submit" class="btn btn-brand" [disabled]="saving()">
         @if (saving()) { <span class="spinner-border spinner-border-sm me-1"></span> }
-        {{ isEdit() ? 'Speichern' : 'Anlegen' }}
+        {{ isEdit() ? 'Änderungen speichern' : 'Lernziel anlegen' }}
       </button>
     </div>
   </form>

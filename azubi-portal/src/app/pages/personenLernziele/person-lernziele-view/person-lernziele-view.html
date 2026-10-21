@@ -1,52 +1,59 @@
-<div class="page-card">
-  <div class="page-title">{{ auth.isStaff() ? 'Lernfortschritt der Azubis' : 'Meine Lernziele' }}</div>
-  <div class="page-subtitle">
+<div class="page">
+  <div class="page-header">
+    <div>
+      <h1 class="page-title">{{ auth.isStaff() ? 'Lernfortschritt' : 'Meine Lernziele' }}</h1>
+      <p class="page-subtitle">
+        @if (auth.isStaff()) {
+          Setze den Stand der Feinlernziele. Grob- und Richtlernziele werden daraus automatisch berechnet.
+        } @else {
+          Ein Feinlernziel wechselt auf „In Bearbeitung“, sobald du es im Berichtsheft angibst. „Erreicht“ bestätigt deine Ausbildung.
+        }
+      </p>
+    </div>
     @if (auth.isStaff()) {
-      Wähle eine Person und setze den Stand ihrer Lernziele.
-    } @else {
-      Lernziele werden automatisch auf „In Bearbeitung“ gesetzt, sobald du sie im Berichtsheft angibst. „Erreicht“ bestätigt dein Ausbilder.
+      <div class="page-actions">
+        <select class="form-select" style="min-width: 280px" [ngModel]="personId() ?? ''" (ngModelChange)="selectPerson($event)" aria-label="Person wählen">
+          <option value="">Person wählen</option>
+          @for (p of azubis(); track p.id) {
+            <option [value]="p.id">{{ p.fullName }} ({{ p.roleLabel }})</option>
+          }
+        </select>
+      </div>
     }
   </div>
 
   @if (error()) {
-    <div class="alert alert-danger alert-dismissible">
-      {{ error() }}<button type="button" class="btn-close" (click)="error.set('')"></button>
-    </div>
-  }
-
-  @if (auth.isStaff()) {
-    <div class="mb-3" style="max-width: 400px">
-      <label class="form-label">Person</label>
-      <select class="form-select" [ngModel]="personId() ?? ''" (ngModelChange)="selectPerson($event)">
-        <option value="">– bitte wählen –</option>
-        @for (p of azubis(); track p.id) {
-          <option [value]="p.id">{{ p.fullName }} ({{ p.roleLabel }})</option>
-        }
-      </select>
+    <div class="alert alert-danger alert-dismissible" role="alert">
+      {{ error() }}<button type="button" class="btn-close" (click)="error.set('')" aria-label="Schließen"></button>
     </div>
   }
 
   @if (fortschritt(); as f) {
-    <div class="row g-3 mb-3">
-      <div class="col-md-6">
-        <div class="stat-tile">
-          <div class="d-flex justify-content-between">
-            <span class="label">{{ f.personName }}</span>
-            <strong>{{ f.prozent }} %</strong>
-          </div>
-          <div class="progress progress-brand my-2" style="height: 12px">
-            <div class="progress-bar" [style.width.%]="f.prozent"></div>
-          </div>
-          <div class="label">{{ f.erreicht }} erreicht · {{ f.inBearbeitung }} in Bearbeitung · {{ f.offen }} offen · {{ f.gesamt }} gesamt</div>
-        </div>
+    <div class="figures">
+      <div class="figure">
+        <div class="value">{{ f.prozent }} %</div>
+        <div class="label">der Feinlernziele erreicht</div>
+        <div class="progress progress-brand mt-2"><div class="progress-bar" [style.width.%]="f.prozent"></div></div>
+      </div>
+      <div class="figure">
+        <div class="value">{{ f.erreicht }}</div>
+        <div class="label">erreicht</div>
+      </div>
+      <div class="figure">
+        <div class="value">{{ f.inBearbeitung }}</div>
+        <div class="label">in Bearbeitung</div>
+      </div>
+      <div class="figure">
+        <div class="value">{{ f.offen }}</div>
+        <div class="label">offen</div>
       </div>
     </div>
   }
 
   @if (lernziele().length > 0) {
-    <div class="d-flex flex-wrap gap-2 mb-2">
-      <input class="form-control" style="max-width: 300px" placeholder="Lernziel suchen…" [ngModel]="search()" (ngModelChange)="search.set($event)" />
-      <select class="form-select" style="max-width: 200px" [ngModel]="statusFilter()" (ngModelChange)="statusFilter.set($event)">
+    <div class="d-flex flex-wrap gap-2 mb-3">
+      <input class="form-control" style="max-width: 300px" placeholder="Lernziel suchen" [ngModel]="search()" (ngModelChange)="search.set($event)" aria-label="Lernziel suchen" />
+      <select class="form-select" style="max-width: 200px" [ngModel]="statusFilter()" (ngModelChange)="statusFilter.set($event)" aria-label="Nach Status filtern">
         <option value="">Alle Status</option>
         @for (s of statusOptions; track s[0]) {
           <option [value]="s[0]">{{ s[1] }}</option>
@@ -54,46 +61,53 @@
       </select>
     </div>
 
-    <table class="table table-hover">
-      <thead>
-        <tr>
-          <th>Lernziel</th>
-          <th>Art</th>
-          <th>Status</th>
-          <th>Geändert</th>
-        </tr>
-      </thead>
-      <tbody>
-        @for (pl of gefiltert(); track pl.id) {
+    <div class="panel panel-flush">
+      <table class="table table-hover">
+        <thead>
           <tr>
-            <td>
-              <div class="fw-semibold">{{ pl.lernziel.title }}</div>
-              @if (pl.lernziel.description) {
-                <div class="small text-muted">{{ pl.lernziel.description }}</div>
-              }
-            </td>
-            <td><span class="badge-status kind-{{ pl.lernziel.kind }}">{{ kindLabels[pl.lernziel.kind] }}</span></td>
-            <td style="min-width: 170px">
-              @if (auth.isStaff()) {
-                <select class="form-select form-select-sm" [ngModel]="pl.status" (ngModelChange)="setStatus(pl, $event)">
-                  @for (s of statusOptions; track s[0]) {
-                    <option [value]="s[0]">{{ s[1] }}</option>
-                  }
-                </select>
-              } @else {
-                <span class="badge-status status-{{ pl.status }}">{{ pl.statusLabel }}</span>
-              }
-            </td>
-            <td class="small text-muted">{{ pl.updatedAt ? (pl.updatedAt | date: 'dd.MM.yyyy') : '–' }}</td>
+            <th class="ps-4">Lernziel</th>
+            <th>Art</th>
+            <th>Stand</th>
+            <th class="pe-4">Geändert</th>
           </tr>
-        } @empty {
-          <tr><td colspan="4" class="text-muted">Keine Lernziele für diesen Filter.</td></tr>
-        }
-      </tbody>
-    </table>
+        </thead>
+        <tbody>
+          @for (row of gefiltert(); track row.pl.id) {
+            <tr [class.tree-root]="row.depth === 0 && !search() && !statusFilter()">
+              <td class="ps-4" [style.padding-left.rem]="1.5 + row.depth * 1.75">
+                <div [class.fw-medium]="row.pl.berechnet">{{ row.pl.lernziel.title }}</div>
+                @if (row.pl.lernziel.description && !row.pl.berechnet) {
+                  <div class="hint">{{ row.pl.lernziel.description }}</div>
+                }
+              </td>
+              <td><span class="kind kind-{{ row.pl.lernziel.kind }}">{{ kindLabels[row.pl.lernziel.kind] }}</span></td>
+              <td style="min-width: 190px">
+                @if (auth.isStaff() && !row.pl.berechnet) {
+                  <select class="form-select form-select-sm" [ngModel]="row.pl.status" (ngModelChange)="setStatus(row.pl, $event)" [attr.aria-label]="'Stand von ' + row.pl.lernziel.title">
+                    @for (s of statusOptions; track s[0]) {
+                      <option [value]="s[0]">{{ s[1] }}</option>
+                    }
+                  </select>
+                } @else {
+                  <span class="badge-status status-{{ row.pl.status }}">{{ row.pl.statusLabel }}</span>
+                  @if (row.pl.berechnet) {
+                    <span class="hint ms-1" title="Wird aus den Unterzielen berechnet">automatisch</span>
+                  }
+                }
+              </td>
+              <td class="hint num pe-4">{{ row.pl.updatedAt ? (row.pl.updatedAt | date: 'dd.MM.yyyy') : '–' }}</td>
+            </tr>
+          } @empty {
+            <tr><td colspan="4" class="hint ps-4">Keine Lernziele für diesen Filter.</td></tr>
+          }
+        </tbody>
+      </table>
+    </div>
   } @else if (loading()) {
     <div class="text-center py-4"><span class="spinner-border"></span></div>
   } @else if (!auth.isStaff() || selectedId()) {
-    <p class="text-muted">Es sind noch keine Lernziele zugeordnet.</p>
+    <p class="hint">Es sind noch keine Lernziele zugeordnet.</p>
+  } @else {
+    <div class="panel hint">Wähle oben eine Person, um ihren Lernfortschritt zu sehen.</div>
   }
 </div>

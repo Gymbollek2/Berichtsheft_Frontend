@@ -41,6 +41,26 @@ export const BERICHT_STATUS_LABELS: Record<BerichtStatus, string> = {
   ABGELEHNT: 'Zur Überarbeitung',
 };
 
+/** Hierarchie: Richtlernziel → keines, Groblernziel → Richtlernziel, Feinlernziel → Groblernziel. */
+export const REQUIRED_PARENT_KIND: Record<Kind, Kind | null> = {
+  KIND_GENERAL: null,
+  KIND_BROAD: 'KIND_GENERAL',
+  KIND_SPECIFIC: 'KIND_BROAD',
+};
+
+/** Art, die ein direktes Unterziel hat (Feinlernziele haben keine Unterziele). */
+export const CHILD_KIND: Record<Kind, Kind | null> = {
+  KIND_GENERAL: 'KIND_BROAD',
+  KIND_BROAD: 'KIND_SPECIFIC',
+  KIND_SPECIFIC: null,
+};
+
+/** Arten von Tagen, an denen gearbeitet bzw. gelernt wurde (Stunden + Beschreibung Pflicht). */
+export const ANWESEND: EintragArt[] = ['BETRIEB', 'SCHULE', 'SONSTIGES'];
+/** Tage ohne Lernziele (Urlaub, Krankheit, Feiertag). */
+export const ABWESEND: EintragArt[] = ['URLAUB', 'KRANK', 'FEIERTAG'];
+export const MAX_STUNDEN = 10;
+
 export function isStaff(role: Role | undefined | null): boolean {
   return role === 'ROLE_TRAINER' || role === 'ROLE_ADMIN';
 }
@@ -71,7 +91,6 @@ export interface PersonCreateRequest {
   username?: string | null;
   password: string;
   beruf?: string | null;
-  yearOfTraining: number;
   dateOfTrainingStart?: string | null;
   dateOfBirth?: string | null;
 }
@@ -82,7 +101,6 @@ export interface PersonUpdateRequest {
   role: Role;
   username: string;
   beruf?: string | null;
-  yearOfTraining: number;
   dateOfTrainingStart?: string | null;
   dateOfBirth?: string | null;
 }
@@ -100,6 +118,7 @@ export interface Lernziel {
   kind: Kind;
   kindLabel: string;
   parentId: number | null;
+  anzahlUntergeordnet: number;
 }
 
 export interface LernzielRequest {
@@ -115,6 +134,8 @@ export interface PersonLernziel {
   lernziel: Lernziel;
   status: LernzielStatus;
   statusLabel: string;
+  /** Status wird aus den Unterzielen berechnet und ist nicht direkt änderbar. */
+  berechnet: boolean;
   updatedAt: string | null;
 }
 

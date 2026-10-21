@@ -27,7 +27,7 @@ export function today(): string {
 export function errorMessage(err: unknown, fallback = 'Es ist ein Fehler aufgetreten'): string {
   if (err instanceof HttpErrorResponse) {
     if (err.status === 0) {
-      return 'Backend nicht erreichbar – läuft der Server auf Port 8080?';
+      return 'Backend nicht erreichbar – läuft der Server unter https://localhost:8443?';
     }
     const body = err.error as { message?: string } | null;
     if (body && typeof body === 'object' && body.message) {
@@ -46,4 +46,24 @@ export function normalizeSearch(value: string | null | undefined): string {
     .replace(/ö/g, 'oe')
     .replace(/ü/g, 'ue')
     .replace(/ß/g, 'ss');
+}
+
+/** Baut aus einer flachen Liste mit parentId eine Baum-Reihenfolge (Eltern vor Kindern) mit Tiefe. */
+export function treeOrder<T>(items: T[], id: (t: T) => number, parentId: (t: T) => number | null): { item: T; depth: number }[] {
+  const ids = new Set(items.map(id));
+  const children = new Map<number | null, T[]>();
+  for (const item of items) {
+    const p = parentId(item);
+    const key = p !== null && ids.has(p) ? p : null;
+    children.set(key, [...(children.get(key) ?? []), item]);
+  }
+  const result: { item: T; depth: number }[] = [];
+  const visit = (parent: number | null, depth: number) => {
+    for (const item of children.get(parent) ?? []) {
+      result.push({ item, depth });
+      visit(id(item), depth + 1);
+    }
+  };
+  visit(null, 0);
+  return result;
 }

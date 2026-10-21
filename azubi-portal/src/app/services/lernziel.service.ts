@@ -1,7 +1,7 @@
 import { Injectable, inject } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { Observable } from 'rxjs';
-import { CsvImportResult, Lernziel, LernzielRequest } from '@app/core/models';
+import { CsvImportResult, Kind, Lernziel, LernzielRequest } from '@app/core/models';
 
 @Injectable({ providedIn: 'root' })
 export class LernzielService {
@@ -10,6 +10,11 @@ export class LernzielService {
 
   getAll(): Observable<Lernziel[]> {
     return this.http.get<Lernziel[]>(this.url);
+  }
+
+  /** Lernziele, die für die Art als übergeordnetes Lernziel erlaubt sind. */
+  getParentOptions(kind: Kind): Observable<Lernziel[]> {
+    return this.http.get<Lernziel[]>(`${this.url}/parent-options`, { params: { kind } });
   }
 
   getById(id: number): Observable<Lernziel> {

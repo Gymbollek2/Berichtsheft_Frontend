@@ -3,8 +3,8 @@ import { FormsModule } from '@angular/forms';
 import { RouterLink } from '@angular/router';
 import { Auth } from '@app/services/auth';
 import { LernzielService } from '@app/services/lernziel.service';
-import { CsvImportResult, KIND_LABELS, Kind, Lernziel } from '@app/core/models';
-import { errorMessage, normalizeSearch } from '@app/core/utils';
+import { CHILD_KIND, CsvImportResult, KIND_LABELS, Kind, Lernziel } from '@app/core/models';
+import { errorMessage, normalizeSearch, treeOrder } from '@app/core/utils';
 
 interface TreeRow {
   lernziel: Lernziel;
@@ -23,6 +23,7 @@ export class LernzielViewAll implements OnInit {
 
   readonly kindLabels = KIND_LABELS;
   readonly kindOptions = Object.entries(KIND_LABELS) as [Kind, string][];
+  readonly childKind = CHILD_KIND;
 
   readonly lernziele = signal<Lernziel[]>([]);
   readonly error = signal('');
@@ -43,21 +44,7 @@ export class LernzielViewAll implements OnInit {
         .filter((l) => !q || normalizeSearch(l.title + ' ' + (l.description ?? '')).includes(q))
         .map((lernziel) => ({ lernziel, depth: 0 }));
     }
-    const ids = new Set(all.map((l) => l.id));
-    const children = new Map<number | null, Lernziel[]>();
-    for (const l of all) {
-      const parent = l.parentId !== null && ids.has(l.parentId) ? l.parentId : null;
-      children.set(parent, [...(children.get(parent) ?? []), l]);
-    }
-    const result: TreeRow[] = [];
-    const visit = (parent: number | null, depth: number) => {
-      for (const l of children.get(parent) ?? []) {
-        result.push({ lernziel: l, depth });
-        visit(l.id, depth + 1);
-      }
-    };
-    visit(null, 0);
-    return result;
+    return treeOrder(all, (l) => l.id, (l) => l.parentId).map((r) => ({ lernziel: r.item, depth: r.depth }));
   });
 
   readonly parentTitle = computed(() => {
@@ -86,7 +73,11 @@ export class LernzielViewAll implements OnInit {
   }
 
   loeschen(l: Lernziel): void {
-    if (!confirm(`Lernziel „${l.title}“ wirklich löschen? Die Zuordnung bei allen Azubis geht verloren.`)) {
+    if (l.anzahlUntergeordnet > 0) {
+      this.error.set(`„${l.title}“ hat ${l.anzahlUntergeordnet} Unterziele. Bitte zuerst diese löschen.`);
+      return;
+    }
+    if (!confirm(`Lernziel „${l.title}“ wirklich löschen? Der Fortschritt aller Azubis zu diesem Lernziel geht verloren.`)) {
       return;
     }
     this.service.delete(l.id).subscribe({

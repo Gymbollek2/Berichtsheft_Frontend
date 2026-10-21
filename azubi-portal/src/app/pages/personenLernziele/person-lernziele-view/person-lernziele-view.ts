@@ -13,7 +13,7 @@ import {
   PersonLernziel,
   STATUS_LABELS,
 } from '@app/core/models';
-import { errorMessage, normalizeSearch } from '@app/core/utils';
+import { errorMessage, normalizeSearch, treeOrder } from '@app/core/utils';
 
 /**
  * Lernfortschritt: Azubis sehen ihre eigenen Lernziele, Ausbilder wählen einen Azubi
@@ -46,14 +46,23 @@ export class PersonLernzieleView {
 
   readonly selectedId = computed(() => (this.personId() ? Number(this.personId()) : null));
 
-  readonly gefiltert = computed(() => {
+  /** Ohne Filter als Baum (Richt → Grob → Fein), mit Filter als flache Trefferliste. */
+  readonly gefiltert = computed<{ pl: PersonLernziel; depth: number }[]>(() => {
     const q = normalizeSearch(this.search());
     const status = this.statusFilter();
-    return this.lernziele().filter(
-      (pl) =>
-        (!status || pl.status === status) &&
-        (!q || normalizeSearch(pl.lernziel.title + ' ' + (pl.lernziel.description ?? '')).includes(q)),
-    );
+    if (!q && !status) {
+      return treeOrder(this.lernziele(), (pl) => pl.lernziel.id, (pl) => pl.lernziel.parentId).map((r) => ({
+        pl: r.item,
+        depth: r.depth,
+      }));
+    }
+    return this.lernziele()
+      .filter(
+        (pl) =>
+          (!status || pl.status === status) &&
+          (!q || normalizeSearch(pl.lernziel.title + ' ' + (pl.lernziel.description ?? '')).includes(q)),
+      )
+      .map((pl) => ({ pl, depth: 0 }));
   });
 
   constructor() {
@@ -97,9 +106,12 @@ export class PersonLernzieleView {
 
   setStatus(pl: PersonLernziel, status: LernzielStatus): void {
     this.service.setStatus(pl.id, status).subscribe({
-      next: (updated) => {
-        this.lernziele.update((list) => list.map((x) => (x.id === updated.id ? updated : x)));
-        this.loadProgress(this.selectedId());
+      next: () => {
+        // Übergeordnete Ziele werden im Backend neu berechnet → Liste ohne Flackern neu laden
+        const id = this.selectedId();
+        const list$ = id ? this.service.getForPerson(id) : this.service.getMine();
+        list$.subscribe((list) => this.lernziele.set(list));
+        this.loadProgress(id);
       },
       error: (err) => this.error.set(errorMessage(err)),
     });

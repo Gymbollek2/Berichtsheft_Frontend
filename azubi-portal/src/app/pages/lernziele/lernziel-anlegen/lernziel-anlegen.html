@@ -1,0 +1,50 @@
+<div class="page-card" style="max-width: 720px">
+  <div class="page-title">{{ isEdit() ? 'Lernziel bearbeiten' : 'Neues Lernziel anlegen' }}</div>
+  <div class="page-subtitle">
+    Neue Lernziele werden automatisch allen Azubis und dualen Studierenden zugewiesen.
+  </div>
+
+  @if (error()) {
+    <div class="alert alert-danger">{{ error() }}</div>
+  }
+
+  <form (ngSubmit)="speichern()">
+    <div class="mb-3">
+      <label class="form-label" for="title">Bezeichnung *</label>
+      <input id="title" class="form-control" name="title" [ngModel]="title()" (ngModelChange)="title.set($event)" maxlength="255" required placeholder="z. B. Unit-Tests mit JUnit schreiben" />
+    </div>
+
+    <div class="mb-3">
+      <label class="form-label" for="description">Beschreibung</label>
+      <textarea id="description" class="form-control" name="description" rows="3" maxlength="2000" [ngModel]="description()" (ngModelChange)="description.set($event)"></textarea>
+    </div>
+
+    <div class="row g-3 mb-3">
+      <div class="col-md-5">
+        <label class="form-label" for="kind">Art *</label>
+        <select id="kind" class="form-select" name="kind" [ngModel]="kind()" (ngModelChange)="kind.set($event)">
+          @for (k of kindOptions; track k[0]) {
+            <option [value]="k[0]">{{ k[1] }}</option>
+          }
+        </select>
+      </div>
+      <div class="col-md-7">
+        <label class="form-label" for="parent">Übergeordnetes Lernziel</label>
+        <select id="parent" class="form-select" name="parentId" [ngModel]="parentId()" (ngModelChange)="parentId.set($event)">
+          <option [ngValue]="null">– keines (oberste Ebene) –</option>
+          @for (l of parentOptions(); track l.id) {
+            <option [ngValue]="l.id">{{ kindLabels[l.kind] }}: {{ l.title }}</option>
+          }
+        </select>
+      </div>
+    </div>
+
+    <div class="d-flex justify-content-end gap-2">
+      <a class="btn btn-outline-secondary" routerLink="/lernziel-view-all">Abbrechen</a>
+      <button type="submit" class="btn btn-brand" [disabled]="saving()">
+        @if (saving()) { <span class="spinner-border spinner-border-sm me-1"></span> }
+        {{ isEdit() ? 'Speichern' : 'Anlegen' }}
+      </button>
+    </div>
+  </form>
+</div>

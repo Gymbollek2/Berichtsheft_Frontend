@@ -1,0 +1,86 @@
+<div class="page-card">
+  <div class="d-flex flex-wrap justify-content-between align-items-start gap-2">
+    <div>
+      <div class="page-title">Lernziele</div>
+      <div class="page-subtitle">{{ lernziele().length }} Lernziele aus dem Ausbildungsrahmenplan</div>
+    </div>
+    @if (auth.isStaff()) {
+      <div class="d-flex flex-wrap gap-2">
+        <a class="btn btn-brand" routerLink="/lernziel-anlegen"><i class="fa-solid fa-plus me-1"></i>Neues Lernziel</a>
+        <button class="btn btn-outline-secondary" (click)="exportCsv()"><i class="fa-solid fa-file-export me-1"></i>CSV-Export</button>
+        <label class="btn btn-outline-secondary mb-0">
+          <i class="fa-solid fa-file-import me-1"></i>CSV-Import
+          <input type="file" accept=".csv,text/csv" hidden (change)="importCsv($event)" />
+        </label>
+      </div>
+    }
+  </div>
+
+  @if (error()) {
+    <div class="alert alert-danger alert-dismissible">
+      {{ error() }}<button type="button" class="btn-close" (click)="error.set('')"></button>
+    </div>
+  }
+  @if (info()) {
+    <div class="alert alert-success py-2">{{ info() }}</div>
+  }
+  @if (importResult(); as r) {
+    <div class="alert" [class.alert-success]="r.fehler.length === 0" [class.alert-warning]="r.fehler.length > 0">
+      <button type="button" class="btn-close float-end" (click)="importResult.set(null)"></button>
+      <strong>{{ r.importiert }} Lernziele importiert.</strong>
+      @if (r.fehler.length) {
+        <ul class="mb-0 mt-1 small">
+          @for (f of r.fehler; track $index) { <li>{{ f }}</li> }
+        </ul>
+      }
+      <div class="small text-muted mt-1">Format: <code>titel;beschreibung;art;uebergeordnetes_lernziel</code> (Art: Richtlernziel, Groblernziel oder Feinlernziel)</div>
+    </div>
+  }
+
+  <div class="d-flex flex-wrap gap-2 my-3">
+    <input class="form-control" style="max-width: 320px" placeholder="Lernziel suchen…" [ngModel]="search()" (ngModelChange)="search.set($event)" />
+    <select class="form-select" style="max-width: 200px" [ngModel]="kindFilter()" (ngModelChange)="kindFilter.set($event)">
+      <option value="">Alle Arten</option>
+      @for (k of kindOptions; track k[0]) {
+        <option [value]="k[0]">{{ k[1] }}</option>
+      }
+    </select>
+  </div>
+
+  <table class="table table-hover">
+    <thead>
+      <tr>
+        <th>Lernziel</th>
+        <th>Art</th>
+        <th>Übergeordnet</th>
+        @if (auth.isStaff()) { <th></th> }
+      </tr>
+    </thead>
+    <tbody>
+      @for (row of rows(); track row.lernziel.id) {
+        <tr>
+          <td [style.padding-left.rem]="0.5 + row.depth * 1.5">
+            @if (row.depth > 0) { <i class="fa-solid fa-turn-up fa-rotate-90 text-muted me-2"></i> }
+            <span class="fw-semibold clickable" (click)="toggle(row.lernziel.id)">{{ row.lernziel.title }}</span>
+            @if (row.lernziel.description) {
+              <i class="fa-solid ms-1 text-muted clickable" [class.fa-caret-down]="!expanded().has(row.lernziel.id)" [class.fa-caret-up]="expanded().has(row.lernziel.id)" (click)="toggle(row.lernziel.id)"></i>
+              @if (expanded().has(row.lernziel.id)) {
+                <div class="small text-muted">{{ row.lernziel.description }}</div>
+              }
+            }
+          </td>
+          <td><span class="badge-status kind-{{ row.lernziel.kind }}">{{ kindLabels[row.lernziel.kind] }}</span></td>
+          <td class="small text-muted">{{ row.lernziel.parentId ? parentTitle().get(row.lernziel.parentId) : '–' }}</td>
+          @if (auth.isStaff()) {
+            <td class="table-actions">
+              <a class="btn btn-sm btn-outline-primary me-1" [routerLink]="['/lernziel-bearbeiten', row.lernziel.id]" title="Bearbeiten"><i class="fa-solid fa-pen"></i></a>
+              <button class="btn btn-sm btn-outline-danger" (click)="loeschen(row.lernziel)" title="Löschen"><i class="fa-solid fa-trash"></i></button>
+            </td>
+          }
+        </tr>
+      } @empty {
+        <tr><td colspan="4" class="text-muted">Keine Lernziele gefunden.</td></tr>
+      }
+    </tbody>
+  </table>
+</div>

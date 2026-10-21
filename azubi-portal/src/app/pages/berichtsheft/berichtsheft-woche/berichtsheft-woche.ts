@@ -6,14 +6,18 @@ import { Auth } from '@app/services/auth';
 import { BerichtsheftService } from '@app/services/berichtsheft.service';
 import { PersonLernzielService } from '@app/services/person-lernziel.service';
 import {
+  ABWESEND,
   ART_LABELS,
   EintragArt,
-  KIND_LABELS,
+  MAX_STUNDEN,
   PersonLernziel,
   WochenTag,
   Wochenbericht,
 } from '@app/core/models';
 import { addDays, errorMessage, normalizeSearch, today } from '@app/core/utils';
+
+/** Warum ein Tag nicht bearbeitet werden kann (null = bearbeitbar). */
+export type TagSperre = 'zukunft' | 'vor-beginn' | null;
 
 interface TagForm {
   hours: number;
@@ -50,7 +54,8 @@ export class BerichtsheftWoche {
   readonly datum = input<string | undefined>();
 
   readonly artOptions = Object.entries(ART_LABELS) as [EintragArt, string][];
-  readonly kindLabels = KIND_LABELS;
+  readonly maxStunden = MAX_STUNDEN;
+  readonly heute = today();
 
   readonly woche = signal<Wochenbericht | null>(null);
   readonly loading = signal(false);
@@ -80,6 +85,48 @@ export class BerichtsheftWoche {
     const map = new Map<number, PersonLernziel>();
     this.meineLernziele().forEach((pl) => map.set(pl.lernziel.id, pl));
     return map;
+  });
+
+  /** Tätigkeiten werden Feinlernzielen zugeordnet – gruppiert nach ihrem Groblernziel. */
+  private readonly feinlernziele = computed(() =>
+    this.meineLernziele()
+      .filter((pl) => pl.lernziel.kind === 'KIND_SPECIFIC')
+      .sort(
+        (a, b) =>
+          this.parentTitle(a).localeCompare(this.parentTitle(b), 'de') ||
+          a.lernziel.title.localeCompare(b.lernziel.title, 'de'),
+      ),
+  );
+
+  /** Fehlende Werktage (Mo–Fr) der angezeigten Woche. */
+  readonly fehlendeTage = computed(() => {
+    const w = this.woche();
+    if (!w) {
+      return [];
+    }
+    return w.tage
+      .slice(0, 5)
+      .filter((t) => !t.eintrag && this.sperre(t.date) !== 'vor-beginn')
+      .map((t) => t.wochentag);
+  });
+
+  /** Ab Freitag und mit Einträgen für alle Werktage darf eingereicht werden. */
+  readonly einreichHinweis = computed<string | null>(() => {
+    const w = this.woche();
+    if (!w) {
+      return null;
+    }
+    const freitag = addDays(w.weekStart, 4);
+    if (this.heute < freitag) {
+      return `Einreichen ist ab Freitag, ${this.formatDate(freitag)}, möglich.`;
+    }
+    if (this.fehlendeTage().length) {
+      return `Es fehlen noch: ${this.fehlendeTage().join(', ')}. Urlaub, Krankheit und Feiertage bitte als solche eintragen.`;
+    }
+    if (this.hatUngespeichert()) {
+      return 'Bitte speichere zuerst alle geänderten Tage.';
+    }
+    return null;
   });
 
   constructor() {
@@ -139,6 +186,26 @@ export class BerichtsheftWoche {
 
   // ---------------------------------------------------------- Erfassen
 
+  sperre(date: string): TagSperre {
+    if (date > this.heute) {
+      return 'zukunft';
+    }
+    const start = this.auth.user()?.dateOfTrainingStart;
+    if (start && date < start) {
+      return 'vor-beginn';
+    }
+    return null;
+  }
+
+  istAbwesend(art: EintragArt): boolean {
+    return ABWESEND.includes(art);
+  }
+
+  parentTitle(pl: PersonLernziel): string {
+    const parentId = pl.lernziel.parentId;
+    return parentId ? (this.lernzielMap().get(parentId)?.lernziel.title ?? '') : '';
+  }
+
   form(date: string): TagForm {
     return this.forms()[date];
   }
@@ -157,6 +224,11 @@ export class BerichtsheftWoche {
     // sinnvolle Standardstunden vorschlagen
     if (form.hours === 0 || form.hours === 8 || form.hours === 6) {
       patch.hours = art === 'SCHULE' ? 6 : art === 'BETRIEB' || art === 'SONSTIGES' ? 8 : 0;
+    }
+    // An Urlaubs-, Krankheits- und Feiertagen gibt es keine Lernziele
+    if (this.istAbwesend(art)) {
+      patch.lernzielIds = [];
+      patch.showLernziele = false;
     }
     this.change(date, patch);
   }
@@ -178,15 +250,25 @@ export class BerichtsheftWoche {
 
   gefilterteLernziele(date: string): PersonLernziel[] {
     const filter = normalizeSearch(this.form(date).lernzielFilter);
-    return this.meineLernziele().filter(
-      (pl) => !filter || normalizeSearch(pl.lernziel.title).includes(filter),
+    return this.feinlernziele().filter(
+      (pl) => !filter || normalizeSearch(pl.lernziel.title + ' ' + this.parentTitle(pl)).includes(filter),
     );
   }
 
   speichern(tag: WochenTag): void {
     const form = this.form(tag.date);
-    if (!form.description.trim() && (form.art === 'BETRIEB' || form.art === 'SCHULE')) {
-      this.setUi(tag.date, { error: 'Bitte beschreibe kurz deine Tätigkeiten.' });
+    const stunden = Number(form.hours) || 0;
+    const anwesend = form.art === 'BETRIEB' || form.art === 'SCHULE';
+    if (stunden < 0 || stunden > MAX_STUNDEN) {
+      this.setUi(tag.date, { error: `Pro Tag sind 0 bis ${MAX_STUNDEN} Stunden möglich.` });
+      return;
+    }
+    if (anwesend && stunden === 0) {
+      this.setUi(tag.date, { error: 'Bitte gib die Stunden an.' });
+      return;
+    }
+    if (anwesend && !form.description.trim()) {
+      this.setUi(tag.date, { error: 'Bitte beschreibe kurz deine Tätigkeiten bzw. die Unterrichtsthemen.' });
       return;
     }
     this.setUi(tag.date, { saving: true, error: '' });
@@ -236,8 +318,9 @@ export class BerichtsheftWoche {
     if (!w) {
       return;
     }
-    if (this.hatUngespeichert()) {
-      this.error.set('Bitte speichere zuerst alle geänderten Tage.');
+    const hinweis = this.einreichHinweis();
+    if (hinweis) {
+      this.error.set(hinweis);
       return;
     }
     if (!confirm(`KW ${w.kalenderwoche} jetzt zur Prüfung einreichen? Danach ist keine Bearbeitung mehr möglich.`)) {
@@ -293,6 +376,11 @@ export class BerichtsheftWoche {
   }
 
   // ---------------------------------------------------------- intern
+
+  formatDate(iso: string): string {
+    const [y, m, d] = iso.split('-');
+    return `${d}.${m}.${y}`;
+  }
 
   private afterReview(neu: Wochenbericht, message: string): void {
     this.busy.set(false);

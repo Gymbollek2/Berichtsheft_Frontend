@@ -1,41 +1,45 @@
-<div class="page-card">
-  <div class="page-title">Berichtshefte prüfen</div>
-  <div class="page-subtitle">Eingereichte Wochen – älteste zuerst. Öffne eine Woche, um sie abzuzeichnen oder zurückzugeben.</div>
+<div class="page">
+  <div class="page-header">
+    <div>
+      <h1 class="page-title">Zur Prüfung</h1>
+      <p class="page-subtitle">Eingereichte Wochen, die älteste zuerst. Öffne eine Woche, um sie abzuzeichnen oder mit Kommentar zurückzugeben.</p>
+    </div>
+  </div>
 
   @if (error()) {
-    <div class="alert alert-danger">{{ error() }}</div>
+    <div class="alert alert-danger" role="alert">{{ error() }}</div>
   }
 
-  <table class="table table-hover">
-    <thead>
-      <tr>
-        <th>Azubi</th>
-        <th>Kalenderwoche</th>
-        <th>Einträge</th>
-        <th>Stunden</th>
-        <th>Eingereicht am</th>
-        <th></th>
-      </tr>
-    </thead>
-    <tbody>
-      @for (w of offen(); track w.id) {
+  <div class="panel panel-flush">
+    <table class="table table-hover">
+      <thead>
         <tr>
-          <td>{{ w.personName }}</td>
-          <td>KW {{ w.kalenderwoche }}/{{ w.jahr }} <span class="text-muted small">(ab {{ w.weekStart | date: 'dd.MM.' }})</span></td>
-          <td>{{ w.anzahlEintraege }}</td>
-          <td>{{ w.gesamtStunden | number: '1.0-1' }}</td>
-          <td>{{ w.eingereichtAm | date: 'dd.MM.yyyy HH:mm' }}</td>
-          <td class="table-actions">
-            <a class="btn btn-sm btn-brand" [routerLink]="['/berichtsheft/azubis', w.personId]" [queryParams]="{ datum: w.weekStart }">
-              <i class="fa-solid fa-stamp me-1"></i>Prüfen
-            </a>
-          </td>
+          <th class="ps-4">Azubi</th>
+          <th>Kalenderwoche</th>
+          <th class="text-end">Einträge</th>
+          <th class="text-end">Stunden</th>
+          <th>Eingereicht</th>
+          <th class="pe-4"></th>
         </tr>
-      } @empty {
-        @if (!loading()) {
-          <tr><td colspan="6" class="text-muted">Keine offenen Prüfungen – alles erledigt. 🎉</td></tr>
+      </thead>
+      <tbody>
+        @for (w of offen(); track w.id) {
+          <tr>
+            <td class="ps-4 fw-medium">{{ w.personName }}</td>
+            <td>KW {{ w.kalenderwoche }}/{{ w.jahr }} <span class="hint">ab {{ w.weekStart | date: 'dd.MM.' }}</span></td>
+            <td class="text-end num">{{ w.anzahlEintraege }}</td>
+            <td class="text-end num">{{ w.gesamtStunden | number: '1.0-1' }}</td>
+            <td class="num">{{ w.eingereichtAm | date: 'dd.MM.yyyy, HH:mm' }}</td>
+            <td class="table-actions pe-4">
+              <a class="btn btn-sm btn-brand" [routerLink]="['/berichtsheft/azubis', w.personId]" [queryParams]="{ datum: w.weekStart }">Woche prüfen</a>
+            </td>
+          </tr>
+        } @empty {
+          @if (!loading()) {
+            <tr><td colspan="6" class="hint ps-4">Keine offenen Wochen. Neue Einreichungen erscheinen hier automatisch.</td></tr>
+          }
         }
-      }
-    </tbody>
-  </table>
+      </tbody>
+    </table>
+  </div>
 </div>

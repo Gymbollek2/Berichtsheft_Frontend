@@ -1,6 +1,16 @@
-<div class="page-card">
-  <div class="page-title">{{ begruessung() }}, {{ auth.user()?.firstName }}!</div>
-  <div class="page-subtitle">{{ auth.user()?.roleLabel }}@if (auth.user()?.beruf) { · {{ auth.user()?.beruf }} }</div>
+<div class="page">
+  <div class="page-header">
+    <div>
+      <h1 class="page-title">{{ begruessung() }}, {{ auth.user()?.firstName }}</h1>
+      <p class="page-subtitle">
+        @if (auth.isStaff()) {
+          Hier siehst du, was auf deine Prüfung wartet und wie weit deine Azubis sind.
+        } @else {
+          {{ auth.user()?.beruf }}@if (auth.user()?.yearOfTraining) {, {{ auth.user()?.yearOfTraining }}. Ausbildungsjahr}
+        }
+      </p>
+    </div>
+  </div>
 
   @if (error()) {
     <div class="alert alert-danger">{{ error() }}</div>
@@ -8,132 +18,119 @@
 
   @if (auth.isStaff()) {
     <!-- ================= Ausbilder / Admin ================= -->
-    <div class="row g-3 mb-4">
-      <div class="col-md-4">
-        <div class="stat-tile">
-          <div class="value">{{ alleFortschritte().length }}</div>
-          <div class="label">Azubis &amp; Studierende</div>
-        </div>
-      </div>
-      <div class="col-md-4">
-        <a class="text-decoration-none" routerLink="/berichtsheft/pruefung">
-          <div class="stat-tile">
-            <div class="value">{{ offen().length }}</div>
-            <div class="label">Wochen warten auf Prüfung</div>
-          </div>
-        </a>
-      </div>
-      <div class="col-md-4">
-        <div class="stat-tile">
-          <div class="value">{{ durchschnitt() | number: '1.0-0' }} %</div>
-          <div class="label">Ø Lernziele erreicht</div>
-        </div>
-      </div>
+    <div class="figures">
+      <a class="figure" routerLink="/berichtsheft/pruefung">
+        <div class="value">{{ offen().length }}</div>
+        <div class="label">Wochen warten auf Prüfung</div>
+      </a>
+      <a class="figure" routerLink="/personen-lernziele-view">
+        <div class="value">{{ durchschnitt() | number: '1.0-0' }} %</div>
+        <div class="label">Feinlernziele erreicht (Durchschnitt)</div>
+      </a>
+      <a class="figure" routerLink="/berichtsheft/azubis">
+        <div class="value">{{ alleFortschritte().length }}</div>
+        <div class="label">Azubis und Studierende</div>
+      </a>
     </div>
 
     <div class="row g-4">
-      <div class="col-lg-6">
-        <div class="section-title">Zur Prüfung eingereicht</div>
-        @if (offen().length === 0) {
-          <p class="text-muted">Keine offenen Prüfungen – alles erledigt. 🎉</p>
-        } @else {
-          <table class="table table-hover table-sm">
-            <thead>
-              <tr><th>Azubi</th><th>Woche</th><th>Stunden</th><th></th></tr>
-            </thead>
-            <tbody>
-              @for (w of offen(); track w.id) {
-                <tr>
-                  <td>{{ w.personName }}</td>
-                  <td>KW {{ w.kalenderwoche }}/{{ w.jahr }}</td>
-                  <td>{{ w.gesamtStunden | number: '1.0-1' }}</td>
-                  <td class="table-actions">
-                    <a class="btn btn-sm btn-brand" [routerLink]="['/berichtsheft/azubis', w.personId]" [queryParams]="{ datum: w.weekStart }">Prüfen</a>
-                  </td>
-                </tr>
-              }
-            </tbody>
-          </table>
-        }
+      <div class="col-xl-7">
+        <div class="panel panel-flush">
+          <div class="px-4 pt-4"><h2 class="section-title">Zur Prüfung eingereicht</h2></div>
+          @if (offen().length === 0) {
+            <p class="hint px-4 pb-4 mb-0">Keine offenen Wochen. Neue Einreichungen erscheinen hier automatisch.</p>
+          } @else {
+            <table class="table table-hover">
+              <thead>
+                <tr><th class="ps-4">Azubi</th><th>Woche</th><th class="text-end">Stunden</th><th></th></tr>
+              </thead>
+              <tbody>
+                @for (w of offen(); track w.id) {
+                  <tr>
+                    <td class="ps-4">{{ w.personName }}</td>
+                    <td>KW {{ w.kalenderwoche }}/{{ w.jahr }}</td>
+                    <td class="text-end num">{{ w.gesamtStunden | number: '1.0-1' }}</td>
+                    <td class="table-actions pe-4">
+                      <a class="btn btn-sm btn-brand" [routerLink]="['/berichtsheft/azubis', w.personId]" [queryParams]="{ datum: w.weekStart }">Prüfen</a>
+                    </td>
+                  </tr>
+                }
+              </tbody>
+            </table>
+          }
+        </div>
       </div>
 
-      <div class="col-lg-6">
-        <div class="section-title">Lernfortschritt</div>
-        @for (f of alleFortschritte(); track f.personId) {
-          <a class="d-block text-decoration-none text-reset mb-2" routerLink="/personen-lernziele-view" [queryParams]="{ personId: f.personId }">
-            <div class="d-flex justify-content-between small">
-              <span>{{ f.personName }}</span>
-              <span class="text-muted">{{ f.erreicht }}/{{ f.gesamt }} · {{ f.prozent }} %</span>
-            </div>
-            <div class="progress progress-brand" style="height: 8px">
-              <div class="progress-bar" [style.width.%]="f.prozent"></div>
-            </div>
-          </a>
-        } @empty {
-          <p class="text-muted">Noch keine Azubis angelegt.</p>
-        }
+      <div class="col-xl-5">
+        <div class="panel">
+          <h2 class="section-title">Lernfortschritt</h2>
+          @for (f of alleFortschritte(); track f.personId) {
+            <a class="progress-row" routerLink="/personen-lernziele-view" [queryParams]="{ personId: f.personId }">
+              <div class="d-flex justify-content-between">
+                <span>{{ f.personName }}</span>
+                <span class="hint num">{{ f.erreicht }} von {{ f.gesamt }}</span>
+              </div>
+              <div class="progress progress-brand mt-1">
+                <div class="progress-bar" [style.width.%]="f.prozent"></div>
+              </div>
+            </a>
+          } @empty {
+            <p class="hint mb-0">Noch keine Azubis angelegt.</p>
+          }
+        </div>
       </div>
     </div>
   } @else {
     <!-- ================= Azubi ================= -->
     @for (w of abgelehnt(); track w.weekStart) {
-      <div class="alert alert-warning d-flex justify-content-between align-items-center">
-        <span><i class="fa-solid fa-triangle-exclamation me-2"></i>KW {{ w.kalenderwoche }}/{{ w.jahr }} wurde zur Überarbeitung zurückgegeben.</span>
-        <a class="btn btn-sm btn-warning" routerLink="/berichtsheft" [queryParams]="{ datum: w.weekStart }">Öffnen</a>
+      <div class="alert alert-warning d-flex flex-wrap justify-content-between align-items-center gap-2">
+        <span>KW {{ w.kalenderwoche }}/{{ w.jahr }} wurde zur Überarbeitung zurückgegeben.</span>
+        <a class="btn btn-sm btn-outline-secondary" routerLink="/berichtsheft" [queryParams]="{ datum: w.weekStart }">Woche öffnen</a>
       </div>
     }
 
-    <div class="row g-3 mb-4">
+    <div class="figures">
       @if (aktuelleWoche(); as woche) {
-        <div class="col-md-6">
-          <div class="stat-tile">
-            <div class="d-flex justify-content-between align-items-start">
-              <div>
-                <div class="label">Aktuelle Woche · KW {{ woche.kalenderwoche }}</div>
-                <div class="value">{{ erfassteTage(woche) }} / 5 Tage</div>
-                <div class="label">{{ woche.gesamtStunden | number: '1.0-1' }} Stunden erfasst</div>
-              </div>
-              <span class="badge-status status-{{ woche.status }}">{{ woche.statusLabel }}</span>
-            </div>
-            <a class="btn btn-brand btn-sm mt-3" routerLink="/berichtsheft">
-              <i class="fa-solid fa-pen-to-square me-1"></i>Berichtsheft öffnen
-            </a>
-          </div>
-        </div>
+        <a class="figure" routerLink="/berichtsheft">
+          <div class="value">{{ erfassteTage(woche) }} von 5</div>
+          <div class="label">Tagen in KW {{ woche.kalenderwoche }} erfasst, {{ woche.gesamtStunden | number: '1.0-1' }} Stunden</div>
+        </a>
       }
       @if (fortschritt(); as f) {
-        <div class="col-md-6">
-          <div class="stat-tile">
-            <div class="label">Lernziele erreicht</div>
-            <div class="value">{{ f.prozent }} %</div>
-            <div class="progress progress-brand my-2" style="height: 10px">
-              <div class="progress-bar" [style.width.%]="f.prozent"></div>
-            </div>
-            <div class="label">{{ f.erreicht }} erreicht · {{ f.inBearbeitung }} in Bearbeitung · {{ f.offen }} offen</div>
-            <a class="btn btn-outline-secondary btn-sm mt-3" routerLink="/personen-lernziele-view">Meine Lernziele</a>
-          </div>
-        </div>
+        <a class="figure" routerLink="/personen-lernziele-view">
+          <div class="value">{{ f.prozent }} %</div>
+          <div class="label">der Feinlernziele erreicht ({{ f.erreicht }} von {{ f.gesamt }})</div>
+        </a>
+        <a class="figure" routerLink="/personen-lernziele-view">
+          <div class="value">{{ f.inBearbeitung }}</div>
+          <div class="label">Lernziele in Bearbeitung</div>
+        </a>
       }
     </div>
 
-    <div class="section-title">Letzte Wochen</div>
-    <table class="table table-hover table-sm">
-      <thead>
-        <tr><th>Woche</th><th>Einträge</th><th>Stunden</th><th>Status</th><th>Geprüft am</th></tr>
-      </thead>
-      <tbody>
-        @for (w of historie().slice(0, 6); track w.weekStart) {
-          <tr class="clickable" [routerLink]="['/berichtsheft']" [queryParams]="{ datum: w.weekStart }">
-            <td>KW {{ w.kalenderwoche }}/{{ w.jahr }} <span class="text-muted small">({{ w.weekStart | date: 'dd.MM.' }})</span></td>
-            <td>{{ w.anzahlEintraege }}</td>
-            <td>{{ w.gesamtStunden | number: '1.0-1' }}</td>
-            <td><span class="badge-status status-{{ w.status }}">{{ w.statusLabel }}</span></td>
-            <td>{{ w.geprueftAm ? (w.geprueftAm | date: 'dd.MM.yyyy') : '–' }}</td>
-          </tr>
-        } @empty {
-          <tr><td colspan="5" class="text-muted">Noch keine Einträge vorhanden.</td></tr>
-        }
-      </tbody>
-    </table>
+    <div class="panel panel-flush">
+      <div class="d-flex justify-content-between align-items-center px-4 pt-4">
+        <h2 class="section-title">Letzte Wochen</h2>
+        <a routerLink="/berichtsheft/historie" class="small">Alle Wochen</a>
+      </div>
+      <table class="table table-hover">
+        <thead>
+          <tr><th class="ps-4">Woche</th><th class="text-end">Einträge</th><th class="text-end">Stunden</th><th>Status</th><th class="pe-4">Geprüft</th></tr>
+        </thead>
+        <tbody>
+          @for (w of historie().slice(0, 6); track w.weekStart) {
+            <tr class="clickable" [routerLink]="['/berichtsheft']" [queryParams]="{ datum: w.weekStart }">
+              <td class="ps-4">KW {{ w.kalenderwoche }}/{{ w.jahr }} <span class="hint">ab {{ w.weekStart | date: 'dd.MM.' }}</span></td>
+              <td class="text-end num">{{ w.anzahlEintraege }}</td>
+              <td class="text-end num">{{ w.gesamtStunden | number: '1.0-1' }}</td>
+              <td><span class="badge-status status-{{ w.status }}">{{ w.statusLabel }}</span></td>
+              <td class="pe-4 num">{{ w.geprueftAm ? (w.geprueftAm | date: 'dd.MM.yyyy') : '–' }}</td>
+            </tr>
+          } @empty {
+            <tr><td colspan="5" class="hint ps-4">Noch keine Einträge. Starte mit der aktuellen Woche.</td></tr>
+          }
+        </tbody>
+      </table>
+    </div>
   }
 </div>

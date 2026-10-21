@@ -1,51 +1,57 @@
-<div class="page-card">
-  <div class="page-title">Berichtshefte der Azubis</div>
-  <div class="page-subtitle">Wähle eine Person, um ihre Wochen einzusehen.</div>
+<div class="page">
+  <div class="page-header">
+    <div>
+      <h1 class="page-title">Alle Berichtshefte</h1>
+      <p class="page-subtitle">Wähle eine Person, um ihre Wochen zu sehen.</p>
+    </div>
+  </div>
 
   @if (error()) {
-    <div class="alert alert-danger">{{ error() }}</div>
+    <div class="alert alert-danger" role="alert">{{ error() }}</div>
   }
 
   <div class="row g-4">
-    <div class="col-md-4">
-      <input class="form-control mb-2" placeholder="Person suchen…" [ngModel]="search()" (ngModelChange)="search.set($event)" />
-      <div class="list-group">
+    <div class="col-lg-4">
+      <input class="form-control mb-2" placeholder="Person suchen" [ngModel]="search()" (ngModelChange)="search.set($event)" aria-label="Person suchen" />
+      <div class="panel panel-flush person-list">
         @for (p of gefiltert(); track p.id) {
-          <button type="button" class="list-group-item list-group-item-action" [class.active]="selected()?.id === p.id" (click)="select(p)">
-            <div class="fw-semibold">{{ p.fullName }}</div>
-            <div class="small" [class.text-muted]="selected()?.id !== p.id">{{ p.roleLabel }}@if (p.yearOfTraining) { · {{ p.yearOfTraining }}. Lehrjahr }</div>
+          <button type="button" class="person-item" [class.active]="selected()?.id === p.id" (click)="select(p)">
+            <span class="fw-medium d-block">{{ p.fullName }}</span>
+            <span class="hint">{{ p.roleLabel }}@if (p.yearOfTraining) {, {{ p.yearOfTraining }}. Ausbildungsjahr}</span>
           </button>
         } @empty {
-          <div class="text-muted small p-2">Keine Azubis gefunden.</div>
+          <div class="hint p-3">Keine Azubis gefunden.</div>
         }
       </div>
     </div>
 
-    <div class="col-md-8">
+    <div class="col-lg-8">
       @if (selected(); as p) {
-        <div class="d-flex justify-content-between align-items-center mb-2">
-          <div class="section-title mb-0">{{ p.fullName }}</div>
-          <a class="btn btn-sm btn-outline-secondary" [routerLink]="['/berichtsheft/azubis', p.id]">Aktuelle Woche öffnen</a>
+        <div class="panel panel-flush">
+          <div class="d-flex flex-wrap justify-content-between align-items-center gap-2 px-4 pt-4 pb-2">
+            <h2 class="section-title mb-0">{{ p.fullName }}</h2>
+            <a class="btn btn-sm btn-outline-secondary" [routerLink]="['/berichtsheft/azubis', p.id]">Aktuelle Woche öffnen</a>
+          </div>
+          <table class="table table-hover">
+            <thead>
+              <tr><th class="ps-4">Woche</th><th class="text-end">Einträge</th><th class="text-end">Stunden</th><th class="pe-4">Status</th></tr>
+            </thead>
+            <tbody>
+              @for (w of wochen(); track w.weekStart) {
+                <tr class="clickable" [routerLink]="['/berichtsheft/azubis', p.id]" [queryParams]="{ datum: w.weekStart }">
+                  <td class="ps-4">KW {{ w.kalenderwoche }}/{{ w.jahr }} <span class="hint">ab {{ w.weekStart | date: 'dd.MM.' }}</span></td>
+                  <td class="text-end num">{{ w.anzahlEintraege }}</td>
+                  <td class="text-end num">{{ w.gesamtStunden | number: '1.0-1' }}</td>
+                  <td class="pe-4"><span class="badge-status status-{{ w.status }}">{{ w.statusLabel }}</span></td>
+                </tr>
+              } @empty {
+                <tr><td colspan="4" class="hint ps-4">Noch keine Einträge.</td></tr>
+              }
+            </tbody>
+          </table>
         </div>
-        <table class="table table-hover table-sm">
-          <thead>
-            <tr><th>Woche</th><th>Einträge</th><th>Stunden</th><th>Status</th></tr>
-          </thead>
-          <tbody>
-            @for (w of wochen(); track w.weekStart) {
-              <tr class="clickable" [routerLink]="['/berichtsheft/azubis', p.id]" [queryParams]="{ datum: w.weekStart }">
-                <td>KW {{ w.kalenderwoche }}/{{ w.jahr }} <span class="text-muted small">({{ w.weekStart | date: 'dd.MM.' }})</span></td>
-                <td>{{ w.anzahlEintraege }}</td>
-                <td>{{ w.gesamtStunden | number: '1.0-1' }}</td>
-                <td><span class="badge-status status-{{ w.status }}">{{ w.statusLabel }}</span></td>
-              </tr>
-            } @empty {
-              <tr><td colspan="4" class="text-muted">Noch keine Einträge.</td></tr>
-            }
-          </tbody>
-        </table>
       } @else {
-        <div class="text-muted py-5 text-center"><i class="fa-solid fa-hand-pointer me-2"></i>Bitte links eine Person auswählen.</div>
+        <div class="panel hint">Links eine Person auswählen.</div>
       }
     </div>
   </div>

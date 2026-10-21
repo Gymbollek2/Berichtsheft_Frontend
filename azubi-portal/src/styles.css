@@ -254,6 +254,7 @@ a.figure:hover {
 .form-control:focus,
 .form-select:focus,
 .form-check-input:focus {
+  background-color: var(--surface);
   border-color: var(--accent);
   box-shadow: 0 0 0 0.2rem rgba(163, 18, 111, 0.15);
 }

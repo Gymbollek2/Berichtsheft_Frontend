@@ -31,7 +31,7 @@
   width: 168px;
 }
 
-.mark {
+.login-mark {
   width: 56px;
   height: 56px;
   margin-bottom: 1.5rem;
@@ -96,7 +96,7 @@
     margin-bottom: 0.5rem;
   }
 
-  .mark {
+  .login-mark {
     display: none;
   }
 

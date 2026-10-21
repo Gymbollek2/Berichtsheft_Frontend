@@ -1,0 +1,28 @@
+<header class="app-header">
+  <div class="header-left">
+    <img src="assets/logo.png" alt="Logo" class="logo" />
+    <span class="divider">|</span>
+    <img src="assets/book_icon.png" alt="Buch" class="logo" />
+    <a class="app-title" routerLink="/dashboard">Azubi Portal</a>
+
+    <nav class="header-nav">
+      @for (section of sections(); track section.key) {
+        <a class="nav-link" [class.active]="activeKey() === section.key" [routerLink]="section.links[0].route">
+          <i class="fa-solid {{ section.icon }} me-1"></i>{{ section.label }}
+        </a>
+      }
+    </nav>
+  </div>
+
+  @if (auth.user(); as user) {
+    <div class="header-user">
+      <a routerLink="/profil" class="user-link" title="Mein Profil">
+        <i class="fa-solid fa-circle-user me-1"></i>{{ user.fullName }}
+        <span class="role-badge">{{ user.roleLabel }}</span>
+      </a>
+      <button type="button" class="btn btn-sm btn-outline-light ms-3" (click)="logout()" title="Abmelden">
+        <i class="fa-solid fa-right-from-bracket"></i>
+      </button>
+    </div>
+  }
+</header>

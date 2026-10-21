@@ -1,0 +1,15 @@
+<div class="sidebar">
+  <nav>
+    @for (link of links(); track link.route + link.label) {
+      <a
+        class="rotated"
+        [routerLink]="link.route"
+        routerLinkActive="active"
+        [routerLinkActiveOptions]="{ exact: true }"
+        [title]="link.label"
+      >
+        <i class="fa-solid {{ link.icon }} mb-2"></i>{{ link.label }}
+      </a>
+    }
+  </nav>
+</div>

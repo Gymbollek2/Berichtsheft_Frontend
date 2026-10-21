@@ -1,0 +1,41 @@
+<div class="page-card">
+  <div class="page-title">Berichtshefte prüfen</div>
+  <div class="page-subtitle">Eingereichte Wochen – älteste zuerst. Öffne eine Woche, um sie abzuzeichnen oder zurückzugeben.</div>
+
+  @if (error()) {
+    <div class="alert alert-danger">{{ error() }}</div>
+  }
+
+  <table class="table table-hover">
+    <thead>
+      <tr>
+        <th>Azubi</th>
+        <th>Kalenderwoche</th>
+        <th>Einträge</th>
+        <th>Stunden</th>
+        <th>Eingereicht am</th>
+        <th></th>
+      </tr>
+    </thead>
+    <tbody>
+      @for (w of offen(); track w.id) {
+        <tr>
+          <td>{{ w.personName }}</td>
+          <td>KW {{ w.kalenderwoche }}/{{ w.jahr }} <span class="text-muted small">(ab {{ w.weekStart | date: 'dd.MM.' }})</span></td>
+          <td>{{ w.anzahlEintraege }}</td>
+          <td>{{ w.gesamtStunden | number: '1.0-1' }}</td>
+          <td>{{ w.eingereichtAm | date: 'dd.MM.yyyy HH:mm' }}</td>
+          <td class="table-actions">
+            <a class="btn btn-sm btn-brand" [routerLink]="['/berichtsheft/azubis', w.personId]" [queryParams]="{ datum: w.weekStart }">
+              <i class="fa-solid fa-stamp me-1"></i>Prüfen
+            </a>
+          </td>
+        </tr>
+      } @empty {
+        @if (!loading()) {
+          <tr><td colspan="6" class="text-muted">Keine offenen Prüfungen – alles erledigt. 🎉</td></tr>
+        }
+      }
+    </tbody>
+  </table>
+</div>

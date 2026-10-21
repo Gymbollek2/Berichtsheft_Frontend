@@ -1,0 +1,199 @@
+<div class="page-card berichtsheft">
+  <!-- Kopf -->
+  <div class="d-flex flex-wrap justify-content-between align-items-start gap-3 mb-3">
+    <div>
+      @if (fremdeAnsicht()) {
+        <a routerLink="/berichtsheft/azubis" class="small text-decoration-none no-print">
+          <i class="fa-solid fa-arrow-left me-1"></i>Alle Berichtshefte
+        </a>
+      }
+      <div class="page-title">
+        Berichtsheft @if (woche(); as w) { – KW {{ w.kalenderwoche }}/{{ w.jahr }} }
+      </div>
+      @if (woche(); as w) {
+        <div class="text-muted">
+          {{ w.personName }}@if (w.beruf) { · {{ w.beruf }} }@if (w.ausbildungsjahr) { · {{ w.ausbildungsjahr }}. Ausbildungsjahr }
+          <br />{{ w.weekStart | date: 'dd.MM.yyyy' }} – {{ w.weekEnd | date: 'dd.MM.yyyy' }}
+        </div>
+      }
+    </div>
+
+    <div class="d-flex flex-wrap align-items-center gap-2 no-print">
+      <div class="btn-group">
+        <button class="btn btn-outline-secondary" (click)="vorherigeWoche()" title="Vorherige Woche">
+          <i class="fa-solid fa-chevron-left"></i>
+        </button>
+        <button class="btn btn-outline-secondary" (click)="dieseWoche()">Heute</button>
+        <button class="btn btn-outline-secondary" (click)="naechsteWoche()" title="Nächste Woche">
+          <i class="fa-solid fa-chevron-right"></i>
+        </button>
+      </div>
+      <input type="date" class="form-control" style="width: 160px" [ngModel]="woche()?.weekStart" (ngModelChange)="gotoDatum($event)" title="Zu Datum springen" />
+      <button class="btn btn-outline-secondary" (click)="drucken()" title="Drucken / als PDF speichern">
+        <i class="fa-solid fa-print"></i>
+      </button>
+    </div>
+  </div>
+
+  @if (error()) {
+    <div class="alert alert-danger alert-dismissible">
+      {{ error() }}
+      <button type="button" class="btn-close" (click)="error.set('')"></button>
+    </div>
+  }
+  @if (info()) {
+    <div class="alert alert-success py-2">{{ info() }}</div>
+  }
+
+  @if (loading() && !woche()) {
+    <div class="text-center py-5"><span class="spinner-border"></span></div>
+  }
+
+  @if (woche(); as w) {
+    <!-- Status -->
+    <div class="status-bar mb-3">
+      <span class="badge-status status-{{ w.status }}">{{ w.statusLabel }}</span>
+      <span class="ms-3"><strong>{{ w.gesamtStunden | number: '1.0-1' }}</strong> Stunden</span>
+      @if (w.eingereichtAm) {
+        <span class="ms-3 text-muted small">eingereicht am {{ w.eingereichtAm | date: 'dd.MM.yyyy HH:mm' }}</span>
+      }
+      @if (w.geprueftVon) {
+        <span class="ms-3 text-muted small">geprüft von {{ w.geprueftVon }} am {{ w.geprueftAm | date: 'dd.MM.yyyy' }}</span>
+      }
+    </div>
+
+    @if (w.kommentar) {
+      <div class="alert" [class.alert-warning]="w.status === 'ABGELEHNT'" [class.alert-info]="w.status !== 'ABGELEHNT'">
+        <strong><i class="fa-solid fa-comment me-1"></i>Kommentar Ausbilder:</strong> {{ w.kommentar }}
+      </div>
+    }
+
+    <!-- Tage -->
+    @for (tag of sichtbareTage(); track tag.date) {
+      <div class="day-card" [class.day-empty]="!tag.eintrag && !w.editierbar">
+        <div class="day-header">
+          <div>
+            <strong>{{ tag.wochentag }}</strong>
+            <span class="text-muted ms-2">{{ tag.date | date: 'dd.MM.yyyy' }}</span>
+          </div>
+          @if (!w.editierbar && tag.eintrag) {
+            <div class="small">
+              <span class="badge bg-light text-dark border me-2">{{ tag.eintrag.artLabel }}</span>
+              {{ tag.eintrag.hours | number: '1.0-1' }} h
+            </div>
+          }
+        </div>
+
+        @if (w.editierbar && form(tag.date); as f) {
+          <!-- Bearbeiten -->
+          <div class="row g-2">
+            <div class="col-sm-4 col-lg-3">
+              <label class="form-label">Art</label>
+              <select class="form-select" [ngModel]="f.art" (ngModelChange)="onArtChange(tag.date, $event)">
+                @for (opt of artOptions; track opt[0]) {
+                  <option [value]="opt[0]">{{ opt[1] }}</option>
+                }
+              </select>
+            </div>
+            <div class="col-sm-3 col-lg-2">
+              <label class="form-label">Stunden</label>
+              <input type="number" class="form-control" min="0" max="24" step="0.5" [ngModel]="f.hours" (ngModelChange)="change(tag.date, { hours: $event })" />
+            </div>
+            <div class="col-12">
+              <label class="form-label">Tätigkeiten / Unterrichtsthemen</label>
+              <textarea class="form-control" rows="3" maxlength="4000" placeholder="Was hast du heute gemacht und gelernt?"
+                [ngModel]="f.description" (ngModelChange)="change(tag.date, { description: $event })"></textarea>
+            </div>
+            <div class="col-12">
+              <label class="form-label d-block">Bearbeitete Lernziele</label>
+              @for (id of f.lernzielIds; track id) {
+                <span class="lz-chip">
+                  {{ lernzielTitel(id, tag) }}
+                  <button type="button" class="btn-close btn-close-white ms-1" (click)="toggleLernziel(tag.date, id)" title="Entfernen"></button>
+                </span>
+              }
+              <button type="button" class="btn btn-sm btn-outline-secondary" (click)="setUi(tag.date, { showLernziele: !f.showLernziele })">
+                <i class="fa-solid" [class.fa-plus]="!f.showLernziele" [class.fa-chevron-up]="f.showLernziele"></i>
+                Lernziele {{ f.showLernziele ? 'schließen' : 'zuordnen' }}
+              </button>
+
+              @if (f.showLernziele) {
+                <div class="lz-picker mt-2">
+                  <input class="form-control form-control-sm mb-2" placeholder="Lernziel suchen…" [ngModel]="f.lernzielFilter" (ngModelChange)="setUi(tag.date, { lernzielFilter: $event })" />
+                  @for (pl of gefilterteLernziele(tag.date); track pl.id) {
+                    <label class="lz-option">
+                      <input type="checkbox" class="form-check-input me-2" [checked]="f.lernzielIds.includes(pl.lernziel.id)" (change)="toggleLernziel(tag.date, pl.lernziel.id)" />
+                      <span class="badge-status kind-{{ pl.lernziel.kind }} me-2">{{ kindLabels[pl.lernziel.kind] }}</span>
+                      {{ pl.lernziel.title }}
+                      <span class="badge-status status-{{ pl.status }} ms-auto">{{ pl.statusLabel }}</span>
+                    </label>
+                  } @empty {
+                    <div class="text-muted small">Keine Lernziele gefunden.</div>
+                  }
+                </div>
+              }
+            </div>
+          </div>
+
+          @if (f.error) {
+            <div class="text-danger small mt-2">{{ f.error }}</div>
+          }
+
+          <div class="d-flex justify-content-end gap-2 mt-2">
+            @if (tag.eintrag) {
+              <button class="btn btn-sm btn-outline-danger" (click)="loeschen(tag)"><i class="fa-solid fa-trash"></i></button>
+            }
+            <button class="btn btn-sm btn-brand" (click)="speichern(tag)" [disabled]="f.saving || (!f.dirty && !!tag.eintrag)">
+              @if (f.saving) { <span class="spinner-border spinner-border-sm"></span> }
+              {{ tag.eintrag ? (f.dirty ? 'Änderungen speichern' : 'Gespeichert') : 'Speichern' }}
+            </button>
+          </div>
+        } @else {
+          <!-- Nur lesen -->
+          @if (tag.eintrag; as e) {
+            <p class="mb-1 description">{{ e.description || '–' }}</p>
+            @for (lz of e.lernziele; track lz.id) {
+              <span class="lz-chip lz-chip-readonly">{{ lz.title }}</span>
+            }
+          } @else {
+            <p class="text-muted mb-0 small">Kein Eintrag</p>
+          }
+        }
+      </div>
+    }
+
+    <div class="d-flex flex-wrap justify-content-between align-items-center gap-2 mt-3 no-print">
+      <button class="btn btn-link px-0" (click)="showWeekend.set(!showWeekend())">
+        {{ showWeekend() ? 'Wochenende ausblenden' : 'Wochenende anzeigen' }}
+      </button>
+
+      @if (w.editierbar) {
+        <button class="btn btn-brand" (click)="einreichen()" [disabled]="busy()">
+          <i class="fa-solid fa-paper-plane me-1"></i>Woche zur Prüfung einreichen
+        </button>
+      }
+    </div>
+
+    <!-- Prüfung durch Ausbilder -->
+    @if (kannPruefen()) {
+      <div class="review-box mt-4 no-print">
+        <div class="section-title"><i class="fa-solid fa-stamp me-1"></i>Woche prüfen</div>
+        <textarea class="form-control mb-2" rows="2" [(ngModel)]="kommentar" placeholder="Kommentar (Pflicht beim Zurückgeben)"></textarea>
+        <div class="d-flex gap-2 justify-content-end">
+          <button class="btn btn-outline-danger" (click)="zurueckgeben()" [disabled]="busy()">
+            <i class="fa-solid fa-rotate-left me-1"></i>Zur Überarbeitung zurückgeben
+          </button>
+          <button class="btn btn-success" (click)="abzeichnen()" [disabled]="busy()">
+            <i class="fa-solid fa-check me-1"></i>Abzeichnen
+          </button>
+        </div>
+      </div>
+    }
+
+    <!-- Unterschriften für den Ausdruck -->
+    <div class="print-only signatures">
+      <div>Datum, Unterschrift Auszubildende/r</div>
+      <div>Datum, Unterschrift Ausbilder/in</div>
+    </div>
+  }
+</div>

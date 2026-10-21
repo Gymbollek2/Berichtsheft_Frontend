@@ -1,0 +1,45 @@
+<div class="page-card">
+  <div class="page-title">Meine Wochen</div>
+  <div class="page-subtitle">
+    {{ wochen().length }} Wochen erfasst · {{ abgezeichnet() }} abgezeichnet · {{ gesamtStunden() | number: '1.0-1' }} Stunden gesamt
+  </div>
+
+  @if (error()) {
+    <div class="alert alert-danger">{{ error() }}</div>
+  }
+
+  <table class="table table-hover">
+    <thead>
+      <tr>
+        <th>Kalenderwoche</th>
+        <th>Zeitraum</th>
+        <th>Einträge</th>
+        <th>Stunden</th>
+        <th>Status</th>
+        <th>Eingereicht</th>
+        <th>Geprüft</th>
+      </tr>
+    </thead>
+    <tbody>
+      @for (w of wochen(); track w.weekStart) {
+        <tr class="clickable" [routerLink]="['/berichtsheft']" [queryParams]="{ datum: w.weekStart }">
+          <td>KW {{ w.kalenderwoche }}/{{ w.jahr }}</td>
+          <td>{{ w.weekStart | date: 'dd.MM.' }} – {{ weekEnd(w.weekStart) | date: 'dd.MM.yyyy' }}</td>
+          <td>{{ w.anzahlEintraege }}</td>
+          <td>{{ w.gesamtStunden | number: '1.0-1' }}</td>
+          <td><span class="badge-status status-{{ w.status }}">{{ w.statusLabel }}</span></td>
+          <td>{{ w.eingereichtAm ? (w.eingereichtAm | date: 'dd.MM.yyyy') : '–' }}</td>
+          <td>{{ w.geprueftAm ? (w.geprueftAm | date: 'dd.MM.yyyy') : '–' }}</td>
+        </tr>
+      } @empty {
+        @if (!loading()) {
+          <tr>
+            <td colspan="7" class="text-muted">
+              Noch keine Einträge. <a routerLink="/berichtsheft">Jetzt die erste Woche erfassen</a>.
+            </td>
+          </tr>
+        }
+      }
+    </tbody>
+  </table>
+</div>

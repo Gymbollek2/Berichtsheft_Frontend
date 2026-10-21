@@ -1,0 +1,43 @@
+<div class="row g-4">
+  <div class="col-lg-6">
+    <div class="page-card h-100">
+      <div class="page-title">Mein Profil</div>
+      @if (auth.user(); as u) {
+        <table class="table table-sm mt-3 mb-0">
+          <tbody>
+            <tr><th style="width: 45%">Name</th><td>{{ u.fullName }}</td></tr>
+            <tr><th>Benutzername</th><td><code>{{ u.username }}</code></td></tr>
+            <tr><th>Rolle</th><td>{{ u.roleLabel }}</td></tr>
+            @if (u.beruf) { <tr><th>Ausbildungsberuf</th><td>{{ u.beruf }}</td></tr> }
+            @if (u.yearOfTraining) { <tr><th>Ausbildungsjahr</th><td>{{ u.yearOfTraining }}.</td></tr> }
+            @if (u.dateOfTrainingStart) { <tr><th>Ausbildungsbeginn</th><td>{{ u.dateOfTrainingStart | date: 'dd.MM.yyyy' }}</td></tr> }
+            @if (u.dateOfBirth) { <tr><th>Geburtsdatum</th><td>{{ u.dateOfBirth | date: 'dd.MM.yyyy' }}</td></tr> }
+          </tbody>
+        </table>
+      }
+    </div>
+  </div>
+
+  <div class="col-lg-6">
+    <div class="page-card h-100">
+      <div class="section-title">Passwort ändern</div>
+      @if (error()) { <div class="alert alert-danger py-2">{{ error() }}</div> }
+      @if (info()) { <div class="alert alert-success py-2">{{ info() }}</div> }
+      <form (ngSubmit)="passwortAendern()">
+        <div class="mb-2">
+          <label class="form-label" for="old">Aktuelles Passwort</label>
+          <input id="old" type="password" class="form-control" name="old" autocomplete="current-password" [ngModel]="oldPassword()" (ngModelChange)="oldPassword.set($event)" required />
+        </div>
+        <div class="mb-2">
+          <label class="form-label" for="new">Neues Passwort (min. 8 Zeichen)</label>
+          <input id="new" type="password" class="form-control" name="new" autocomplete="new-password" [ngModel]="newPassword()" (ngModelChange)="newPassword.set($event)" required />
+        </div>
+        <div class="mb-3">
+          <label class="form-label" for="confirm">Neues Passwort wiederholen</label>
+          <input id="confirm" type="password" class="form-control" name="confirm" autocomplete="new-password" [ngModel]="confirmPassword()" (ngModelChange)="confirmPassword.set($event)" required />
+        </div>
+        <button type="submit" class="btn btn-brand" [disabled]="saving()">Passwort ändern</button>
+      </form>
+    </div>
+  </div>
+</div>

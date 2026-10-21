@@ -1,0 +1,155 @@
+<div class="page-card">
+  <div class="d-flex flex-wrap justify-content-between align-items-start gap-2">
+    <div>
+      <div class="page-title">Personen verwalten</div>
+      <div class="page-subtitle">{{ personen().length }} Personen</div>
+    </div>
+    <a class="btn btn-brand" routerLink="/person-anlegen"><i class="fa-solid fa-user-plus me-1"></i>Person anlegen</a>
+  </div>
+
+  @if (error()) {
+    <div class="alert alert-danger alert-dismissible">
+      {{ error() }}<button type="button" class="btn-close" (click)="error.set('')"></button>
+    </div>
+  }
+  @if (info()) {
+    <div class="alert alert-success py-2">{{ info() }}</div>
+  }
+
+  <div class="d-flex flex-wrap gap-2 mb-3">
+    <input class="form-control" style="max-width: 320px" placeholder="Name, Benutzername oder Beruf suchen…" [ngModel]="search()" (ngModelChange)="search.set($event)" />
+    <select class="form-select" style="max-width: 220px" [ngModel]="roleFilter()" (ngModelChange)="roleFilter.set($event)">
+      <option value="">Alle Rollen</option>
+      @for (r of roleFilterOptions; track r[0]) {
+        <option [value]="r[0]">{{ r[1] }}</option>
+      }
+    </select>
+  </div>
+
+  <div class="table-responsive">
+    <table class="table table-hover">
+      <thead>
+        <tr>
+          <th>Name</th>
+          <th>Benutzername</th>
+          <th>Rolle</th>
+          <th>Beruf / Jahr</th>
+          <th>Letzter Login</th>
+          <th></th>
+        </tr>
+      </thead>
+      <tbody>
+        @for (p of gefiltert(); track p.id) {
+          <tr>
+            <td class="fw-semibold">{{ p.lastName }}, {{ p.firstName }} @if (istIch(p)) { <span class="badge bg-secondary">Ich</span> }</td>
+            <td><code>{{ p.username }}</code></td>
+            <td>{{ p.roleLabel }}</td>
+            <td class="small">
+              @if (p.beruf) { {{ p.beruf }} }
+              @if (p.yearOfTraining) { · {{ p.yearOfTraining }}. Jahr }
+            </td>
+            <td class="small text-muted">{{ p.lastLogin ? (p.lastLogin | date: 'dd.MM.yyyy HH:mm') : 'noch nie' }}</td>
+            <td class="table-actions">
+              @if (darfVerwalten(p)) {
+                <button class="btn btn-sm btn-outline-primary me-1" (click)="bearbeiten(p)" title="Bearbeiten"><i class="fa-solid fa-pen"></i></button>
+                <button class="btn btn-sm btn-outline-secondary me-1" (click)="passwortZuruecksetzen(p)" title="Passwort zurücksetzen"><i class="fa-solid fa-key"></i></button>
+                @if (!istIch(p)) {
+                  <button class="btn btn-sm btn-outline-danger" (click)="loeschen(p)" title="Löschen"><i class="fa-solid fa-trash"></i></button>
+                }
+              }
+            </td>
+          </tr>
+        } @empty {
+          <tr><td colspan="6" class="text-muted">Keine Personen gefunden.</td></tr>
+        }
+      </tbody>
+    </table>
+  </div>
+</div>
+
+<!-- Dialog: Bearbeiten -->
+@if (model(); as m) {
+  <div class="modal-backdrop-custom" (click)="schliessen()">
+    <div class="modal-card" (click)="$event.stopPropagation()">
+      <div class="d-flex justify-content-between align-items-center mb-3">
+        <div class="section-title mb-0">{{ editing()?.fullName }} bearbeiten</div>
+        <button type="button" class="btn-close" (click)="schliessen()"></button>
+      </div>
+      @if (modalError()) {
+        <div class="alert alert-danger py-2">{{ modalError() }}</div>
+      }
+      <form (ngSubmit)="speichern()">
+        <div class="row g-3">
+          <div class="col-md-6">
+            <label class="form-label">Vorname</label>
+            <input class="form-control" name="firstName" [ngModel]="m.firstName" (ngModelChange)="set('firstName', $event)" required />
+          </div>
+          <div class="col-md-6">
+            <label class="form-label">Nachname</label>
+            <input class="form-control" name="lastName" [ngModel]="m.lastName" (ngModelChange)="set('lastName', $event)" required />
+          </div>
+          <div class="col-md-6">
+            <label class="form-label">Benutzername</label>
+            <input class="form-control" name="username" [ngModel]="m.username" (ngModelChange)="set('username', $event)" required />
+          </div>
+          <div class="col-md-6">
+            <label class="form-label">Rolle</label>
+            <select class="form-select" name="role" [ngModel]="m.role" (ngModelChange)="set('role', $event)" [disabled]="istIch(editing()!)">
+              @for (r of roles; track r[0]) {
+                <option [value]="r[0]">{{ r[1] }}</option>
+              }
+            </select>
+          </div>
+          <div class="col-md-6">
+            <label class="form-label">Geburtsdatum</label>
+            <input type="date" class="form-control" name="dateOfBirth" [ngModel]="m.dateOfBirth" (ngModelChange)="set('dateOfBirth', $event)" />
+          </div>
+          @if (lernend()) {
+            <div class="col-md-6">
+              <label class="form-label">Ausbildungsbeginn</label>
+              <input type="date" class="form-control" name="dateOfTrainingStart" [ngModel]="m.dateOfTrainingStart" (ngModelChange)="set('dateOfTrainingStart', $event)" />
+            </div>
+            <div class="col-md-8">
+              <label class="form-label">Ausbildungsberuf / Studiengang</label>
+              <input class="form-control" name="beruf" [ngModel]="m.beruf" (ngModelChange)="set('beruf', $event)" />
+            </div>
+            <div class="col-md-4">
+              <label class="form-label">Ausbildungsjahr</label>
+              <select class="form-select" name="yearOfTraining" [ngModel]="m.yearOfTraining" (ngModelChange)="set('yearOfTraining', $event)">
+                @for (y of [1, 2, 3, 4]; track y) {
+                  <option [ngValue]="y">{{ y }}. Jahr</option>
+                }
+              </select>
+            </div>
+          }
+        </div>
+        <div class="d-flex justify-content-end gap-2 mt-4">
+          <button type="button" class="btn btn-outline-secondary" (click)="schliessen()">Abbrechen</button>
+          <button type="submit" class="btn btn-brand" [disabled]="saving()">Speichern</button>
+        </div>
+      </form>
+    </div>
+  </div>
+}
+
+<!-- Dialog: Passwort zurücksetzen -->
+@if (resetFor(); as p) {
+  <div class="modal-backdrop-custom" (click)="resetFor.set(null)">
+    <div class="modal-card" style="width: min(460px, 94vw)" (click)="$event.stopPropagation()">
+      <div class="section-title">Passwort für {{ p.fullName }} zurücksetzen</div>
+      @if (modalError()) {
+        <div class="alert alert-danger py-2">{{ modalError() }}</div>
+      }
+      <label class="form-label">Neues Passwort</label>
+      <div class="input-group mb-3">
+        <input class="form-control" [ngModel]="resetPassword()" (ngModelChange)="resetPassword.set($event)" />
+        <button type="button" class="btn btn-outline-secondary" (click)="passwortZuruecksetzen(p)" title="Neu erzeugen"><i class="fa-solid fa-dice"></i></button>
+      </div>
+      <p class="small text-muted">Bestehende Anmeldungen der Person werden dadurch beendet.</p>
+      <div class="d-flex justify-content-end gap-2">
+        <button type="button" class="btn btn-outline-secondary" (click)="resetFor.set(null)">Abbrechen</button>
+        <button type="button" class="btn btn-brand" (click)="passwortSpeichern()">Passwort setzen</button>
+      </div>
+    </div>
+  </div>
+}

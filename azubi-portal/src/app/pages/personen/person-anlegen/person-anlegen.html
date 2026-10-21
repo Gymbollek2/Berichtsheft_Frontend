@@ -1,0 +1,83 @@
+<div class="page-card" style="max-width: 820px">
+  <div class="page-title">Person anlegen</div>
+  <div class="page-subtitle">Legt eine Person mit Login an. Azubis bekommen automatisch alle Lernziele zugewiesen.</div>
+
+  @if (created(); as c) {
+    <div class="alert alert-success">
+      <button type="button" class="btn-close float-end" (click)="created.set(null)"></button>
+      <strong>{{ c.person.fullName }}</strong> wurde als {{ c.person.roleLabel }} angelegt.<br />
+      Zugangsdaten: Benutzername <code>{{ c.person.username }}</code>, Startpasswort <code>{{ c.password }}</code><br />
+      <span class="small">Bitte die Zugangsdaten weitergeben – das Passwort kann im Profil geändert werden.</span>
+    </div>
+  }
+  @if (error()) {
+    <div class="alert alert-danger">{{ error() }}</div>
+  }
+
+  <form (ngSubmit)="speichern()">
+    <div class="row g-3">
+      <div class="col-md-6">
+        <label class="form-label" for="firstName">Vorname *</label>
+        <input id="firstName" class="form-control" name="firstName" required [ngModel]="model().firstName" (ngModelChange)="set('firstName', $event)" />
+      </div>
+      <div class="col-md-6">
+        <label class="form-label" for="lastName">Nachname *</label>
+        <input id="lastName" class="form-control" name="lastName" required [ngModel]="model().lastName" (ngModelChange)="set('lastName', $event)" />
+      </div>
+      <div class="col-md-6">
+        <label class="form-label" for="role">Rolle *</label>
+        <select id="role" class="form-select" name="role" [ngModel]="model().role" (ngModelChange)="set('role', $event)">
+          @for (r of roles; track r[0]) {
+            <option [value]="r[0]">{{ r[1] }}</option>
+          }
+        </select>
+      </div>
+      <div class="col-md-6">
+        <label class="form-label" for="dateOfBirth">Geburtsdatum</label>
+        <input id="dateOfBirth" type="date" class="form-control" name="dateOfBirth" [ngModel]="model().dateOfBirth" (ngModelChange)="set('dateOfBirth', $event)" />
+      </div>
+
+      @if (lernend()) {
+        <div class="col-md-6">
+          <label class="form-label" for="beruf">Ausbildungsberuf / Studiengang</label>
+          <input id="beruf" class="form-control" name="beruf" [ngModel]="model().beruf" (ngModelChange)="set('beruf', $event)" />
+        </div>
+        <div class="col-md-3">
+          <label class="form-label" for="year">Ausbildungsjahr</label>
+          <select id="year" class="form-select" name="yearOfTraining" [ngModel]="model().yearOfTraining" (ngModelChange)="set('yearOfTraining', $event)">
+            @for (y of [1, 2, 3, 4]; track y) {
+              <option [ngValue]="y">{{ y }}. Jahr</option>
+            }
+          </select>
+        </div>
+        <div class="col-md-3">
+          <label class="form-label" for="start">Ausbildungsbeginn</label>
+          <input id="start" type="date" class="form-control" name="dateOfTrainingStart" [ngModel]="model().dateOfTrainingStart" (ngModelChange)="set('dateOfTrainingStart', $event)" />
+        </div>
+      }
+
+      <div class="col-12"><hr class="my-1" /><div class="section-title mt-2 mb-0">Zugang</div></div>
+      <div class="col-md-6">
+        <label class="form-label" for="username">Benutzername</label>
+        <input id="username" class="form-control" name="username" placeholder="leer = vorname.nachname" [ngModel]="model().username" (ngModelChange)="set('username', $event)" />
+      </div>
+      <div class="col-md-6">
+        <label class="form-label" for="password">Startpasswort * (min. 8 Zeichen)</label>
+        <div class="input-group">
+          <input id="password" class="form-control" name="password" [ngModel]="model().password" (ngModelChange)="set('password', $event)" />
+          <button type="button" class="btn btn-outline-secondary" (click)="neuesPasswort()" title="Neues Passwort erzeugen">
+            <i class="fa-solid fa-dice"></i>
+          </button>
+        </div>
+      </div>
+    </div>
+
+    <div class="d-flex justify-content-end gap-2 mt-4">
+      <a class="btn btn-outline-secondary" routerLink="/person-bearbeiten">Zur Personenliste</a>
+      <button type="submit" class="btn btn-brand" [disabled]="saving()">
+        @if (saving()) { <span class="spinner-border spinner-border-sm me-1"></span> }
+        Person anlegen
+      </button>
+    </div>
+  </form>
+</div>

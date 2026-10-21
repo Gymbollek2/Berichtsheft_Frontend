@@ -1,0 +1,175 @@
+import { Component, OnInit, computed, inject, signal } from '@angular/core';
+import { DatePipe } from '@angular/common';
+import { FormsModule } from '@angular/forms';
+import { RouterLink } from '@angular/router';
+import { Auth } from '@app/services/auth';
+import { PersonService } from '@app/services/person.service';
+import { Person, ROLE_LABELS, Role, isLearner } from '@app/core/models';
+import { errorMessage, normalizeSearch } from '@app/core/utils';
+import { PersonForm, assignableRoles, emptyToNull, generatePassword } from '../person-form';
+
+/** Personenliste mit Suche, Bearbeiten, Passwort zurücksetzen und Löschen. */
+@Component({
+  selector: 'app-person-bearbeiten',
+  imports: [FormsModule, RouterLink, DatePipe],
+  templateUrl: './person-bearbeiten.html',
+})
+export class PersonBearbeiten implements OnInit {
+  protected readonly auth = inject(Auth);
+  private readonly service = inject(PersonService);
+
+  readonly roleLabels = ROLE_LABELS;
+  readonly roleFilterOptions = Object.entries(ROLE_LABELS) as [Role, string][];
+  readonly roles = assignableRoles(this.auth.isAdmin());
+
+  readonly personen = signal<Person[]>([]);
+  readonly search = signal('');
+  readonly roleFilter = signal<Role | ''>('');
+  readonly error = signal('');
+  readonly info = signal('');
+
+  readonly editing = signal<Person | null>(null);
+  readonly model = signal<PersonForm | null>(null);
+  readonly modalError = signal('');
+  readonly saving = signal(false);
+
+  readonly resetFor = signal<Person | null>(null);
+  readonly resetPassword = signal('');
+
+  readonly gefiltert = computed(() => {
+    const q = normalizeSearch(this.search());
+    const role = this.roleFilter();
+    return this.personen().filter(
+      (p) =>
+        (!role || p.role === role) &&
+        (!q || normalizeSearch(`${p.fullName} ${p.username} ${p.beruf ?? ''}`).includes(q)),
+    );
+  });
+  readonly lernend = computed(() => isLearner(this.model()?.role));
+
+  ngOnInit(): void {
+    this.load();
+  }
+
+  load(): void {
+    this.service.getAll().subscribe({
+      next: (list) => this.personen.set(list),
+      error: (err) => this.error.set(errorMessage(err)),
+    });
+  }
+
+  /** Ausbilder dürfen nur Azubis und Studierende verwalten, Admins alle. */
+  darfVerwalten(p: Person): boolean {
+    return this.auth.isAdmin() || isLearner(p.role);
+  }
+
+  istIch(p: Person): boolean {
+    return this.auth.user()?.id === p.id;
+  }
+
+  // ------------------------------------------------ Bearbeiten
+
+  bearbeiten(p: Person): void {
+    this.modalError.set('');
+    this.editing.set(p);
+    this.model.set({
+      firstName: p.firstName,
+      lastName: p.lastName,
+      role: p.role,
+      username: p.username,
+      password: '',
+      beruf: p.beruf ?? '',
+      yearOfTraining: p.yearOfTraining,
+      dateOfTrainingStart: p.dateOfTrainingStart ?? '',
+      dateOfBirth: p.dateOfBirth ?? '',
+    });
+  }
+
+  set<K extends keyof PersonForm>(key: K, value: PersonForm[K]): void {
+    this.model.update((m) => (m ? { ...m, [key]: value } : m));
+  }
+
+  speichern(): void {
+    const p = this.editing();
+    const m = this.model();
+    if (!p || !m) {
+      return;
+    }
+    this.saving.set(true);
+    this.modalError.set('');
+    this.service
+      .update(p.id, {
+        firstName: m.firstName.trim(),
+        lastName: m.lastName.trim(),
+        role: m.role,
+        username: m.username.trim(),
+        beruf: this.lernend() ? emptyToNull(m.beruf) : null,
+        yearOfTraining: this.lernend() ? Number(m.yearOfTraining) || 0 : 0,
+        dateOfTrainingStart: this.lernend() ? emptyToNull(m.dateOfTrainingStart) : null,
+        dateOfBirth: emptyToNull(m.dateOfBirth),
+      })
+      .subscribe({
+        next: (updated) => {
+          this.saving.set(false);
+          this.personen.update((list) => list.map((x) => (x.id === updated.id ? updated : x)));
+          this.schliessen();
+          this.flash(`${updated.fullName} gespeichert`);
+        },
+        error: (err) => {
+          this.saving.set(false);
+          this.modalError.set(errorMessage(err));
+        },
+      });
+  }
+
+  schliessen(): void {
+    this.editing.set(null);
+    this.model.set(null);
+  }
+
+  // ------------------------------------------------ Passwort
+
+  passwortZuruecksetzen(p: Person): void {
+    this.modalError.set('');
+    this.resetPassword.set(generatePassword());
+    this.resetFor.set(p);
+  }
+
+  passwortSpeichern(): void {
+    const p = this.resetFor();
+    if (!p) {
+      return;
+    }
+    if (this.resetPassword().length < 8) {
+      this.modalError.set('Mindestens 8 Zeichen.');
+      return;
+    }
+    this.service.resetPassword(p.id, this.resetPassword()).subscribe({
+      next: () => {
+        this.flash(`Neues Passwort für ${p.fullName}: ${this.resetPassword()}`, 10000);
+        this.resetFor.set(null);
+      },
+      error: (err) => this.modalError.set(errorMessage(err)),
+    });
+  }
+
+  // ------------------------------------------------ Löschen
+
+  loeschen(p: Person): void {
+    if (!confirm(`${p.fullName} wirklich löschen? Berichtsheft und Lernfortschritt werden ebenfalls gelöscht.`)) {
+      return;
+    }
+    this.service.delete(p.id).subscribe({
+      next: () => {
+        this.personen.update((list) => list.filter((x) => x.id !== p.id));
+        this.flash(`${p.fullName} gelöscht`);
+      },
+      error: (err) => this.error.set(errorMessage(err)),
+    });
+  }
+
+  private flash(message: string, ms = 3000): void {
+    this.info.set(message);
+    setTimeout(() => this.info.set(''), ms);
+  }
+}

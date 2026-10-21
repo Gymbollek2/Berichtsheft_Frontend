@@ -1,5 +1,22 @@
 # Changelog
 
+## [1.1.0] – 2026-10-21
+
+### Neu
+- **Neues Design** im Corporate Design: ruhige Flächen in Nachtblau und Weiß, Marken-Verlauf nur
+  noch als Akzent, Seitenleiste statt Kopf- plus gedrehter Seitenleiste, mobil ausklappbar.
+- Schrift **IBM Plex Sans**, lokal ausgeliefert (keine Google-Fonts-Aufrufe mehr).
+- Berichtsheft als liniertes Nachweisblatt mit Datumsspalte.
+- **Lernziel-Hierarchie im Formular**: Art wählen, dann nur passende übergeordnete Lernziele.
+  Richtlernziele haben keines. „Unterziel anlegen“ direkt aus der Liste.
+- Berechneter Status für Grob- und Richtlernziele (nicht direkt änderbar).
+- Hinweise, warum eine Woche noch nicht eingereicht werden kann. Zukünftige Tage sind gesperrt.
+- **HTTPS**: Entwicklungsserver auf https://localhost:4200, Proxy zum Backend über HTTPS.
+
+### Geändert
+- Ausbildungsjahr wird aus dem Ausbildungsbeginn berechnet; Ausbildungsbeginn ist Pflicht für Azubis.
+- Passwort- und Benutzernamenregeln wie im Backend.
+
 ## [1.0.0] – 2026-10-21
 
 Erste vollständige Version des Azubi-Portals.

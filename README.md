@@ -4,13 +4,13 @@ Angular-Oberfläche für das **digitale Berichtsheft**. Azubis erfassen ihre Woc
 
 Das Backend liegt in [`Berichtsheft_Backend`](https://github.com/Gymbollek2/Berichtsheft_Backend) und muss für die Nutzung laufen.
 
-**Technik:** Angular 21 (Standalone-Komponenten, Signals, zoneless) · Bootstrap 5 · Font Awesome · TypeScript
+**Technik:** Angular 21 (Standalone-Komponenten, Signals, zoneless), Bootstrap 5, Font Awesome, IBM Plex Sans (lokal eingebunden), TypeScript. Läuft ausschließlich über **HTTPS**.
 
 ---
 
 ## Lokal starten – Schritt für Schritt
 
-Ihr startet zwei Programme: zuerst das **Backend** (Port 8080), dann das **Frontend** (Port 4200).
+Ihr startet zwei Programme: zuerst das **Backend** (https://localhost:8443), dann das **Frontend** (https://localhost:4200). Beide laufen nur verschlüsselt.
 
 ### 1. Voraussetzungen installieren
 
@@ -42,7 +42,7 @@ mvnw.cmd spring-boot:run      # Windows
 ./mvnw spring-boot:run        # macOS / Linux
 ```
 
-Warte, bis `Started BerichtsheftApplication` erscheint. Details stehen im [Backend-README](https://github.com/Gymbollek2/Berichtsheft_Backend#lokal-starten--schritt-für-schritt).
+Warte, bis `Started BerichtsheftApplication` erscheint. Beim ersten Start erzeugt das Backend selbst ein Entwicklungszertifikat. Details stehen im [Backend-README](https://github.com/Gymbollek2/Berichtsheft_Backend#lokal-starten--schritt-für-schritt).
 
 ### 4. Frontend starten (Terminal 2)
 
@@ -52,9 +52,19 @@ npm install        # nur beim ersten Mal bzw. nach Änderungen an package.json
 npm start
 ```
 
-Dann im Browser **<http://localhost:4200>** öffnen.
+Dann im Browser **<https://localhost:4200>** öffnen.
 
-Der Entwicklungsserver leitet alle Aufrufe an `/v1/...` automatisch an `http://localhost:8080` weiter (`proxy.conf.json`). Dafür ist keine weitere Konfiguration nötig.
+Der Browser warnt beim ersten Aufruf vor dem selbstsignierten Zertifikat: *Erweitert → Weiter zu localhost (unsicher)*. Lokal ist das unbedenklich. Ohne Warnung geht es mit mkcert, siehe [Vertrauenswürdiges Zertifikat](#vertrauenswürdiges-zertifikat-optional).
+
+Der Entwicklungsserver leitet alle Aufrufe an `/v1/...` automatisch an `https://localhost:8443` weiter (`proxy.conf.json`). Der Browser spricht damit nur mit einer Adresse, weitere Konfiguration ist nicht nötig.
+
+### Vertrauenswürdiges Zertifikat (optional)
+
+1. [mkcert](https://github.com/FiloSottile/mkcert) installieren (Windows: `winget install FiloSottile.mkcert`) und einmalig `mkcert -install` ausführen.
+2. Im Ordner `azubi-portal`: `mkcert -cert-file ssl/localhost.pem -key-file ssl/localhost-key.pem localhost 127.0.0.1`
+3. Starten mit `npm run start:mkcert`.
+
+Für das Backend gibt es dieselbe Möglichkeit, siehe Backend-README.
 
 ### 5. Einloggen
 
@@ -67,8 +77,8 @@ Der Entwicklungsserver leitet alle Aufrufe an `/v1/...` automatisch an `http://l
 
 **Zum Ausprobieren:**
 
-1. Als `azubi` anmelden, unter *Berichtsheft → Meine Woche* Tage ausfüllen, Lernziele zuordnen und die Woche **einreichen**.
-2. Als `ausbilder` anmelden, unter *Berichtsheft → Prüfen* die Woche öffnen und **abzeichnen** oder mit Kommentar **zurückgeben**.
+1. Als `azubi` anmelden, unter *Berichtsheft → Aktuelle Woche* Tage ausfüllen und Feinlernziele zuordnen. Eine vergangene, vollständige Woche **einreichen**.
+2. Als `ausbilder` anmelden, unter *Berichtsheft → Zur Prüfung* die Woche öffnen und **abzeichnen** oder mit Kommentar **zurückgeben**.
 3. Unter *Lernfortschritt* den Status von Lernzielen setzen, unter *Personen* neue Azubis anlegen.
 
 ### In IntelliJ / WebStorm
@@ -82,7 +92,11 @@ Ordner `Berichtsheft_Frontend/azubi-portal` öffnen, im Terminal `npm install` a
 ### Für Azubis und duale Studierende
 
 - **Übersicht**: Stand der aktuellen Woche, Lernfortschritt in Prozent, Hinweis auf zurückgegebene Wochen
-- **Meine Woche**: Montag bis Freitag (Wochenende einblendbar) mit Art (Betrieb, Berufsschule, Urlaub, Krank …), Stunden, Tätigkeiten und Lernzielen. Speichern pro Tag, Woche einreichen.
+- **Aktuelle Woche**: Nachweisblatt Montag bis Freitag (Wochenende einblendbar) mit Art (Betrieb, Berufsschule, Urlaub, Krank …), Stunden, Tätigkeiten und Feinlernzielen. Speichern pro Tag, Woche einreichen.
+  - Zukünftige Tage und Tage vor dem Ausbildungsbeginn sind gesperrt.
+  - Höchstens 10 Stunden pro Tag.
+  - An Urlaubs-, Krankheits- und Feiertagen gibt es keine Lernziele.
+  - Einreichen geht ab Freitag, wenn alle Werktage eingetragen sind. Die Seite sagt, was noch fehlt.
 - Zwischen Wochen blättern oder per Datum springen
 - **Drucken / als PDF speichern** mit Unterschriftszeilen
 - **Meine Wochen**: alle Wochen mit Status
@@ -94,8 +108,12 @@ Ordner `Berichtsheft_Frontend/azubi-portal` öffnen, im Terminal `npm install` a
 - **Übersicht**: offene Prüfungen und Lernfortschritt aller Azubis
 - **Prüfen**: Warteschlange der eingereichten Wochen, abzeichnen oder mit Kommentar zurückgeben
 - **Berichtshefte**: Berichtshefte aller Azubis durchsuchen
-- **Lernfortschritt**: Azubi wählen und Status je Lernziel setzen
-- **Lernziele**: Baumansicht (Richt → Grob → Fein), Suche, anlegen, bearbeiten, löschen, **CSV-Import/-Export**
+- **Lernfortschritt**: Azubi wählen und den Status der Feinlernziele setzen. Grob- und Richtlernziele werden automatisch berechnet.
+- **Lernziele**: Baumansicht mit Suche, anlegen, bearbeiten, löschen sowie **CSV-Import/-Export**. Die Hierarchie wird geführt:
+  - Ein Richtlernziel hat kein übergeordnetes Lernziel.
+  - Ein Groblernziel wählt sein Richtlernziel, ein Feinlernziel sein Groblernziel. Die Auswahl zeigt nur passende Lernziele.
+  - „+ Groblernziel“ bzw. „+ Feinlernziel“ in der Liste legt direkt ein Unterziel an.
+  - Lernziele mit Unterzielen lassen sich nicht löschen.
 - **Personen**: anlegen (mit generiertem Startpasswort), bearbeiten, Passwort zurücksetzen, löschen. Ausbilder dürfen nur Azubis und Studierende verwalten, Admins alle.
 
 Menü und Seiten passen sich automatisch der **Rolle** an. Die Rechte werden zusätzlich im Backend geprüft.
@@ -108,7 +126,8 @@ Alle im Ordner `azubi-portal`:
 
 | Befehl | Zweck |
 |---|---|
-| `npm start` | Entwicklungsserver auf <http://localhost:4200> |
+| `npm start` | Entwicklungsserver auf <https://localhost:4200> |
+| `npm run start:mkcert` | wie `npm start`, mit eigenem Zertifikat aus `ssl/` |
 | `npm run build` | Produktions-Build nach `dist/azubi-portal/browser` |
 | `npm test` | Unit-Tests (Vitest) |
 | `npx prettier --write src` | Code formatieren |
@@ -128,14 +147,14 @@ azubi-portal/
 ├── proxy.conf.json            Weiterleitung /v1 → Backend (localhost:8080)
 ├── public/assets/             Logos & Icons
 └── src/
-    ├── styles.css             globales Design (Farben, Karten, Badges, Druckansicht)
+    ├── styles.css             Design-System (Farben, Schrift, Tabellen, Status, Druckansicht)
     └── app/
         ├── app.routes.ts      alle Routen inkl. Rollen-Schutz
         ├── core/              Datentypen (models.ts) & Hilfsfunktionen
         ├── services/          API-Zugriffe, Login, Navigation
         ├── interceptors/      hängt das Login-Token an jede Anfrage
         ├── guards/            Login- & Rollenprüfung für Routen
-        ├── layout/            Kopfzeile, Seitenleiste, Rahmen
+        ├── layout/            Seitenleiste und Rahmen (mobil ausklappbar)
         └── pages/             Seiten (dashboard, berichtsheft, lernziele, personen, …)
 ```
 
@@ -143,7 +162,9 @@ azubi-portal/
 
 | Problem | Lösung |
 |---|---|
-| „Backend nicht erreichbar – läuft der Server auf Port 8080?“ | Das Backend ist nicht gestartet oder läuft auf einem anderen Port (`proxy.conf.json` prüfen). |
+| „Backend nicht erreichbar …“ | Das Backend ist nicht gestartet oder läuft auf einem anderen Port (`proxy.conf.json` prüfen). |
+| „Diese Verbindung ist nicht sicher“ | Erwartet beim selbstsignierten Zertifikat: einmal bestätigen oder mkcert verwenden. |
+| `http://localhost:4200` lädt nicht | Richtig so, das Portal läuft nur unter `https://`. |
 | Login schlägt fehl | Benutzername/Passwort prüfen. Nach einem DB-Reset im Backend gelten wieder die Demo-Passwörter. |
 | `npm install` meldet Versionskonflikte | `node_modules` und `package-lock.json` löschen und `npm install` erneut ausführen. |
 | `The Angular CLI requires a minimum Node.js version` | Node.js 22 LTS installieren. |

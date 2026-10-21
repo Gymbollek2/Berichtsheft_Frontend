@@ -1,0 +1,64 @@
+name: Release
+
+# Legt automatisch einen Git-Tag "v<Version>" und ein GitHub-Release an,
+# sobald auf main eine neue Version in azubi-portal/package.json steht.
+# Neue Version veroeffentlichen: "version" in package.json erhoehen + Abschnitt im CHANGELOG.md ergaenzen.
+
+on:
+  push:
+    branches: [main]
+    paths: [azubi-portal/package.json, CHANGELOG.md, .github/workflows/release.yml]
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  release:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Version ermitteln
+        id: version
+        run: |
+          VERSION=$(node -p "require('./azubi-portal/package.json').version")
+          echo "version=$VERSION" >> "$GITHUB_OUTPUT"
+          if git rev-parse "v$VERSION" >/dev/null 2>&1; then
+            echo "exists=true" >> "$GITHUB_OUTPUT"
+          else
+            echo "exists=false" >> "$GITHUB_OUTPUT"
+          fi
+          echo "Version: $VERSION"
+
+      - name: Node.js 22 einrichten
+        if: steps.version.outputs.exists == 'false'
+        uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+          cache: npm
+          cache-dependency-path: azubi-portal/package-lock.json
+
+      - name: Bauen und testen
+        if: steps.version.outputs.exists == 'false'
+        working-directory: azubi-portal
+        run: |
+          npm install --no-audit --no-fund
+          npx ng test --watch=false
+          npm run build
+          cd dist/azubi-portal/browser && zip -r ../../../azubi-portal.zip .
+
+      - name: Tag und Release anlegen
+        if: steps.version.outputs.exists == 'false'
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          VERSION: ${{ steps.version.outputs.version }}
+        run: |
+          awk -v v="$VERSION" '$0 ~ "^## \\[" v "\\]" {f=1; next} /^## \[/ {f=0} f' CHANGELOG.md > notes.md
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git tag -a "v$VERSION" -m "Version $VERSION"
+          git push origin "v$VERSION"
+          gh release create "v$VERSION" azubi-portal/azubi-portal.zip --title "v$VERSION" --notes-file notes.md

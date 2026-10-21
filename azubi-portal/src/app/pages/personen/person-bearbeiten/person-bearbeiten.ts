@@ -6,7 +6,17 @@ import { Auth } from '@app/services/auth';
 import { PersonService } from '@app/services/person.service';
 import { Person, ROLE_LABELS, Role, isLearner } from '@app/core/models';
 import { errorMessage, normalizeSearch } from '@app/core/utils';
-import { PersonForm, assignableRoles, emptyToNull, generatePassword } from '../person-form';
+import {
+  PASSWORD_HINT,
+  PASSWORD_PATTERN,
+  PersonForm,
+  USERNAME_HINT,
+  assignableRoles,
+  ausbildungsjahr,
+  emptyToNull,
+  generatePassword,
+  validatePersonForm,
+} from '../person-form';
 
 /** Personenliste mit Suche, Bearbeiten, Passwort zurücksetzen und Löschen. */
 @Component({
@@ -21,6 +31,8 @@ export class PersonBearbeiten implements OnInit {
   readonly roleLabels = ROLE_LABELS;
   readonly roleFilterOptions = Object.entries(ROLE_LABELS) as [Role, string][];
   readonly roles = assignableRoles(this.auth.isAdmin());
+  readonly passwordHint = PASSWORD_HINT;
+  readonly usernameHint = USERNAME_HINT;
 
   readonly personen = signal<Person[]>([]);
   readonly search = signal('');
@@ -46,6 +58,7 @@ export class PersonBearbeiten implements OnInit {
     );
   });
   readonly lernend = computed(() => isLearner(this.model()?.role));
+  readonly jahr = computed(() => ausbildungsjahr(this.model()?.dateOfTrainingStart ?? ''));
 
   ngOnInit(): void {
     this.load();
@@ -79,7 +92,6 @@ export class PersonBearbeiten implements OnInit {
       username: p.username,
       password: '',
       beruf: p.beruf ?? '',
-      yearOfTraining: p.yearOfTraining,
       dateOfTrainingStart: p.dateOfTrainingStart ?? '',
       dateOfBirth: p.dateOfBirth ?? '',
     });
@@ -95,6 +107,12 @@ export class PersonBearbeiten implements OnInit {
     if (!p || !m) {
       return;
     }
+    const username = m.username.trim().toLowerCase();
+    const fehler = validatePersonForm({ ...m, username }, this.lernend(), false) ?? (username ? null : 'Bitte gib einen Benutzernamen an.');
+    if (fehler) {
+      this.modalError.set(fehler);
+      return;
+    }
     this.saving.set(true);
     this.modalError.set('');
     this.service
@@ -102,9 +120,8 @@ export class PersonBearbeiten implements OnInit {
         firstName: m.firstName.trim(),
         lastName: m.lastName.trim(),
         role: m.role,
-        username: m.username.trim(),
+        username,
         beruf: this.lernend() ? emptyToNull(m.beruf) : null,
-        yearOfTraining: this.lernend() ? Number(m.yearOfTraining) || 0 : 0,
         dateOfTrainingStart: this.lernend() ? emptyToNull(m.dateOfTrainingStart) : null,
         dateOfBirth: emptyToNull(m.dateOfBirth),
       })
@@ -140,8 +157,8 @@ export class PersonBearbeiten implements OnInit {
     if (!p) {
       return;
     }
-    if (this.resetPassword().length < 8) {
-      this.modalError.set('Mindestens 8 Zeichen.');
+    if (!PASSWORD_PATTERN.test(this.resetPassword())) {
+      this.modalError.set(PASSWORD_HINT);
       return;
     }
     this.service.resetPassword(p.id, this.resetPassword()).subscribe({

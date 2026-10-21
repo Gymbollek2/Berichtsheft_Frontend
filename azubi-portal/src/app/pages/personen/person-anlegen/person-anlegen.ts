@@ -5,7 +5,17 @@ import { Auth } from '@app/services/auth';
 import { PersonService } from '@app/services/person.service';
 import { Person, isLearner } from '@app/core/models';
 import { errorMessage } from '@app/core/utils';
-import { PersonForm, assignableRoles, emptyPersonForm, emptyToNull, generatePassword } from '../person-form';
+import {
+  PASSWORD_HINT,
+  PersonForm,
+  USERNAME_HINT,
+  assignableRoles,
+  ausbildungsjahr,
+  emptyPersonForm,
+  emptyToNull,
+  generatePassword,
+  validatePersonForm,
+} from '../person-form';
 
 @Component({
   selector: 'app-person-anlegen',
@@ -17,11 +27,14 @@ export class PersonAnlegen {
   private readonly service = inject(PersonService);
 
   readonly roles = assignableRoles(this.auth.isAdmin());
+  readonly passwordHint = PASSWORD_HINT;
+  readonly usernameHint = USERNAME_HINT;
   readonly model = signal<PersonForm>(emptyPersonForm());
   readonly error = signal('');
   readonly saving = signal(false);
   readonly created = signal<{ person: Person; password: string } | null>(null);
   readonly lernend = computed(() => isLearner(this.model().role));
+  readonly jahr = computed(() => ausbildungsjahr(this.model().dateOfTrainingStart));
 
   set<K extends keyof PersonForm>(key: K, value: PersonForm[K]): void {
     this.model.update((m) => ({ ...m, [key]: value }));
@@ -32,13 +45,10 @@ export class PersonAnlegen {
   }
 
   speichern(): void {
-    const m = this.model();
-    if (!m.firstName.trim() || !m.lastName.trim()) {
-      this.error.set('Vor- und Nachname sind Pflichtfelder.');
-      return;
-    }
-    if (m.password.length < 8) {
-      this.error.set('Das Startpasswort muss mindestens 8 Zeichen lang sein.');
+    const m = { ...this.model(), username: this.model().username.trim().toLowerCase() };
+    const fehler = validatePersonForm(m, this.lernend(), true);
+    if (fehler) {
+      this.error.set(fehler);
       return;
     }
     this.saving.set(true);
@@ -51,7 +61,6 @@ export class PersonAnlegen {
         username: emptyToNull(m.username),
         password: m.password,
         beruf: this.lernend() ? emptyToNull(m.beruf) : null,
-        yearOfTraining: this.lernend() ? Number(m.yearOfTraining) || 0 : 0,
         dateOfTrainingStart: this.lernend() ? emptyToNull(m.dateOfTrainingStart) : null,
         dateOfBirth: emptyToNull(m.dateOfBirth),
       })

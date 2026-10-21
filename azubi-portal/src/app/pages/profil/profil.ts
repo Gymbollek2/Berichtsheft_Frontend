@@ -3,6 +3,7 @@ import { DatePipe } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { Auth } from '@app/services/auth';
 import { errorMessage } from '@app/core/utils';
+import { PASSWORD_PATTERN } from '../personen/person-form';
 
 /** Eigene Daten ansehen und Passwort ändern. */
 @Component({
@@ -27,8 +28,8 @@ export class Profil {
   passwortAendern(): void {
     this.error.set('');
     this.info.set('');
-    if (this.newPassword().length < 8) {
-      this.error.set('Das neue Passwort muss mindestens 8 Zeichen lang sein.');
+    if (!PASSWORD_PATTERN.test(this.newPassword())) {
+      this.error.set('Das neue Passwort braucht mindestens 8 Zeichen mit Buchstaben und Ziffern.');
       return;
     }
     if (this.newPassword() !== this.confirmPassword()) {

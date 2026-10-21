@@ -1,0 +1,38 @@
+<img src="assets/fisp-logo.jpg.png" alt="Logo" class="logo" />
+
+<div class="box">
+  <h2 class="text">Login</h2>
+  <p class="subtitle">Digitales Berichtsheft</p>
+
+  <form class="login-form" (ngSubmit)="login()">
+    <input placeholder="Benutzername" [(ngModel)]="user" name="user" class="input-user" autocomplete="username" required />
+
+    <div class="password-eye">
+      <input
+        [type]="isPasswordVisible() ? 'text' : 'password'"
+        id="password"
+        autocomplete="current-password"
+        placeholder="Passwort"
+        [(ngModel)]="password"
+        name="password"
+        class="password-input"
+        required
+      />
+      <button type="button" class="toggle-icon" (click)="togglePassword()" [title]="isPasswordVisible() ? 'Passwort verbergen' : 'Passwort anzeigen'">
+        <i class="fa-solid" [class.fa-eye]="!isPasswordVisible()" [class.fa-eye-slash]="isPasswordVisible()"></i>
+      </button>
+    </div>
+
+    <button class="btn" type="submit" [disabled]="loading()">
+      @if (loading()) {
+        <span class="spinner-border spinner-border-sm"></span>
+      } @else {
+        Login
+      }
+    </button>
+
+    @if (error()) {
+      <p class="error">{{ error() }}</p>
+    }
+  </form>
+</div>

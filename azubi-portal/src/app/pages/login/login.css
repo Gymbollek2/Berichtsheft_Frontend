@@ -1,0 +1,124 @@
+h2 {
+      display: flex;
+      justify-content: center;
+      margin-top: 10%;
+}
+
+.input-user {
+      display: block;
+      margin: 0 auto;
+      border-radius: 10px;
+      margin-bottom: 12px;
+      padding: 8px;
+      padding-right: 40px;
+}
+.login-form{
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+}
+
+.box{
+      background-color: #ffffff;
+      padding: 20px;
+      border-radius: 8px;
+      width: fit-content;
+      margin: 50px auto;
+      margin-top: 100px;
+}
+
+.text{
+      background: linear-gradient(
+            230deg,
+            #ffe171 30%,
+            #f33038 60%,
+            #ec28b0 70%,
+            #9d1090 80%,
+            #010046 80%);
+            -webkit-background-clip: text;
+            background-clip: text;
+            color: transparent;
+}
+
+.btn{
+      width: 260px;
+      height: 40px;
+      margin: 0 auto;
+      border-radius: 10px;
+      text-align: center;
+      line-height: 20px;
+      height: 40px;
+      padding: 12px 24px;
+      font-size: 20px;
+      color: rgb(255, 255, 255);
+      border: none;
+      border-radius: 8px; 
+      background: linear-gradient(140deg,
+            #ffe171 20%,
+            #f33038 40%,
+            #ec28b0 70%,
+            #9d1090 80%,
+            #010046 100%);
+      cursor: pointer;
+}
+
+.btn:hover {
+      filter: brightness(1.1);
+}
+
+.logo {
+      position: fixed;
+      top: 20px;
+      left: 20px;
+      width: 120px;
+}
+
+.error{
+      margin-top: 12px;
+      padding: 10px;
+      background: #fdecea;
+      color: #d32f2f;
+      border-radius: 8px;
+      font-size: 14px;
+}
+
+@keyframes fadeInOut {
+      0% {opacity: 0; transform: translateY(-5px);}
+      15% {opacity: 1; transform: translateY(0);}
+      85% {opacity: 1; transform: translateY(0);}
+      100% {opacity: 0; transform: translateY(-5px);}
+}
+
+.password-eye{
+      display: flex;
+      align-items: center;
+      padding-left: 8px;
+      border: 2px solid #333;
+      border-radius: 8px;
+      padding: 1px;
+      margin-bottom: 10px;
+}
+
+.password-input{
+      border: none;
+      padding: 6px 0;
+      flex: 1;
+      outline: none;
+}
+
+.toggle-icon{
+      background: none;
+      border: none;
+      cursor: pointer;
+      font-size: 23px;
+}
+
+.subtitle{
+      text-align: center;
+      color: #6c757d;
+      margin-top: -8px;
+}
+
+.box{
+      box-shadow: 0 10px 40px rgba(0, 0, 0, 0.35);
+}

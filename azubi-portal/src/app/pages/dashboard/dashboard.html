@@ -1,0 +1,139 @@
+<div class="page-card">
+  <div class="page-title">{{ begruessung() }}, {{ auth.user()?.firstName }}!</div>
+  <div class="page-subtitle">{{ auth.user()?.roleLabel }}@if (auth.user()?.beruf) { · {{ auth.user()?.beruf }} }</div>
+
+  @if (error()) {
+    <div class="alert alert-danger">{{ error() }}</div>
+  }
+
+  @if (auth.isStaff()) {
+    <!-- ================= Ausbilder / Admin ================= -->
+    <div class="row g-3 mb-4">
+      <div class="col-md-4">
+        <div class="stat-tile">
+          <div class="value">{{ alleFortschritte().length }}</div>
+          <div class="label">Azubis &amp; Studierende</div>
+        </div>
+      </div>
+      <div class="col-md-4">
+        <a class="text-decoration-none" routerLink="/berichtsheft/pruefung">
+          <div class="stat-tile">
+            <div class="value">{{ offen().length }}</div>
+            <div class="label">Wochen warten auf Prüfung</div>
+          </div>
+        </a>
+      </div>
+      <div class="col-md-4">
+        <div class="stat-tile">
+          <div class="value">{{ durchschnitt() | number: '1.0-0' }} %</div>
+          <div class="label">Ø Lernziele erreicht</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="row g-4">
+      <div class="col-lg-6">
+        <div class="section-title">Zur Prüfung eingereicht</div>
+        @if (offen().length === 0) {
+          <p class="text-muted">Keine offenen Prüfungen – alles erledigt. 🎉</p>
+        } @else {
+          <table class="table table-hover table-sm">
+            <thead>
+              <tr><th>Azubi</th><th>Woche</th><th>Stunden</th><th></th></tr>
+            </thead>
+            <tbody>
+              @for (w of offen(); track w.id) {
+                <tr>
+                  <td>{{ w.personName }}</td>
+                  <td>KW {{ w.kalenderwoche }}/{{ w.jahr }}</td>
+                  <td>{{ w.gesamtStunden | number: '1.0-1' }}</td>
+                  <td class="table-actions">
+                    <a class="btn btn-sm btn-brand" [routerLink]="['/berichtsheft/azubis', w.personId]" [queryParams]="{ datum: w.weekStart }">Prüfen</a>
+                  </td>
+                </tr>
+              }
+            </tbody>
+          </table>
+        }
+      </div>
+
+      <div class="col-lg-6">
+        <div class="section-title">Lernfortschritt</div>
+        @for (f of alleFortschritte(); track f.personId) {
+          <a class="d-block text-decoration-none text-reset mb-2" routerLink="/personen-lernziele-view" [queryParams]="{ personId: f.personId }">
+            <div class="d-flex justify-content-between small">
+              <span>{{ f.personName }}</span>
+              <span class="text-muted">{{ f.erreicht }}/{{ f.gesamt }} · {{ f.prozent }} %</span>
+            </div>
+            <div class="progress progress-brand" style="height: 8px">
+              <div class="progress-bar" [style.width.%]="f.prozent"></div>
+            </div>
+          </a>
+        } @empty {
+          <p class="text-muted">Noch keine Azubis angelegt.</p>
+        }
+      </div>
+    </div>
+  } @else {
+    <!-- ================= Azubi ================= -->
+    @for (w of abgelehnt(); track w.weekStart) {
+      <div class="alert alert-warning d-flex justify-content-between align-items-center">
+        <span><i class="fa-solid fa-triangle-exclamation me-2"></i>KW {{ w.kalenderwoche }}/{{ w.jahr }} wurde zur Überarbeitung zurückgegeben.</span>
+        <a class="btn btn-sm btn-warning" routerLink="/berichtsheft" [queryParams]="{ datum: w.weekStart }">Öffnen</a>
+      </div>
+    }
+
+    <div class="row g-3 mb-4">
+      @if (aktuelleWoche(); as woche) {
+        <div class="col-md-6">
+          <div class="stat-tile">
+            <div class="d-flex justify-content-between align-items-start">
+              <div>
+                <div class="label">Aktuelle Woche · KW {{ woche.kalenderwoche }}</div>
+                <div class="value">{{ erfassteTage(woche) }} / 5 Tage</div>
+                <div class="label">{{ woche.gesamtStunden | number: '1.0-1' }} Stunden erfasst</div>
+              </div>
+              <span class="badge-status status-{{ woche.status }}">{{ woche.statusLabel }}</span>
+            </div>
+            <a class="btn btn-brand btn-sm mt-3" routerLink="/berichtsheft">
+              <i class="fa-solid fa-pen-to-square me-1"></i>Berichtsheft öffnen
+            </a>
+          </div>
+        </div>
+      }
+      @if (fortschritt(); as f) {
+        <div class="col-md-6">
+          <div class="stat-tile">
+            <div class="label">Lernziele erreicht</div>
+            <div class="value">{{ f.prozent }} %</div>
+            <div class="progress progress-brand my-2" style="height: 10px">
+              <div class="progress-bar" [style.width.%]="f.prozent"></div>
+            </div>
+            <div class="label">{{ f.erreicht }} erreicht · {{ f.inBearbeitung }} in Bearbeitung · {{ f.offen }} offen</div>
+            <a class="btn btn-outline-secondary btn-sm mt-3" routerLink="/personen-lernziele-view">Meine Lernziele</a>
+          </div>
+        </div>
+      }
+    </div>
+
+    <div class="section-title">Letzte Wochen</div>
+    <table class="table table-hover table-sm">
+      <thead>
+        <tr><th>Woche</th><th>Einträge</th><th>Stunden</th><th>Status</th><th>Geprüft am</th></tr>
+      </thead>
+      <tbody>
+        @for (w of historie().slice(0, 6); track w.weekStart) {
+          <tr class="clickable" [routerLink]="['/berichtsheft']" [queryParams]="{ datum: w.weekStart }">
+            <td>KW {{ w.kalenderwoche }}/{{ w.jahr }} <span class="text-muted small">({{ w.weekStart | date: 'dd.MM.' }})</span></td>
+            <td>{{ w.anzahlEintraege }}</td>
+            <td>{{ w.gesamtStunden | number: '1.0-1' }}</td>
+            <td><span class="badge-status status-{{ w.status }}">{{ w.statusLabel }}</span></td>
+            <td>{{ w.geprueftAm ? (w.geprueftAm | date: 'dd.MM.yyyy') : '–' }}</td>
+          </tr>
+        } @empty {
+          <tr><td colspan="5" class="text-muted">Noch keine Einträge vorhanden.</td></tr>
+        }
+      </tbody>
+    </table>
+  }
+</div>

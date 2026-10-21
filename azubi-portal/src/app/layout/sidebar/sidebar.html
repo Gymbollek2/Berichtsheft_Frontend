@@ -1,15 +1,42 @@
-<div class="sidebar">
-  <nav>
-    @for (link of links(); track link.route + link.label) {
-      <a
-        class="rotated"
-        [routerLink]="link.route"
-        routerLinkActive="active"
-        [routerLinkActiveOptions]="{ exact: true }"
-        [title]="link.label"
-      >
-        <i class="fa-solid {{ link.icon }} mb-2"></i>{{ link.label }}
-      </a>
+<nav class="sidebar" aria-label="Hauptnavigation">
+  <a class="brand" routerLink="/dashboard">
+    <img src="assets/logo.png" alt="" class="brand-mark" />
+    <span class="brand-name">Azubi-Portal</span>
+  </a>
+
+  <div class="nav-groups">
+    @for (section of sections(); track section.key) {
+      @if (section.links.length === 1) {
+        <a class="nav-item" [routerLink]="section.links[0].route" routerLinkActive="active" [routerLinkActiveOptions]="{ exact: true }">
+          <i class="fa-solid {{ section.icon }}"></i>{{ section.links[0].label === section.label ? section.label : section.links[0].label }}
+        </a>
+      } @else {
+        <div class="nav-group" [class.current]="activeKey() === section.key">
+          <div class="nav-group-label"><i class="fa-solid {{ section.icon }}"></i>{{ section.label }}</div>
+          @for (link of section.links; track link.route + link.label) {
+            <a class="nav-item nav-sub" [routerLink]="link.route" routerLinkActive="active" [routerLinkActiveOptions]="{ exact: true }">
+              {{ link.label }}
+            </a>
+          }
+        </div>
+      }
     }
-  </nav>
-</div>
+  </div>
+
+  @if (auth.user(); as user) {
+    <div class="user">
+      <a routerLink="/profil" class="user-link" routerLinkActive="active">
+        <span class="avatar" aria-hidden="true">{{ user.firstName.charAt(0) }}{{ user.lastName.charAt(0) }}</span>
+        <span class="user-text">
+          <span class="user-name">{{ user.fullName }}</span>
+          <span class="user-role">{{ user.roleLabel }}</span>
+        </span>
+      </a>
+      <button type="button" class="logout" (click)="logout()" title="Abmelden" aria-label="Abmelden">
+        <i class="fa-solid fa-arrow-right-from-bracket"></i>
+      </button>
+    </div>
+  }
+
+  <img src="assets/fisp-logo.jpg.png" alt="Finanz Informatik Solutions Plus" class="company" />
+</nav>

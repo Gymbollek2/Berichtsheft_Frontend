@@ -1,163 +1,291 @@
+/* ==========================================================================
+   Azubi-Portal – Design-System
+   Ruhige Flaechen in Nachtblau und Papierweiss; die Markenfarben (Verlauf
+   Gelb → Rot → Magenta → Violett) erscheinen nur im Logo und als feiner Streifen.
+   Schrift: IBM Plex Sans, lokal ausgeliefert (keine Google-Server, DSGVO).
+   ========================================================================== */
+
+:root {
+  --navy: #010046;
+  --navy-2: #10024d;
+  --navy-3: #1c1466;
+  --ink: #1d1b3a;
+  --muted: #5d5b74;
+  --line: #e4e3ec;
+  --line-strong: #cfcde0;
+  --paper: #f5f5f8;
+  --surface: #ffffff;
+  --accent: #a3126f;
+  --accent-soft: #fbeaf4;
+  --brand-gradient: linear-gradient(90deg, #ffc400 0%, #ee0000 35%, #dd00a0 70%, #7a2bd6 100%);
+
+  --ok: #2f6b4f;
+  --ok-bg: #e5f1eb;
+  --warn: #84590a;
+  --warn-bg: #fbf0d9;
+  --bad: #9b1c2c;
+  --bad-bg: #f8e3e6;
+
+  --radius: 10px;
+  --radius-sm: 6px;
+
+  /* Bootstrap an das Corporate Design anpassen */
+  --bs-body-font-family: 'IBM Plex Sans', system-ui, -apple-system, 'Segoe UI', sans-serif;
+  --bs-body-font-size: 0.9375rem;
+  --bs-body-line-height: 1.55;
+  --bs-body-color: var(--ink);
+  --bs-body-bg: var(--paper);
+  --bs-border-color: var(--line);
+  --bs-secondary-color: var(--muted);
+  --bs-link-color: var(--navy-2);
+  --bs-link-color-rgb: 16, 2, 77;
+  --bs-link-hover-color: var(--accent);
+  --bs-link-hover-color-rgb: 163, 18, 111;
+  --bs-primary: var(--navy-2);
+  --bs-primary-rgb: 16, 2, 77;
+  --bs-focus-ring-color: rgba(163, 18, 111, 0.25);
+  --bs-border-radius: var(--radius-sm);
+}
+
 html,
 body {
   height: 100%;
-  margin: 0;
-  padding: 0;
 }
 
 body {
-  background: radial-gradient(
-    circle at bottom right,
-    #ffe171 0%,
-    #f33038 10%,
-    #ec28b0 20%,
-    #9d1090 30%,
-    #010046 40%,
-    #010046 100%
-  );
-  background-size: cover;
-  background-repeat: no-repeat;
-  background-attachment: fixed;
-  font-family: 'Inter', system-ui, sans-serif;
+  margin: 0;
+  background: var(--paper);
+  color: var(--ink);
+  font-feature-settings: 'tnum' 0;
+  -webkit-font-smoothing: antialiased;
 }
 
-/* ---------- Layout ---------- */
+h1,
+h2,
+h3 {
+  color: var(--ink);
+  letter-spacing: -0.01em;
+}
 
-.main-container {
+.num {
+  font-variant-numeric: tabular-nums;
+}
+
+:focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: 2px;
+}
+
+/* ---------- Seitenaufbau ---------- */
+
+.page {
+  max-width: 1180px;
+}
+
+.page-header {
   display: flex;
-  flex-direction: row;
-  height: calc(100vh - 60px);
-  margin-top: 60px;
-}
-
-.content {
-  flex: 1;
-  padding: 24px;
-  overflow-y: auto;
-}
-
-/* ---------- Karten & Seitenelemente ---------- */
-
-.page-card {
-  background: rgba(255, 255, 255, 0.97);
-  border-radius: 12px;
-  box-shadow: 0 8px 30px rgba(0, 0, 0, 0.25);
-  padding: 1.5rem;
+  flex-wrap: wrap;
+  align-items: flex-end;
+  justify-content: space-between;
+  gap: 1rem;
   margin-bottom: 1.5rem;
-  max-width: 1200px;
 }
 
 .page-title {
-  font-weight: 700;
   font-size: 1.5rem;
-  margin-bottom: 0.25rem;
-  color: #10024d;
+  font-weight: 600;
+  line-height: 1.25;
+  margin: 0;
+  color: var(--ink);
+  letter-spacing: -0.015em;
 }
 
 .page-subtitle {
-  color: #6c757d;
-  margin-bottom: 1.25rem;
+  color: var(--muted);
+  margin: 0.25rem 0 0;
+  max-width: 70ch;
+}
+
+.page-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+}
+
+/* Eine Flaeche fuer zusammengehoerige Inhalte (keine Kartenflut) */
+.panel,
+.page-card {
+  background: var(--surface);
+  border: 1px solid var(--line);
+  border-radius: var(--radius);
+  padding: 1.5rem;
+  margin-bottom: 1.5rem;
+}
+
+.panel-flush {
+  padding: 0;
+  overflow: hidden;
 }
 
 .section-title {
+  font-size: 1.0625rem;
   font-weight: 600;
-  font-size: 1.1rem;
-  color: #10024d;
-  margin-bottom: 0.75rem;
+  color: var(--ink);
+  margin: 0 0 0.75rem;
 }
 
-.btn-brand {
-  color: white;
-  border: none;
-  background: linear-gradient(140deg, #f33038 0%, #ec28b0 45%, #9d1090 75%, #010046 100%);
+.hint {
+  color: var(--muted);
+  font-size: 0.8125rem;
 }
 
-.btn-brand:hover,
-.btn-brand:focus {
-  color: white;
-  filter: brightness(1.1);
+/* ---------- Kennzahlen ---------- */
+
+.figures {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+  gap: 1px;
+  background: var(--line);
+  border: 1px solid var(--line);
+  border-radius: var(--radius);
+  overflow: hidden;
+  margin-bottom: 1.5rem;
 }
 
-.btn-brand:disabled {
-  color: white;
-  opacity: 0.6;
-}
-
-.stat-tile {
-  border-radius: 10px;
+.figure {
+  background: var(--surface);
   padding: 1rem 1.25rem;
-  background: #f5f3ff;
-  border: 1px solid #e3ddff;
-  height: 100%;
+  color: inherit;
+  text-decoration: none;
 }
 
-.stat-tile .value {
-  font-size: 1.8rem;
-  font-weight: 700;
-  color: #10024d;
+a.figure:hover {
+  background: #fafaff;
 }
 
-.stat-tile .label {
-  color: #6c757d;
-  font-size: 0.9rem;
+.figure .value {
+  font-size: 1.75rem;
+  font-weight: 600;
+  line-height: 1.2;
+  font-variant-numeric: tabular-nums;
+  color: var(--navy-2);
+}
+
+.figure .label {
+  color: var(--muted);
+  font-size: 0.875rem;
+}
+
+/* ---------- Fortschritt ---------- */
+
+.progress-brand {
+  height: 6px;
+  background: var(--line);
+  border-radius: 3px;
 }
 
 .progress-brand .progress-bar {
-  background: linear-gradient(90deg, #9d1090, #ec28b0, #f33038);
+  background: var(--navy-2);
+  border-radius: 3px;
 }
 
-/* ---------- Status-Badges ---------- */
+/* ---------- Buttons ---------- */
 
-.badge-status {
+.btn {
   font-weight: 500;
-  padding: 0.35em 0.7em;
-  border-radius: 999px;
-  font-size: 0.8rem;
-  white-space: nowrap;
+  border-radius: var(--radius-sm);
 }
 
-.status-ENTWURF,
-.status-STATUS_UNFINISHED {
-  background: #e9ecef;
-  color: #495057;
+.btn-brand,
+.btn-primary {
+  --bs-btn-color: #fff;
+  --bs-btn-bg: var(--navy-2);
+  --bs-btn-border-color: var(--navy-2);
+  --bs-btn-hover-color: #fff;
+  --bs-btn-hover-bg: var(--navy-3);
+  --bs-btn-hover-border-color: var(--navy-3);
+  --bs-btn-active-bg: var(--navy);
+  --bs-btn-active-border-color: var(--navy);
+  --bs-btn-disabled-bg: #8f8bb0;
+  --bs-btn-disabled-border-color: #8f8bb0;
+  --bs-btn-disabled-color: #fff;
 }
 
-.status-EINGEREICHT,
-.status-STATUS_IN_PROGRESS {
-  background: #fff3cd;
-  color: #856404;
+.btn-outline-secondary {
+  --bs-btn-color: var(--ink);
+  --bs-btn-border-color: var(--line-strong);
+  --bs-btn-hover-color: var(--ink);
+  --bs-btn-hover-bg: #efeef5;
+  --bs-btn-hover-border-color: var(--line-strong);
+  --bs-btn-active-bg: #e6e5ef;
+  --bs-btn-active-color: var(--ink);
 }
 
-.status-ABGEZEICHNET,
-.status-STATUS_DONE {
-  background: #d1e7dd;
-  color: #0f5132;
+.btn-outline-primary {
+  --bs-btn-color: var(--navy-2);
+  --bs-btn-border-color: var(--line-strong);
+  --bs-btn-hover-color: #fff;
+  --bs-btn-hover-bg: var(--navy-2);
+  --bs-btn-hover-border-color: var(--navy-2);
 }
 
-.status-ABGELEHNT {
-  background: #f8d7da;
-  color: #842029;
+.btn-icon {
+  width: 2.125rem;
+  height: 2.125rem;
+  padding: 0;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
 }
 
-.kind-KIND_GENERAL {
-  background: #10024d;
-  color: white;
+/* ---------- Formulare ---------- */
+
+.form-label {
+  font-weight: 500;
+  font-size: 0.875rem;
+  margin-bottom: 0.3rem;
 }
 
-.kind-KIND_BROAD {
-  background: #9d1090;
-  color: white;
+.form-control,
+.form-select {
+  border-color: var(--line-strong);
 }
 
-.kind-KIND_SPECIFIC {
-  background: #fde2f3;
-  color: #9d1090;
+.form-control:focus,
+.form-select:focus,
+.form-check-input:focus {
+  border-color: var(--accent);
+  box-shadow: 0 0 0 0.2rem rgba(163, 18, 111, 0.15);
 }
 
-/* ---------- Tabellen & Formulare ---------- */
+.form-check-input:checked {
+  background-color: var(--navy-2);
+  border-color: var(--navy-2);
+}
+
+.form-text {
+  color: var(--muted);
+}
+
+/* ---------- Tabellen ---------- */
+
+.table {
+  --bs-table-hover-bg: #f7f7fb;
+  margin-bottom: 0;
+}
 
 .table > :not(caption) > * > * {
   vertical-align: middle;
+  padding: 0.7rem 0.75rem;
+  border-bottom-color: var(--line);
+}
+
+.table thead th {
+  font-weight: 500;
+  font-size: 0.8125rem;
+  color: var(--muted);
+  background: var(--surface);
+  border-bottom: 1px solid var(--line-strong);
 }
 
 .table-actions {
@@ -165,42 +293,136 @@ body {
   text-align: right;
 }
 
-.form-label {
-  font-weight: 500;
-  font-size: 0.9rem;
-}
-
 .clickable {
   cursor: pointer;
 }
 
-/* Entfernt das Passwort-Auge im Microsoft Edge (eigener Button im Login) */
-input::-ms-reveal,
-input::-ms-clear {
-  display: none;
+/* ---------- Status-Markierungen ---------- */
+
+.badge-status {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35em;
+  font-weight: 500;
+  font-size: 0.78rem;
+  line-height: 1;
+  padding: 0.4em 0.65em;
+  border-radius: 999px;
+  white-space: nowrap;
 }
 
-/* ---------- Modale Dialoge (ohne Bootstrap-JS) ---------- */
+.badge-status::before {
+  content: '';
+  width: 0.45em;
+  height: 0.45em;
+  border-radius: 50%;
+  background: currentColor;
+}
+
+.status-ENTWURF,
+.status-STATUS_UNFINISHED {
+  background: #eeedf3;
+  color: var(--muted);
+}
+
+.status-EINGEREICHT,
+.status-STATUS_IN_PROGRESS {
+  background: var(--warn-bg);
+  color: var(--warn);
+}
+
+.status-ABGEZEICHNET,
+.status-STATUS_DONE {
+  background: var(--ok-bg);
+  color: var(--ok);
+}
+
+.status-ABGELEHNT {
+  background: var(--bad-bg);
+  color: var(--bad);
+}
+
+/* Lernziel-Arten: Ebene statt Farbe – kraeftig → zurueckhaltend */
+.kind {
+  display: inline-block;
+  font-size: 0.75rem;
+  font-weight: 500;
+  line-height: 1;
+  padding: 0.35em 0.55em;
+  border-radius: 4px;
+  white-space: nowrap;
+}
+
+.kind-KIND_GENERAL {
+  background: var(--navy-2);
+  color: #fff;
+}
+
+.kind-KIND_BROAD {
+  background: #e7e5f4;
+  color: var(--navy-2);
+}
+
+.kind-KIND_SPECIFIC {
+  background: transparent;
+  color: var(--muted);
+  box-shadow: inset 0 0 0 1px var(--line-strong);
+}
+
+/* ---------- Hinweise ---------- */
+
+.alert {
+  border-radius: var(--radius-sm);
+  border: 0;
+  border-left: 3px solid;
+}
+
+.alert-danger {
+  background: var(--bad-bg);
+  color: var(--bad);
+}
+
+.alert-success {
+  background: var(--ok-bg);
+  color: var(--ok);
+}
+
+.alert-warning {
+  background: var(--warn-bg);
+  color: var(--warn);
+}
+
+.alert-info {
+  background: #ebeaf6;
+  color: var(--navy-2);
+}
+
+/* ---------- Dialoge (ohne Bootstrap-JS) ---------- */
 
 .modal-backdrop-custom {
   position: fixed;
   inset: 0;
-  background: rgba(1, 0, 70, 0.6);
+  background: rgba(1, 0, 70, 0.45);
   z-index: 1050;
   display: flex;
   align-items: flex-start;
   justify-content: center;
-  padding-top: 8vh;
+  padding: 8vh 1rem 2rem;
   overflow-y: auto;
 }
 
 .modal-card {
-  background: white;
-  border-radius: 12px;
-  width: min(640px, 94vw);
+  background: var(--surface);
+  border-radius: var(--radius);
+  width: min(640px, 100%);
   padding: 1.5rem;
-  box-shadow: 0 20px 60px rgba(0, 0, 0, 0.4);
-  margin-bottom: 2rem;
+  box-shadow: 0 24px 64px rgba(1, 0, 70, 0.25);
+}
+
+/* Passwort-Auge im Edge ausblenden (eigener Button im Login) */
+input::-ms-reveal,
+input::-ms-clear {
+  display: none;
 }
 
 /* ---------- Druckansicht (Berichtsheft drucken / als PDF speichern) ---------- */
@@ -211,34 +433,151 @@ input::-ms-clear {
 
 @media print {
   body {
-    background: white !important;
+    background: #fff !important;
   }
 
-  app-header,
   app-sidebar,
+  .mobile-bar,
   .no-print,
   .btn,
   .alert-success {
     display: none !important;
   }
 
-  .main-container {
-    margin-top: 0;
-    height: auto;
+  .shell,
+  .shell-main {
+    display: block !important;
+    margin: 0 !important;
+    padding: 0 !important;
   }
 
-  .content {
-    padding: 0;
-    overflow: visible;
-  }
-
+  .panel,
   .page-card {
-    box-shadow: none;
-    max-width: none;
+    border: 0;
     padding: 0;
   }
 
   .print-only {
     display: flex !important;
   }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  * {
+    transition: none !important;
+    animation: none !important;
+  }
+}
+
+/* ---------- Auswahl der Lernziel-Art ---------- */
+
+.kind-choice {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+  gap: 0.5rem;
+}
+
+.kind-option {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 0.35rem;
+  padding: 0.75rem 0.85rem;
+  border: 1px solid var(--line-strong);
+  border-radius: var(--radius-sm);
+  cursor: pointer;
+}
+
+.kind-option.selected {
+  border-color: var(--navy-2);
+  box-shadow: inset 0 0 0 1px var(--navy-2);
+}
+
+.kind-option.disabled {
+  opacity: 0.45;
+  cursor: not-allowed;
+}
+
+.kind-option:has(input:focus-visible) {
+  outline: 2px solid var(--accent);
+  outline-offset: 2px;
+}
+
+fieldset legend.form-label {
+  float: none;
+  font-size: 0.875rem;
+}
+
+/* ---------- Fortschrittszeilen ---------- */
+
+.progress-row {
+  display: block;
+  padding: 0.6rem 0;
+  border-bottom: 1px solid var(--line);
+  color: inherit;
+  text-decoration: none;
+}
+
+.progress-row:last-child {
+  border-bottom: 0;
+}
+
+.progress-row:hover {
+  color: var(--navy-2);
+}
+
+.tree-root td {
+  background: #fafafd;
+  font-weight: 600;
+}
+
+.fw-medium {
+  font-weight: 500;
+}
+
+/* ---------- Personenliste (Auswahl) ---------- */
+
+.person-list {
+  max-height: 70vh;
+  overflow-y: auto;
+}
+
+.person-item {
+  display: block;
+  width: 100%;
+  text-align: left;
+  padding: 0.75rem 1rem;
+  border: 0;
+  border-bottom: 1px solid var(--line);
+  background: transparent;
+  color: var(--ink);
+}
+
+.person-item:last-child {
+  border-bottom: 0;
+}
+
+.person-item:hover {
+  background: #f7f7fb;
+}
+
+.person-item.active {
+  background: #ebeaf6;
+  box-shadow: inset 3px 0 0 var(--navy-2);
+}
+
+.data-list {
+  display: grid;
+  grid-template-columns: minmax(9rem, auto) 1fr;
+  gap: 0.6rem 1.5rem;
+  margin: 0;
+}
+
+.data-list dt {
+  font-weight: 400;
+  color: var(--muted);
+}
+
+.data-list dd {
+  margin: 0;
 }

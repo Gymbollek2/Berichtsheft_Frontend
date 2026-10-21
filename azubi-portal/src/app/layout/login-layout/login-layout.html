@@ -1,9 +1,14 @@
-<app-header />
+<div class="shell" [class.menu-open]="menuOpen()">
+  <header class="mobile-bar">
+    <button type="button" class="btn btn-icon menu-btn" (click)="menuOpen.set(!menuOpen())" [attr.aria-expanded]="menuOpen()" aria-label="Menü">
+      <i class="fa-solid" [class.fa-bars]="!menuOpen()" [class.fa-xmark]="menuOpen()"></i>
+    </button>
+    <img src="assets/fisp-logo.jpg.png" alt="Finanz Informatik Solutions Plus" class="mobile-logo" />
+  </header>
 
-<div class="main-container">
-  <app-sidebar />
+  <app-sidebar class="shell-sidebar" />
 
-  <main class="content">
+  <main class="shell-main">
     <router-outlet />
   </main>
 </div>

@@ -35,10 +35,10 @@ export const NAV_SECTIONS: NavSection[] = [
     label: 'Berichtsheft',
     icon: 'fa-book',
     links: [
-      { label: 'Meine Woche', route: '/berichtsheft', icon: 'fa-pen-to-square', roles: LEARNER },
-      { label: 'Meine Wochen', route: '/berichtsheft/historie', icon: 'fa-clock-rotate-left', roles: LEARNER },
-      { label: 'Prüfen', route: '/berichtsheft/pruefung', icon: 'fa-stamp', roles: STAFF },
-      { label: 'Berichtshefte', route: '/berichtsheft/azubis', icon: 'fa-users-viewfinder', roles: STAFF },
+      { label: 'Aktuelle Woche', route: '/berichtsheft', icon: 'fa-pen-to-square', roles: LEARNER },
+      { label: 'Alle Wochen', route: '/berichtsheft/historie', icon: 'fa-clock-rotate-left', roles: LEARNER },
+      { label: 'Zur Prüfung', route: '/berichtsheft/pruefung', icon: 'fa-stamp', roles: STAFF },
+      { label: 'Alle Berichtshefte', route: '/berichtsheft/azubis', icon: 'fa-users-viewfinder', roles: STAFF },
     ],
   },
   {
@@ -65,7 +65,7 @@ export const NAV_SECTIONS: NavSection[] = [
     icon: 'fa-users',
     roles: STAFF,
     links: [
-      { label: 'Personen verwalten', route: '/person-bearbeiten', icon: 'fa-user-gear', roles: STAFF },
+      { label: 'Alle Personen', route: '/person-bearbeiten', icon: 'fa-user-gear', roles: STAFF },
       { label: 'Person anlegen', route: '/person-anlegen', icon: 'fa-user-plus', roles: STAFF },
     ],
   },

@@ -5,6 +5,7 @@ import { filter, map } from 'rxjs';
 import { Auth } from '@app/services/auth';
 import { NavigationService } from '@app/services/navigation';
 
+/** Seitenleiste mit allen Bereichen der Rolle, dem angemeldeten Benutzer und Abmelden. */
 @Component({
   selector: 'app-sidebar',
   imports: [RouterLink, RouterLinkActive],
@@ -12,7 +13,7 @@ import { NavigationService } from '@app/services/navigation';
   styleUrl: './sidebar.css',
 })
 export class SidebarComponent {
-  private readonly auth = inject(Auth);
+  protected readonly auth = inject(Auth);
   private readonly router = inject(Router);
   private readonly navigation = inject(NavigationService);
 
@@ -24,8 +25,12 @@ export class SidebarComponent {
     { initialValue: this.router.url },
   );
 
-  protected readonly links = computed(() => {
-    const sections = this.navigation.sectionsFor(this.auth.role());
-    return this.navigation.sectionForUrl(this.url(), sections)?.links ?? [];
-  });
+  protected readonly sections = computed(() => this.navigation.sectionsFor(this.auth.role()));
+  protected readonly activeKey = computed(
+    () => this.navigation.sectionForUrl(this.url(), this.sections())?.key ?? null,
+  );
+
+  logout(): void {
+    this.auth.logout();
+  }
 }

@@ -528,7 +528,6 @@ fieldset legend.form-label {
 
 .tree-root td {
   background: #fafafd;
-  font-weight: 600;
 }
 
 .fw-medium {
@@ -580,4 +579,36 @@ fieldset legend.form-label {
 
 .data-list dd {
   margin: 0;
+}
+
+/* Eingabefelder heben sich weiss vom Papierhintergrund ab */
+.form-control,
+.form-select,
+.input-group-text {
+  background-color: var(--surface);
+}
+
+.form-control:disabled,
+.form-select:disabled {
+  background-color: #efeef4;
+}
+
+/* Baumstruktur der Lernziele */
+.tree-cell {
+  position: relative;
+}
+
+.tree-child::before {
+  content: '';
+  position: absolute;
+  left: -0.9rem;
+  top: 0.15rem;
+  width: 0.55rem;
+  height: 0.6rem;
+  border-left: 1px solid var(--line-strong);
+  border-bottom: 1px solid var(--line-strong);
+}
+
+.tree-root .fw-medium {
+  font-weight: 600;
 }

@@ -1,5 +1,13 @@
 # Changelog
 
+## [1.1.1] – 2026-10-21
+
+### Behoben
+- Einrückung der Lernziel-Hierarchie in „Lernziele“ und „Lernfortschritt“ (wurde von Bootstrap überschrieben).
+- Eingabefelder wieder weiß statt grau.
+- Logo freigestellt (kein heller Kasten auf dunklem Grund).
+- Veraltete Fehlermeldungen verschwinden nach erfolgreichem Speichern, Einreichen oder Prüfen.
+
 ## [1.1.0] – 2026-10-21
 
 ### Neu

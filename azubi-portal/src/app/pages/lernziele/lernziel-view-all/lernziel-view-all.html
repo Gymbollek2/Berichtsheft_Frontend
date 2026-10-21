@@ -61,7 +61,8 @@
       <tbody>
         @for (row of rows(); track row.lernziel.id) {
           <tr [class.tree-root]="row.depth === 0 && !search() && !kindFilter()">
-            <td class="ps-4" [style.padding-left.rem]="1.5 + row.depth * 1.75">
+            <td class="ps-4">
+              <div class="tree-cell" [class.tree-child]="row.depth > 0" [style.margin-left.rem]="row.depth * 1.75">
               <span class="clickable fw-medium" (click)="toggle(row.lernziel.id)">{{ row.lernziel.title }}</span>
               @if (row.lernziel.description) {
                 <button type="button" class="btn btn-sm btn-link p-0 ms-1 align-baseline" (click)="toggle(row.lernziel.id)"
@@ -75,6 +76,7 @@
               @if ((search() || kindFilter()) && row.lernziel.parentId) {
                 <div class="hint">unter {{ parentTitle().get(row.lernziel.parentId) }}</div>
               }
+              </div>
             </td>
             <td><span class="kind kind-{{ row.lernziel.kind }}">{{ kindLabels[row.lernziel.kind] }}</span></td>
             @if (auth.isStaff()) {

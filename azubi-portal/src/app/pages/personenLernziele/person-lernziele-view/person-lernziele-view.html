@@ -74,12 +74,14 @@
         <tbody>
           @for (row of gefiltert(); track row.pl.id) {
             <tr [class.tree-root]="row.depth === 0 && !search() && !statusFilter()">
-              <td class="ps-4" [style.padding-left.rem]="1.5 + row.depth * 1.75">
+              <td class="ps-4">
+              <div class="tree-cell" [class.tree-child]="row.depth > 0" [style.margin-left.rem]="row.depth * 1.75">
                 <div [class.fw-medium]="row.pl.berechnet">{{ row.pl.lernziel.title }}</div>
                 @if (row.pl.lernziel.description && !row.pl.berechnet) {
                   <div class="hint">{{ row.pl.lernziel.description }}</div>
                 }
-              </td>
+                </div>
+            </td>
               <td><span class="kind kind-{{ row.pl.lernziel.kind }}">{{ kindLabels[row.pl.lernziel.kind] }}</span></td>
               <td style="min-width: 190px">
                 @if (auth.isStaff() && !row.pl.berechnet) {

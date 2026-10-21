@@ -295,6 +295,7 @@ export class BerichtsheftWoche {
               : w,
           );
           this.setUi(tag.date, { saving: false, dirty: false, showLernziele: false });
+          this.error.set('');
           this.flash('Eintrag gespeichert');
           // Lernziel-Status kann sich geändert haben (Offen → In Bearbeitung)
           this.personLernzielService.getMine().subscribe((list) => this.meineLernziele.set(list));
@@ -330,6 +331,7 @@ export class BerichtsheftWoche {
     this.service.einreichen(w.weekStart).subscribe({
       next: (neu) => {
         this.busy.set(false);
+        this.error.set('');
         this.woche.set(neu);
         this.initForms(neu);
         this.flash('Woche eingereicht – dein Ausbilder wurde benachrichtigt.');
@@ -384,6 +386,7 @@ export class BerichtsheftWoche {
 
   private afterReview(neu: Wochenbericht, message: string): void {
     this.busy.set(false);
+    this.error.set('');
     this.kommentar = '';
     this.woche.set(neu);
     this.flash(message);

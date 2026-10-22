@@ -18,7 +18,7 @@ export class BerichtsheftHistorie implements OnInit {
   readonly error = signal('');
   readonly loading = signal(true);
   readonly gesamtStunden = computed(() => this.wochen().reduce((s, w) => s + w.gesamtStunden, 0));
-  readonly abgezeichnet = computed(() => this.wochen().filter((w) => w.status === 'ABGEZEICHNET').length);
+  readonly abgenommen = computed(() => this.wochen().filter((w) => w.status === 'ABGEZEICHNET').length);
 
   weekEnd(weekStart: string): string {
     return addDays(weekStart, 6);

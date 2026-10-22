@@ -77,7 +77,7 @@ Für das Backend gibt es dieselbe Möglichkeit, siehe Backend-README.
 **Zum Ausprobieren:**
 
 1. Als `azubi` anmelden, unter *Berichtsheft → Aktuelle Woche* Tage ausfüllen und Feinlernziele zuordnen. Eine vergangene, vollständige Woche mit **Berichtsheft abgeben** abgeben.
-2. Als `ausbilder` anmelden, unter *Berichtsheft → Zur Prüfung* die Woche öffnen und **abzeichnen** oder mit Kommentar **zurückgeben**.
+2. Als `ausbilder` anmelden, unter *Berichtsheft → Zur Prüfung* die Woche öffnen und **abnehmen** oder mit Kommentar **zurückgeben**.
 3. Unter *Lernfortschritt* den Status von Lernzielen setzen, unter *Personen* neue Azubis anlegen.
 
 ### In IntelliJ / WebStorm
@@ -105,7 +105,7 @@ Ordner `Berichtsheft_Frontend/azubi-portal` öffnen, im Terminal `npm install` a
 ### Für Ausbilder (dürfen alles)
 
 - **Übersicht**: offene Prüfungen, Anzahl der Azubis und Lernfortschritt je Azubi
-- **Prüfen**: Warteschlange der eingereichten Wochen, abzeichnen oder mit Kommentar zurückgeben
+- **Prüfen**: Warteschlange der eingereichten Wochen, abnehmen oder mit Kommentar zurückgeben
 - **Berichtshefte**: Berichtshefte aller Azubis durchsuchen – sichtbar sind nur bereits abgegebene Wochen
 - **Lernfortschritt Azubis**: Azubi wählen und den Status der Feinlernziele setzen. Grob- und Richtlernziele werden automatisch berechnet.
 - **Lernziele**: Baumansicht mit Suche, anlegen, bearbeiten, löschen sowie **CSV-Import/-Export**. Die Hierarchie wird geführt:

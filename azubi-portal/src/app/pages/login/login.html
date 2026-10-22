@@ -4,7 +4,7 @@
     <div class="intro-text">
       <img src="assets/logo-mark.png" alt="" class="login-mark" />
       <h1>Azubi-Portal</h1>
-      <p>Ausbildungsnachweise digital führen, einreichen und abzeichnen.</p>
+      <p>Ausbildungsnachweise digital führen, abgeben und abnehmen lassen.</p>
     </div>
   </section>
 
@@ -27,8 +27,10 @@
         } @else if (optionen()?.sso) {
           @if (ssoHinweis()) {
             <div class="alert alert-warning py-2" role="alert">{{ ssoHinweis() }}</div>
-          } @else {
+          } @else if (selbstAbgemeldet) {
             <p class="hint mb-4">Du hast dich abgemeldet.</p>
+          } @else {
+            <p class="hint mb-4">Mit deinem Windows-Konto – ohne Passwort.</p>
           }
           <button type="button" class="btn btn-brand w-100 py-2" (click)="windowsAnmeldung()">
             <i class="fa-brands fa-windows me-2" aria-hidden="true"></i>Mit Windows-Konto anmelden

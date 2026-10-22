@@ -8,8 +8,10 @@ import { errorMessage } from '@app/core/utils';
 import { KONTO_KEY } from '@app/pages/kein-zugriff/kein-zugriff';
 
 /**
- * Anmeldung. Ist die Windows-Anmeldung (SSO) eingeschaltet, wird beim Öffnen automatisch mit dem
- * Windows-Konto angemeldet; wer nicht in der Personenliste steht, landet auf „Kein Zugriff“.
+ * Anmeldung. Ist die Windows-Anmeldung (SSO) eingeschaltet, gibt es den Button „Mit Windows-Konto anmelden“.
+ * Hat sie in diesem Browser schon einmal geklappt, startet sie beim Öffnen automatisch – sonst könnte der Browser
+ * (z. B. im Inkognito-Fenster) sein eigenes Anmeldefenster zeigen. Wer nicht in der Personenliste steht,
+ * landet auf „Kein Zugriff“.
  */
 @Component({
   selector: 'app-login',
@@ -33,6 +35,7 @@ export class Login {
   readonly ssoHinweis = signal('');
   /** Auf „Kein Zugriff“ wurde die Anmeldung mit Benutzername und Passwort gewählt – sie steht dann im Vordergrund. */
   readonly passwortGewaehlt = signal(this.auth.passwortAnmeldungGewaehlt());
+  readonly selbstAbgemeldet = this.auth.selbstAbgemeldet();
 
   constructor() {
     if (this.auth.isLoggedIn()) {
@@ -41,7 +44,11 @@ export class Login {
     }
     this.auth.optionen$.subscribe((optionen) => {
       this.optionen.set(optionen);
-      if (optionen.sso && !this.auth.ohneAutomatischeWindowsAnmeldung()) {
+      if (
+        optionen.sso &&
+        this.auth.windowsAnmeldungBekannt() &&
+        !this.auth.ohneAutomatischeWindowsAnmeldung()
+      ) {
         this.windowsAnmeldung();
       }
     });
@@ -69,6 +76,8 @@ export class Login {
           this.router.navigate(['/kein-zugriff']);
           return;
         }
+        // Kein Windows-Konto ermittelbar: beim nächsten Öffnen nicht wieder automatisch versuchen
+        this.auth.windowsAnmeldungVergessen();
         this.ssoHinweis.set(
           err instanceof HttpErrorResponse && err.status === 401
             ? 'Dein Windows-Konto konnte nicht automatisch ermittelt werden. Bist du an einem Firmenrechner angemeldet?'

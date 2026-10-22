@@ -18,6 +18,7 @@ import { addDays, errorMessage, normalizeSearch, today } from '@app/core/utils';
 import { KannVerlassen } from '@app/guards/unsaved-changes.guard';
 import { MarkdownEditor } from '@app/shared/markdown-editor/markdown-editor';
 import { MarkdownPipe } from '@app/shared/markdown.pipe';
+import { BestaetigungService } from '@app/shared/bestaetigung/bestaetigung.service';
 
 /** Warum ein Tag nicht bearbeitet werden kann (null = bearbeitbar). */
 export type TagSperre = 'zukunft' | 'vor-beginn' | null;
@@ -52,7 +53,7 @@ interface TagForm {
 /**
  * Wochenansicht des Berichtshefts.
  * - Azubis: eigene Woche erfassen, speichern und einreichen.
- * - Ausbilder (Route /berichtsheft/azubis/:personId): Woche ansehen, abzeichnen oder zurückgeben.
+ * - Ausbilder (Route /berichtsheft/azubis/:personId): Woche ansehen, abnehmen oder zurückgeben.
  */
 @Component({
   selector: 'app-berichtsheft-woche',
@@ -65,6 +66,7 @@ export class BerichtsheftWoche implements OnDestroy, KannVerlassen {
   private readonly service = inject(BerichtsheftService);
   private readonly personLernzielService = inject(PersonLernzielService);
   private readonly router = inject(Router);
+  private readonly bestaetigung = inject(BestaetigungService);
 
   /** Aus der Route (nur Ausbilder-Ansicht). */
   readonly personId = input<string | undefined>();
@@ -258,11 +260,15 @@ export class BerichtsheftWoche implements OnDestroy, KannVerlassen {
     const tage = (this.woche()?.tage ?? [])
       .filter((t) => this.forms()[t.date]?.dirty)
       .map((t) => t.wochentag);
-    return confirm(
-      `Für ${tage.join(', ') || 'einige Tage'} gibt es Änderungen, die nicht gespeichert werden konnten ` +
-        '(Pflichtfelder fehlen oder Fehler beim Speichern).\n\n' +
-        'Seite trotzdem verlassen? Diese Änderungen gehen dann verloren.',
-    );
+    return this.bestaetigung.frage({
+      titel: 'Seite verlassen?',
+      text:
+        `Für ${tage.join(', ') || 'einige Tage'} gibt es Änderungen, die nicht gespeichert werden konnten ` +
+        '(Pflichtfelder fehlen oder Fehler beim Speichern). Beim Verlassen gehen sie verloren.',
+      bestaetigen: 'Trotzdem verlassen',
+      abbrechen: 'Hier bleiben',
+      ton: 'gefahr',
+    });
   }
 
   // ---------------------------------------------------------- Erfassen
@@ -483,8 +489,18 @@ export class BerichtsheftWoche implements OnDestroy, KannVerlassen {
     return a.length === b.length && a.every((id) => b.includes(id));
   }
 
-  loeschen(tag: WochenTag): void {
-    if (!tag.eintrag || !confirm(`Eintrag vom ${tag.wochentag} wirklich löschen?`)) {
+  async loeschen(tag: WochenTag): Promise<void> {
+    if (!tag.eintrag) {
+      return;
+    }
+    const ok = await this.bestaetigung.frage({
+      titel: 'Eintrag löschen?',
+      text: `Der Eintrag vom ${tag.wochentag}, ${this.formatDate(tag.date)}, wird gelöscht.`,
+      bestaetigen: 'Löschen',
+      icon: 'fa-trash-can',
+      ton: 'gefahr',
+    });
+    if (!ok || !tag.eintrag) {
       return;
     }
     clearTimeout(this.timers.get(tag.date));
@@ -506,7 +522,22 @@ export class BerichtsheftWoche implements OnDestroy, KannVerlassen {
       this.error.set(hinweis);
       return;
     }
-    if (!confirm(`Berichtsheft für KW ${w.kalenderwoche} jetzt abgeben? Danach ist keine Bearbeitung mehr möglich.`)) {
+    const werktage = w.tage.slice(0, 5).filter((t) => t.eintrag).length;
+    const abgeben = await this.bestaetigung.frage({
+      titel: 'Berichtsheft abgeben?',
+      text:
+        'Bist du sicher? Nach der Abgabe kannst du die Woche nicht mehr bearbeiten – erst wieder, falls sie ' +
+        'zur Überarbeitung zurückgegeben wird. Deine Ausbilder werden benachrichtigt.',
+      details: [
+        { label: 'Woche', wert: `KW ${w.kalenderwoche}/${w.jahr}` },
+        { label: 'Zeitraum', wert: `${this.formatDate(w.weekStart)} bis ${this.formatDate(w.weekEnd)}` },
+        { label: 'Erfasst', wert: `${werktage} von 5 Werktagen, ${w.gesamtStunden.toLocaleString('de-DE')} Stunden` },
+      ],
+      bestaetigen: 'Jetzt abgeben',
+      abbrechen: 'Weiter bearbeiten',
+      icon: 'fa-paper-plane',
+    });
+    if (!abgeben) {
       return;
     }
     this.busy.set(true);
@@ -527,14 +558,14 @@ export class BerichtsheftWoche implements OnDestroy, KannVerlassen {
 
   // ---------------------------------------------------------- Prüfen (Ausbilder)
 
-  abzeichnen(): void {
+  abnehmen(): void {
     const w = this.woche();
     if (!w?.id) {
       return;
     }
     this.busy.set(true);
-    this.service.abzeichnen(w.id, this.kommentar.trim() || null).subscribe({
-      next: (neu) => this.afterReview(neu, 'Woche abgezeichnet'),
+    this.service.abnehmen(w.id, this.kommentar.trim() || null).subscribe({
+      next: (neu) => this.afterReview(neu, 'Berichtsheft abgenommen'),
       error: (err) => this.reviewError(err),
     });
   }

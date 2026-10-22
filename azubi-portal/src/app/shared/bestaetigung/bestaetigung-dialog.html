@@ -1,0 +1,38 @@
+<dialog #dialog class="rueckfrage" aria-labelledby="rueckfrage-titel" aria-describedby="rueckfrage-text"
+  (cancel)="beiEsc($event)" (click)="beiKlick($event)">
+  @if (service.offen(); as frage) {
+    <form method="dialog" class="rueckfrage-inhalt" (submit)="$event.preventDefault(); bestaetigen()">
+      <span class="rueckfrage-icon" [class.gefahr]="frage.ton === 'gefahr'" aria-hidden="true">
+        <i class="fa-solid {{ frage.icon ?? (frage.ton === 'gefahr' ? 'fa-triangle-exclamation' : 'fa-circle-question') }}"></i>
+      </span>
+      <h2 id="rueckfrage-titel" class="rueckfrage-titel">{{ frage.titel }}</h2>
+      <p id="rueckfrage-text" class="rueckfrage-text">{{ frage.text }}</p>
+
+      @if (frage.details?.length) {
+        <dl class="rueckfrage-details">
+          @for (d of frage.details; track d.label) {
+            <dt>{{ d.label }}</dt>
+            <dd>{{ d.wert }}</dd>
+          }
+        </dl>
+      }
+
+      @if (frage.eingabe; as eingabe) {
+        <label class="form-label" for="rueckfrage-eingabe">{{ eingabe.label }}</label>
+        <input id="rueckfrage-eingabe" class="form-control mb-1" [type]="eingabe.typ ?? 'text'" name="wert"
+          [(ngModel)]="wert" autocomplete="off" autofocus />
+      }
+
+      <div class="rueckfrage-aktionen">
+        <button type="button" class="btn btn-outline-secondary" (click)="abbrechen()"
+          [attr.autofocus]="frage.ton === 'gefahr' && !frage.eingabe ? '' : null">
+          {{ frage.abbrechen ?? 'Abbrechen' }}
+        </button>
+        <button type="submit" class="btn" [class.btn-brand]="frage.ton !== 'gefahr'" [class.btn-danger]="frage.ton === 'gefahr'"
+          [attr.autofocus]="frage.ton !== 'gefahr' && !frage.eingabe ? '' : null" [disabled]="!!frage.eingabe && !wert.trim()">
+          {{ frage.bestaetigen }}
+        </button>
+      </div>
+    </form>
+  }
+</dialog>

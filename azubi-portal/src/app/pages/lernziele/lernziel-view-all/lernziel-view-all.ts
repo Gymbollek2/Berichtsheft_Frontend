@@ -3,6 +3,7 @@ import { FormsModule } from '@angular/forms';
 import { RouterLink } from '@angular/router';
 import { Auth } from '@app/services/auth';
 import { LernzielService } from '@app/services/lernziel.service';
+import { BestaetigungService } from '@app/shared/bestaetigung/bestaetigung.service';
 import { CHILD_KIND, CsvImportResult, KIND_LABELS, Kind, Lernziel } from '@app/core/models';
 import {
   BAUM_EBENEN,
@@ -34,6 +35,7 @@ const EBENE_KEY = 'lernziele.ebene';
 export class LernzielViewAll implements OnInit {
   protected readonly auth = inject(Auth);
   private readonly service = inject(LernzielService);
+  private readonly bestaetigung = inject(BestaetigungService);
 
   readonly kindLabels = KIND_LABELS;
   readonly kindOptions = Object.entries(KIND_LABELS) as [Kind, string][];
@@ -120,12 +122,19 @@ export class LernzielViewAll implements OnInit {
     });
   }
 
-  loeschen(l: Lernziel): void {
+  async loeschen(l: Lernziel): Promise<void> {
     if (l.anzahlUntergeordnet > 0) {
       this.error.set(`„${l.title}“ hat ${l.anzahlUntergeordnet} Unterziele. Bitte zuerst diese löschen.`);
       return;
     }
-    if (!confirm(`Lernziel „${l.title}“ wirklich löschen? Der Fortschritt aller Azubis zu diesem Lernziel geht verloren.`)) {
+    const ok = await this.bestaetigung.frage({
+      titel: 'Lernziel löschen?',
+      text: `„${l.title}“ wird gelöscht. Der Fortschritt aller Azubis zu diesem Lernziel geht verloren.`,
+      bestaetigen: 'Löschen',
+      icon: 'fa-trash-can',
+      ton: 'gefahr',
+    });
+    if (!ok) {
       return;
     }
     this.service.delete(l.id).subscribe({

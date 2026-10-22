@@ -12,6 +12,7 @@ import {
 } from '@angular/core';
 import { DomSanitizer } from '@angular/platform-browser';
 import { MarkdownPipe, htmlZuMarkdown, markdownZuHtml } from '../markdown.pipe';
+import { BestaetigungService } from '../bestaetigung/bestaetigung.service';
 
 interface Format {
   label: string;
@@ -49,6 +50,7 @@ export class MarkdownEditor {
   private readonly textarea = viewChild.required<ElementRef<HTMLTextAreaElement>>('textarea');
   private readonly vorschauFeld = viewChild<ElementRef<HTMLDivElement>>('vorschauFeld');
   private readonly sanitizer = inject(DomSanitizer);
+  private readonly bestaetigung = inject(BestaetigungService);
 
   readonly formate: Format[][] = [
     [
@@ -323,7 +325,7 @@ export class MarkdownEditor {
     this.vorschauUebernehmen();
   }
 
-  private linkVorschau(): void {
+  private async linkVorschau(): Promise<void> {
     const feld = this.vorschauFeld()?.nativeElement;
     const auswahl = window.getSelection();
     if (!feld || !auswahl?.rangeCount || !feld.contains(auswahl.anchorNode)) {
@@ -331,7 +333,17 @@ export class MarkdownEditor {
     }
     // Der Dialog nimmt dem Feld die Auswahl – danach wiederherstellen
     const markiert = auswahl.getRangeAt(0).cloneRange();
-    const adresse = window.prompt('Adresse des Links', 'https://')?.trim();
+    const adresse = (
+      await this.bestaetigung.eingabe({
+        titel: 'Link einfügen',
+        text: markiert.collapsed
+          ? 'Die Adresse wird als Link eingefügt.'
+          : `„${markiert.toString()}“ wird zum Link.`,
+        eingabe: { label: 'Adresse', wert: 'https://', typ: 'url' },
+        bestaetigen: 'Einfügen',
+        icon: 'fa-link',
+      })
+    )?.trim();
     if (!adresse) {
       return;
     }

@@ -4,6 +4,7 @@ import { FormsModule } from '@angular/forms';
 import { RouterLink } from '@angular/router';
 import { Auth } from '@app/services/auth';
 import { PersonService } from '@app/services/person.service';
+import { BestaetigungService } from '@app/shared/bestaetigung/bestaetigung.service';
 import { Person, ROLE_LABELS, Role, isLearner } from '@app/core/models';
 import { errorMessage, normalizeSearch } from '@app/core/utils';
 import {
@@ -27,6 +28,7 @@ import {
 export class PersonBearbeiten implements OnInit {
   protected readonly auth = inject(Auth);
   private readonly service = inject(PersonService);
+  private readonly bestaetigung = inject(BestaetigungService);
 
   readonly roleLabels = ROLE_LABELS;
   readonly roleFilterOptions = Object.entries(ROLE_LABELS) as [Role, string][];
@@ -167,8 +169,15 @@ export class PersonBearbeiten implements OnInit {
 
   // ------------------------------------------------ Löschen
 
-  loeschen(p: Person): void {
-    if (!confirm(`${p.fullName} wirklich löschen? Berichtsheft und Lernfortschritt werden ebenfalls gelöscht.`)) {
+  async loeschen(p: Person): Promise<void> {
+    const ok = await this.bestaetigung.frage({
+      titel: 'Person löschen?',
+      text: `${p.fullName} wird gelöscht – mit Zugang, Berichtsheft und Lernfortschritt.`,
+      bestaetigen: 'Löschen',
+      icon: 'fa-user-xmark',
+      ton: 'gefahr',
+    });
+    if (!ok) {
       return;
     }
     this.service.delete(p.id).subscribe({

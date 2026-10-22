@@ -36,7 +36,7 @@ export const ART_LABELS: Record<EintragArt, string> = {
 export const BERICHT_STATUS_LABELS: Record<BerichtStatus, string> = {
   ENTWURF: 'Entwurf',
   EINGEREICHT: 'Eingereicht',
-  ABGEZEICHNET: 'Abgezeichnet',
+  ABGEZEICHNET: 'Abgenommen',
   ABGELEHNT: 'Zur Überarbeitung',
 };
 

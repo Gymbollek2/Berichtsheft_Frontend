@@ -43,7 +43,8 @@ export class BerichtsheftService {
     return this.http.get<WochenberichtSummary[]>(`${this.url}/offen`);
   }
 
-  abzeichnen(id: number, kommentar: string | null): Observable<Wochenbericht> {
+  /** Woche abnehmen (Endpunkt heißt aus Kompatibilitätsgründen weiter /abzeichnen). */
+  abnehmen(id: number, kommentar: string | null): Observable<Wochenbericht> {
     return this.http.post<Wochenbericht>(`${this.url}/woche/${id}/abzeichnen`, { kommentar });
   }
 

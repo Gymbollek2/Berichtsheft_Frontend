@@ -14,6 +14,12 @@ const EXPIRES_KEY = 'azubi-portal.expires';
 const OHNE_WINDOWS_KEY = 'azubi-portal.abgemeldet';
 const ABGEMELDET = '1';
 const PASSWORT_GEWAEHLT = 'passwort';
+/**
+ * In diesem Browser hat die Windows-Anmeldung schon einmal geklappt – nur dann startet sie beim Öffnen automatisch.
+ * Sonst (neuer Browser, Inkognito-Fenster, Rechner außerhalb der Domäne) könnte der Browser statt der stillen
+ * Anmeldung sein eigenes Fenster für Benutzername und Passwort zeigen. Dann gibt es sofort die Anmeldeseite.
+ */
+const WINDOWS_BEKANNT_KEY = 'azubi-portal.windows-anmeldung';
 
 /** Anmeldung, Token-Verwaltung und Infos zum angemeldeten Benutzer. */
 @Injectable({ providedIn: 'root' })
@@ -39,14 +45,32 @@ export class Auth {
 
   /** Anmeldung mit dem Windows-Konto. Der Browser schickt die Windows-Anmeldung selbst mit (Kerberos/NTLM). */
   ssoLogin(): Observable<LoginResponse> {
-    return this.http
-      .get<LoginResponse>(`${this.apiUrl}/sso`)
-      .pipe(tap((response) => this.storeSession(response)));
+    return this.http.get<LoginResponse>(`${this.apiUrl}/sso`).pipe(
+      tap((response) => {
+        localStorage.setItem(WINDOWS_BEKANNT_KEY, '1');
+        this.storeSession(response);
+      }),
+    );
+  }
+
+  /** Die Windows-Anmeldung hat in diesem Browser schon einmal geklappt (siehe {@link WINDOWS_BEKANNT_KEY}). */
+  windowsAnmeldungBekannt(): boolean {
+    return localStorage.getItem(WINDOWS_BEKANNT_KEY) === '1';
+  }
+
+  /** Windows-Anmeldung ist hier (nicht mehr) möglich – beim nächsten Öffnen nicht automatisch versuchen. */
+  windowsAnmeldungVergessen(): void {
+    localStorage.removeItem(WINDOWS_BEKANNT_KEY);
   }
 
   /** true, wenn in diesem Tab nicht automatisch per Windows angemeldet werden soll. */
   ohneAutomatischeWindowsAnmeldung(): boolean {
     return sessionStorage.getItem(OHNE_WINDOWS_KEY) !== null;
+  }
+
+  /** true, wenn sich der Benutzer in diesem Tab selbst abgemeldet hat. */
+  selbstAbgemeldet(): boolean {
+    return sessionStorage.getItem(OHNE_WINDOWS_KEY) === ABGEMELDET;
   }
 
   /** true, wenn der Benutzer auf „Kein Zugriff“ die Anmeldung mit Benutzername und Passwort gewählt hat. */

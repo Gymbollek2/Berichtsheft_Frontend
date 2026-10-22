@@ -12,8 +12,14 @@
   Anklicken öffnet sich das Fenster mit den Nachrichten (Berichtsheft abgegeben, abgenommen, Korrekturbedarf,
   Erinnerung an die Abgabe, Lernziel erreicht, Willkommen); ein Klick führt zur passenden Seite.
   „Alle als gelesen markieren“; neue Nachrichten werden jede Minute abgefragt.
+- **Eigene Rückfragen statt Browser-Fenster**: Berichtsheft abgeben (mit Zusammenfassung der Woche, „Weiter
+  bearbeiten“ oder „Jetzt abgeben“), Löschen von Einträgen, Lernzielen und Personen, Seite mit ungespeicherten
+  Änderungen verlassen und Link einfügen im Textfeld.
 
 ### Geändert
+- Die Windows-Anmeldung startet beim Öffnen nur noch automatisch, wenn sie in diesem Browser schon einmal geklappt
+  hat. Sonst (z. B. Inkognito-Fenster) erscheint sofort die Anmeldeseite statt der Anmeldeabfrage des Browsers.
+- „Abzeichnen“/„Abgezeichnet“ heißt überall **„Abnehmen“/„Abgenommen“**.
 - Entwicklungs-Proxy zeigt auf das Backend unter https://localhost:5016 (`proxy.conf.mjs` statt `proxy.conf.json`).
 - Berufsschule schlägt jetzt 8 statt 6 Stunden vor.
 - Ausbilder sehen nicht abgegebene Wochen nicht mehr – stattdessen den Hinweis „Noch nicht abgegeben“.

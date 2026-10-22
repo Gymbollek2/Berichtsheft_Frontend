@@ -1,0 +1,117 @@
+.rueckfrage {
+  width: min(440px, calc(100vw - 2rem));
+  padding: 0;
+  border: 0;
+  border-radius: var(--radius);
+  background: var(--surface);
+  color: var(--ink);
+  box-shadow: 0 24px 64px rgba(1, 0, 70, 0.28);
+}
+
+.rueckfrage[open] {
+  animation: rueckfrage-rein 0.16s ease-out;
+}
+
+.rueckfrage::backdrop {
+  background: rgba(1, 0, 70, 0.38);
+  backdrop-filter: blur(2px);
+}
+
+/* Feiner Markenstreifen oben, wie im Rest der Anwendung */
+.rueckfrage::before {
+  content: '';
+  display: block;
+  height: 4px;
+  background: var(--brand-gradient);
+}
+
+.rueckfrage-inhalt {
+  padding: 1.5rem 1.5rem 1.25rem;
+}
+
+.rueckfrage-icon {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 3rem;
+  height: 3rem;
+  margin-bottom: 0.9rem;
+  border-radius: 50%;
+  background: #ebeaf6;
+  color: var(--navy-2);
+  font-size: 1.25rem;
+}
+
+.rueckfrage-icon.gefahr {
+  background: var(--bad-bg);
+  color: var(--bad);
+}
+
+.rueckfrage-titel {
+  margin: 0 0 0.4rem;
+  font-size: 1.2rem;
+  font-weight: 600;
+  color: var(--navy-2);
+}
+
+.rueckfrage-text {
+  margin: 0 0 1rem;
+  color: var(--muted);
+}
+
+.rueckfrage-details {
+  display: grid;
+  grid-template-columns: auto 1fr;
+  gap: 0.35rem 1rem;
+  margin: 0 0 1.25rem;
+  padding: 0.75rem 1rem;
+  border: 1px solid var(--line);
+  border-radius: var(--radius-sm);
+  background: #fbfbfd;
+  font-size: 0.875rem;
+}
+
+.rueckfrage-details dt {
+  font-weight: 500;
+  color: var(--muted);
+}
+
+.rueckfrage-details dd {
+  margin: 0;
+  font-variant-numeric: tabular-nums;
+}
+
+.rueckfrage-aktionen {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: flex-end;
+  gap: 0.5rem;
+  margin-top: 1.25rem;
+}
+
+@media (max-width: 480px) {
+  .rueckfrage-aktionen {
+    flex-direction: column-reverse;
+  }
+
+  .rueckfrage-aktionen .btn {
+    width: 100%;
+  }
+}
+
+@keyframes rueckfrage-rein {
+  from {
+    opacity: 0;
+    transform: translateY(8px) scale(0.98);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .rueckfrage[open] {
+    animation: none;
+  }
+}

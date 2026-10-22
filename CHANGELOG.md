@@ -28,6 +28,8 @@
 - Automatisches Speichern passiert **sofort** nach jeder Änderung statt nach 1,5 Sekunden.
 
 ### Behoben
+- „Windows-Anmeldung erneut versuchen“ auf „Kein Zugriff“ führte nur zur Anmeldeseite. Der Button startet die
+  Windows-Anmeldung jetzt sofort neu und zeigt das Ergebnis an.
 - Klick auf eine Benachrichtigung zeigte die Seite mit altem Stand, wenn man schon auf ihr war
   (z. B. „Zur Überarbeitung“ statt „Eingereicht“). Die Seite wird jetzt immer neu geladen.
 - Erneut abgegebene Wochen zeigen nicht mehr „Geprüft von … am …“ der letzten Rückgabe; der alte Kommentar

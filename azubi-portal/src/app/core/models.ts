@@ -1,6 +1,6 @@
 /** Datentypen der Backend-API (Berichtsheft-Backend /v1/...). */
 
-export type Role = 'ROLE_TRAINEE' | 'ROLE_STUDENT' | 'ROLE_TRAINER' | 'ROLE_ADMIN';
+export type Role = 'ROLE_TRAINEE' | 'ROLE_STUDENT' | 'ROLE_TRAINER';
 export type Kind = 'KIND_GENERAL' | 'KIND_BROAD' | 'KIND_SPECIFIC';
 export type LernzielStatus = 'STATUS_UNFINISHED' | 'STATUS_IN_PROGRESS' | 'STATUS_DONE';
 export type EintragArt = 'BETRIEB' | 'SCHULE' | 'URLAUB' | 'KRANK' | 'FEIERTAG' | 'SONSTIGES';
@@ -10,7 +10,6 @@ export const ROLE_LABELS: Record<Role, string> = {
   ROLE_TRAINEE: 'Auszubildende/r',
   ROLE_STUDENT: 'Duale/r Student/in',
   ROLE_TRAINER: 'Ausbilder/in',
-  ROLE_ADMIN: 'Administrator/in',
 };
 
 export const KIND_LABELS: Record<Kind, string> = {
@@ -61,8 +60,9 @@ export const ANWESEND: EintragArt[] = ['BETRIEB', 'SCHULE', 'SONSTIGES'];
 export const ABWESEND: EintragArt[] = ['URLAUB', 'KRANK', 'FEIERTAG'];
 export const MAX_STUNDEN = 10;
 
+/** Ausbilder/innen dürfen alles (eine eigene Admin-Rolle gibt es nicht). */
 export function isStaff(role: Role | undefined | null): boolean {
-  return role === 'ROLE_TRAINER' || role === 'ROLE_ADMIN';
+  return role === 'ROLE_TRAINER';
 }
 
 export function isLearner(role: Role | undefined | null): boolean {
@@ -103,6 +103,14 @@ export interface PersonUpdateRequest {
   beruf?: string | null;
   dateOfTrainingStart?: string | null;
   dateOfBirth?: string | null;
+}
+
+/** Anmeldearten, die der Server anbietet (GET /v1/passport/optionen). */
+export interface AnmeldeOptionen {
+  /** Windows-Anmeldung (Single Sign-on) ist eingeschaltet. */
+  sso: boolean;
+  /** Anmeldung mit Benutzername und Passwort ist erlaubt. */
+  passwortLogin: boolean;
 }
 
 export interface LoginResponse {
@@ -157,6 +165,8 @@ export interface BerichtsheftEintrag {
   artLabel: string;
   description: string | null;
   lernziele: Lernziel[];
+  /** Zeitpunkt der letzten Speicherung (ISO, Ortszeit des Servers); null bei alten Einträgen. */
+  updatedAt: string | null;
 }
 
 export interface WochenTag {

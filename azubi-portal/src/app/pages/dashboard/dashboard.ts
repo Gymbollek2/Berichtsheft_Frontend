@@ -28,10 +28,6 @@ export class Dashboard implements OnInit {
   // Ausbilder
   readonly offen = signal<WochenberichtSummary[]>([]);
   readonly alleFortschritte = signal<Fortschritt[]>([]);
-  readonly durchschnitt = computed(() => {
-    const list = this.alleFortschritte();
-    return list.length ? list.reduce((sum, f) => sum + f.prozent, 0) / list.length : 0;
-  });
 
   readonly begruessung = computed(() => {
     const h = new Date().getHours();

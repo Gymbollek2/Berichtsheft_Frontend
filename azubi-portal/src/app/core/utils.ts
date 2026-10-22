@@ -1,4 +1,5 @@
 import { HttpErrorResponse } from '@angular/common/http';
+import type { Kind } from './models';
 
 /** Datum als YYYY-MM-DD in lokaler Zeit (ohne UTC-Verschiebung von toISOString). */
 export function toIsoDate(date: Date): string {
@@ -66,4 +67,76 @@ export function treeOrder<T>(items: T[], id: (t: T) => number, parentId: (t: T) 
   };
   visit(null, 0);
   return result;
+}
+
+/** Eine sichtbare Zeile im ein-/ausklappbaren Lernziel-Baum. */
+export interface BaumZeile<T> {
+  item: T;
+  depth: number;
+  /** Hat Unterziele (dann gibt es einen Pfeil zum Auf-/Zuklappen). */
+  hatKinder: boolean;
+  /** Unterziele sind gerade eingeklappt. */
+  eingeklappt: boolean;
+}
+
+/**
+ * Blendet die Unterziele eingeklappter Knoten aus.
+ * Erwartet die Reihenfolge aus {@link treeOrder} (Eltern direkt vor ihren Kindern).
+ */
+export function sichtbarerBaum<T>(
+  geordnet: { item: T; depth: number }[],
+  id: (t: T) => number,
+  eingeklappt: ReadonlySet<number>,
+): BaumZeile<T>[] {
+  const result: BaumZeile<T>[] = [];
+  let versteckeTieferAls = Number.POSITIVE_INFINITY;
+  geordnet.forEach((row, i) => {
+    if (row.depth > versteckeTieferAls) {
+      return;
+    }
+    versteckeTieferAls = Number.POSITIVE_INFINITY;
+    const hatKinder = (geordnet[i + 1]?.depth ?? -1) > row.depth;
+    const zu = hatKinder && eingeklappt.has(id(row.item));
+    result.push({ ...row, hatKinder, eingeklappt: zu });
+    if (zu) {
+      versteckeTieferAls = row.depth;
+    }
+  });
+  return result;
+}
+
+/** Bis zu welcher Ebene der Lernziel-Baum aufgeklappt ist. */
+export type BaumEbene = 'richt' | 'grob' | 'alle';
+
+export const BAUM_EBENEN: { wert: BaumEbene; label: string }[] = [
+  { wert: 'richt', label: 'Nur Richtlernziele' },
+  { wert: 'grob', label: 'Richt- und Groblernziele' },
+  { wert: 'alle', label: 'Alle Ebenen' },
+];
+
+/**
+ * Ids der Lernziele, die für eine Ebene eingeklappt werden:
+ * „richt“ klappt alle Richtlernziele zu, „grob“ alle Groblernziele, „alle“ nichts.
+ */
+export function einklappenFuerEbene<T>(items: T[], id: (t: T) => number, kind: (t: T) => Kind, ebene: BaumEbene): Set<number> {
+  const zu: Kind | null = ebene === 'richt' ? 'KIND_GENERAL' : ebene === 'grob' ? 'KIND_BROAD' : null;
+  return new Set(zu ? items.filter((t) => kind(t) === zu).map(id) : []);
+}
+
+/** Merkt sich die gewählte Ebene pro Seite im Browser (nur Komfort – Fehler werden ignoriert). */
+export function ladeBaumEbene(schluessel: string, fallback: BaumEbene = 'alle'): BaumEbene {
+  try {
+    const wert = localStorage.getItem(schluessel);
+    return wert === 'richt' || wert === 'grob' || wert === 'alle' ? wert : fallback;
+  } catch {
+    return fallback;
+  }
+}
+
+export function speichereBaumEbene(schluessel: string, ebene: BaumEbene): void {
+  try {
+    localStorage.setItem(schluessel, ebene);
+  } catch {
+    // z. B. privater Modus – dann eben ohne Merken
+  }
 }

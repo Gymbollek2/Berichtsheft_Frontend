@@ -1,7 +1,9 @@
 import { Routes } from '@angular/router';
 import { authGuard, roleGuard } from './guards/auth-guard';
+import { unsavedChangesGuard } from './guards/unsaved-changes.guard';
 import { Role } from './core/models';
 import { Login } from './pages/login/login';
+import { KeinZugriff } from './pages/kein-zugriff/kein-zugriff';
 import { LoginLayout } from './layout/login-layout/login-layout';
 import { Dashboard } from './pages/dashboard/dashboard';
 import { BerichtsheftWoche } from './pages/berichtsheft/berichtsheft-woche/berichtsheft-woche';
@@ -15,11 +17,12 @@ import { LernzielAnlegen } from './pages/lernziele/lernziel-anlegen/lernziel-anl
 import { LernzielViewAll } from './pages/lernziele/lernziel-view-all/lernziel-view-all';
 import { Profil } from './pages/profil/profil';
 
-const STAFF: Role[] = ['ROLE_TRAINER', 'ROLE_ADMIN'];
+const STAFF: Role[] = ['ROLE_TRAINER'];
 const LEARNER: Role[] = ['ROLE_TRAINEE', 'ROLE_STUDENT'];
 
 export const routes: Routes = [
   { path: 'login', component: Login, title: 'Anmelden – Azubi Portal' },
+  { path: 'kein-zugriff', component: KeinZugriff, title: 'Kein Zugriff – Azubi Portal' },
   {
     // Seiten mit Header & Sidebar (nur angemeldet)
     path: '',
@@ -31,7 +34,13 @@ export const routes: Routes = [
       { path: 'dashboard', component: Dashboard, title: 'Übersicht – Azubi Portal' },
 
       // Berichtsheft
-      { path: 'berichtsheft', component: BerichtsheftWoche, data: { roles: LEARNER }, title: 'Berichtsheft' },
+      {
+        path: 'berichtsheft',
+        component: BerichtsheftWoche,
+        canDeactivate: [unsavedChangesGuard],
+        data: { roles: LEARNER },
+        title: 'Berichtsheft',
+      },
       { path: 'berichtsheft/historie', component: BerichtsheftHistorie, data: { roles: LEARNER }, title: 'Meine Wochen' },
       { path: 'berichtsheft/pruefung', component: BerichtsheftPruefung, data: { roles: STAFF }, title: 'Berichtshefte prüfen' },
       { path: 'berichtsheft/azubis', component: BerichtsheftAzubis, data: { roles: STAFF }, title: 'Berichtshefte' },

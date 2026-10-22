@@ -31,6 +31,6 @@ export class SidebarComponent {
   );
 
   logout(): void {
-    this.auth.logout();
+    this.auth.logout(true, true);
   }
 }

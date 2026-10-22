@@ -9,41 +9,71 @@
   </section>
 
   <section class="form-side">
-    <form class="login-form" (ngSubmit)="login()" novalidate>
-      <h2>Anmelden</h2>
-      <p class="hint mb-4">Mit deinem Benutzernamen und Passwort.</p>
-
-      <label class="form-label" for="user">Benutzername</label>
-      <input id="user" class="form-control mb-3" [(ngModel)]="user" name="user" autocomplete="username" autofocus required />
-
-      <label class="form-label" for="password">Passwort</label>
-      <div class="input-group mb-4">
-        <input
-          id="password"
-          class="form-control"
-          [type]="isPasswordVisible() ? 'text' : 'password'"
-          autocomplete="current-password"
-          [(ngModel)]="password"
-          name="password"
-          required
-        />
-        <button type="button" class="btn btn-outline-secondary" (click)="togglePassword()" [attr.aria-label]="isPasswordVisible() ? 'Passwort verbergen' : 'Passwort anzeigen'">
-          <i class="fa-regular" [class.fa-eye]="!isPasswordVisible()" [class.fa-eye-slash]="isPasswordVisible()"></i>
-        </button>
-      </div>
-
-      @if (error()) {
-        <div class="alert alert-danger py-2" role="alert">{{ error() }}</div>
-      }
-
-      <button class="btn btn-brand w-100 py-2" type="submit" [disabled]="loading()">
-        @if (loading()) {
-          <span class="spinner-border spinner-border-sm me-2"></span>
+    @if (!optionen() || ssoLaeuft()) {
+      <!-- Automatische Anmeldung mit dem Windows-Konto -->
+      <div class="login-form text-center" role="status" aria-live="polite">
+        <span class="spinner-border text-secondary mb-3" aria-hidden="true"></span>
+        <h2>Anmeldung läuft …</h2>
+        @if (ssoLaeuft()) {
+          <p class="hint">Du wirst mit deinem Windows-Konto angemeldet.</p>
         }
-        Anmelden
-      </button>
+      </div>
+    } @else {
+      <div class="login-form">
+        <h2>Anmelden</h2>
 
-      <p class="hint mt-4 mb-0">Passwort vergessen? Wende dich an deine Ausbilderin oder deinen Ausbilder.</p>
-    </form>
+        @if (optionen()?.sso) {
+          @if (ssoHinweis()) {
+            <div class="alert alert-warning py-2" role="alert">{{ ssoHinweis() }}</div>
+          } @else {
+            <p class="hint mb-4">Du hast dich abgemeldet.</p>
+          }
+          <button type="button" class="btn btn-brand w-100 py-2" (click)="windowsAnmeldung()">
+            <i class="fa-brands fa-windows me-2" aria-hidden="true"></i>Mit Windows-Konto anmelden
+          </button>
+          @if (optionen()?.passwortLogin) {
+            <div class="login-divider"><span>oder mit Benutzername und Passwort</span></div>
+          }
+        } @else {
+          <p class="hint mb-4">Mit deinem Benutzernamen und Passwort.</p>
+        }
+
+        @if (optionen()?.passwortLogin) {
+          <form (ngSubmit)="login()" novalidate>
+            <label class="form-label" for="user">Benutzername</label>
+            <input id="user" class="form-control mb-3" [(ngModel)]="user" name="user" autocomplete="username" [autofocus]="!optionen()?.sso" required />
+
+            <label class="form-label" for="password">Passwort</label>
+            <div class="input-group mb-4">
+              <input
+                id="password"
+                class="form-control"
+                [type]="isPasswordVisible() ? 'text' : 'password'"
+                autocomplete="current-password"
+                [(ngModel)]="password"
+                name="password"
+                required
+              />
+              <button type="button" class="btn btn-outline-secondary" (click)="togglePassword()" [attr.aria-label]="isPasswordVisible() ? 'Passwort verbergen' : 'Passwort anzeigen'">
+                <i class="fa-regular" [class.fa-eye]="!isPasswordVisible()" [class.fa-eye-slash]="isPasswordVisible()"></i>
+              </button>
+            </div>
+
+            @if (error()) {
+              <div class="alert alert-danger py-2" role="alert">{{ error() }}</div>
+            }
+
+            <button class="btn w-100 py-2" [class.btn-brand]="!optionen()?.sso" [class.btn-outline-secondary]="optionen()?.sso" type="submit" [disabled]="loading()">
+              @if (loading()) {
+                <span class="spinner-border spinner-border-sm me-2"></span>
+              }
+              Anmelden
+            </button>
+
+            <p class="hint mt-4 mb-0">Passwort vergessen? Wende dich an deine Ausbilderin oder deinen Ausbilder.</p>
+          </form>
+        }
+      </div>
+    }
   </section>
 </div>

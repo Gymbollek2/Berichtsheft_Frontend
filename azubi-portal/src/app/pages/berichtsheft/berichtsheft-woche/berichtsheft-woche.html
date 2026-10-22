@@ -54,6 +54,45 @@
   }
 
   @if (woche(); as w) {
+    <!-- Automatisches Speichern -->
+    @if (w.editierbar) {
+      <div class="autosave-bar no-print status-{{ speicherStatus() }}" role="status" aria-live="polite">
+        <i class="fa-solid fa-cloud-arrow-up autosave-icon" aria-hidden="true"></i>
+        <span class="autosave-text">Deine Einträge werden automatisch gespeichert.</span>
+        <span class="autosave-state">
+          @switch (speicherStatus()) {
+            @case ('speichert') {
+              <span><span class="spinner-border spinner-border-sm me-1" aria-hidden="true"></span>Speichert …</span>
+            }
+            @case ('ausstehend') {
+              <span>Änderungen werden gleich gespeichert …</span>
+            }
+            @case ('unvollstaendig') {
+              <span class="autosave-warn"><i class="fa-solid fa-circle-info me-1" aria-hidden="true"></i>Unvollständige Tage werden gespeichert, sobald alle Pflichtfelder ausgefüllt sind.</span>
+            }
+            @case ('fehler') {
+              <span><i class="fa-solid fa-triangle-exclamation me-1" aria-hidden="true"></i>Speichern fehlgeschlagen – bitte die markierten Tage prüfen.</span>
+            }
+          }
+          @if (letzteSpeicherung(); as zeit) {
+            <span class="autosave-time">
+              @if (speicherStatus() === 'gespeichert') {
+                <i class="fa-solid fa-circle-check me-1" aria-hidden="true"></i>
+              }
+              Letzte automatische Speicherung:
+              @if ((zeit | date: 'yyyy-MM-dd') === heute) {
+                heute, {{ zeit | date: 'HH:mm:ss' }} Uhr
+              } @else {
+                {{ zeit | date: 'dd.MM.yyyy, HH:mm' }} Uhr
+              }
+            </span>
+          } @else if (speicherStatus() === 'gespeichert') {
+            <span class="autosave-time">In dieser Woche wurde noch nichts gespeichert.</span>
+          }
+        </span>
+      </div>
+    }
+
     <!-- Status der Woche -->
     <div class="week-status">
       <span class="badge-status status-{{ w.status }}">{{ w.statusLabel }}</span>
@@ -111,11 +150,11 @@
               <label class="form-label mt-2" [for]="'t-' + tag.date">
                 {{ f.art === 'SCHULE' ? 'Unterrichtsthemen' : istAbwesend(f.art) ? 'Bemerkung (optional)' : 'Tätigkeiten' }}
               </label>
-              <textarea class="form-control" [id]="'t-' + tag.date" rows="3" maxlength="4000"
+              <app-markdown-editor [inputId]="'t-' + tag.date" [rows]="4" [maxlength]="4000"
                 [placeholder]="f.art === 'SCHULE' ? 'Welche Themen wurden im Unterricht behandelt?' : istAbwesend(f.art) ? '' : 'Was hast du heute gemacht und gelernt?'"
-                [ngModel]="f.description" (ngModelChange)="change(tag.date, { description: $event })"></textarea>
+                [value]="f.description" (valueChange)="change(tag.date, { description: $event })" />
 
-              @if (!istAbwesend(f.art)) {
+              @if (mitLernzielen(f.art)) {
                 <div class="lz-row">
                   @for (id of f.lernzielIds; track id) {
                     <span class="lz-chip">
@@ -149,26 +188,36 @@
                 }
               }
 
-              @if (f.error) {
-                <div class="text-danger small mt-2" role="alert">{{ f.error }}</div>
-              }
-
               <div class="day-actions">
+                <span class="day-save-state small">
+                  @if (f.saving) {
+                    <span><span class="spinner-border spinner-border-sm me-1" aria-hidden="true"></span>Speichert …</span>
+                  } @else if (f.dirty && f.error) {
+                    <span class="text-danger" role="alert">{{ f.error }}</span>
+                    <button type="button" class="btn btn-sm btn-link py-0" (click)="speichern(tag.date)">Erneut versuchen</button>
+                  } @else if (f.dirty && f.hinweis) {
+                    <span class="save-hint"><i class="fa-solid fa-circle-info me-1" aria-hidden="true"></i>{{ f.hinweis }}</span>
+                  } @else if (f.dirty) {
+                    <span>Ungespeicherte Änderungen …</span>
+                  } @else if (tag.eintrag) {
+                    <span class="save-ok"><i class="fa-solid fa-check me-1" aria-hidden="true"></i>Gespeichert</span>
+                  }
+                </span>
                 @if (tag.eintrag) {
                   <button class="btn btn-sm btn-outline-secondary" (click)="loeschen(tag)" title="Eintrag löschen" aria-label="Eintrag löschen">
                     <i class="fa-regular fa-trash-can"></i>
                   </button>
                 }
-                <button class="btn btn-sm btn-brand" (click)="speichern(tag)" [disabled]="f.saving || (!f.dirty && !!tag.eintrag)">
-                  @if (f.saving) { <span class="spinner-border spinner-border-sm me-1"></span> }
-                  {{ tag.eintrag ? (f.dirty ? 'Änderungen speichern' : 'Gespeichert') : 'Speichern' }}
-                </button>
               </div>
               }
             } @else {
               <!-- Nur lesen -->
               @if (tag.eintrag; as e) {
-                <p class="description mb-1">{{ e.description || '–' }}</p>
+                @if (e.description?.trim()) {
+                  <div class="description markdown mb-1" [innerHTML]="e.description | markdown"></div>
+                } @else {
+                  <p class="description mb-1">–</p>
+                }
                 @if (e.lernziele.length) {
                   <div class="lz-row">
                     @for (lz of e.lernziele; track lz.id) {

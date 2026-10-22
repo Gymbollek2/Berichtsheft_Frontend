@@ -78,7 +78,7 @@
 }
 
 .description {
-  white-space: pre-wrap;
+  overflow-wrap: anywhere;
 }
 
 .lz-row {
@@ -152,8 +152,81 @@
 .day-actions {
   display: flex;
   justify-content: flex-end;
+  align-items: center;
   gap: 0.5rem;
   margin-top: 0.75rem;
+  min-height: 2rem;
+}
+
+.day-save-state {
+  margin-right: auto;
+  display: inline-flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.25rem;
+  color: var(--muted);
+}
+
+.save-ok {
+  color: var(--ok);
+}
+
+.save-hint {
+  color: var(--warn);
+}
+
+/* Hinweis „wird automatisch gespeichert“ oben auf der Seite */
+.autosave-bar {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.35rem 0.75rem;
+  margin-bottom: 1rem;
+  padding: 0.6rem 1rem;
+  background: var(--surface);
+  border: 1px solid var(--line);
+  border-left: 3px solid var(--navy-2);
+  border-radius: var(--radius-sm);
+  font-size: 0.875rem;
+}
+
+.autosave-icon {
+  color: var(--navy-2);
+}
+
+.autosave-text {
+  font-weight: 500;
+  color: var(--ink);
+}
+
+.autosave-state {
+  display: inline-flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.25rem 0.75rem;
+  margin-left: auto;
+  color: var(--muted);
+}
+
+.autosave-bar.status-gespeichert .autosave-time {
+  color: var(--ok);
+}
+
+.autosave-bar.status-unvollstaendig {
+  border-left-color: var(--warn);
+}
+
+.autosave-warn {
+  color: var(--warn);
+}
+
+.autosave-bar.status-fehler {
+  border-left-color: var(--bad);
+  background: var(--bad-bg);
+}
+
+.autosave-bar.status-fehler .autosave-state {
+  color: var(--bad);
 }
 
 .submit-area {

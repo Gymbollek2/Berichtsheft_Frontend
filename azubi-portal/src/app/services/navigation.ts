@@ -16,7 +16,7 @@ export interface NavSection {
   links: NavLink[];
 }
 
-const STAFF: Role[] = ['ROLE_TRAINER', 'ROLE_ADMIN'];
+const STAFF: Role[] = ['ROLE_TRAINER'];
 const LEARNER: Role[] = ['ROLE_TRAINEE', 'ROLE_STUDENT'];
 
 /**

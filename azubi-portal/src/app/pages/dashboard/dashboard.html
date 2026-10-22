@@ -17,15 +17,11 @@
   }
 
   @if (auth.isStaff()) {
-    <!-- ================= Ausbilder / Admin ================= -->
+    <!-- ================= Ausbilder ================= -->
     <div class="figures">
       <a class="figure" routerLink="/berichtsheft/pruefung">
         <div class="value">{{ offen().length }}</div>
         <div class="label">Wochen warten auf Prüfung</div>
-      </a>
-      <a class="figure" routerLink="/personen-lernziele-view">
-        <div class="value">{{ durchschnitt() | number: '1.0-0' }} %</div>
-        <div class="label">Feinlernziele erreicht (Durchschnitt)</div>
       </a>
       <a class="figure" routerLink="/berichtsheft/azubis">
         <div class="value">{{ alleFortschritte().length }}</div>

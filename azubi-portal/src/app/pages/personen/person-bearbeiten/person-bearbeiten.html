@@ -56,12 +56,10 @@
               </td>
               <td class="hint num">{{ p.lastLogin ? (p.lastLogin | date: 'dd.MM.yyyy, HH:mm') : 'noch nie' }}</td>
               <td class="table-actions pe-4">
-                @if (darfVerwalten(p)) {
-                  <button class="btn btn-sm btn-outline-secondary btn-icon me-1" (click)="bearbeiten(p)" title="Bearbeiten" aria-label="Bearbeiten"><i class="fa-solid fa-pen"></i></button>
-                  <button class="btn btn-sm btn-outline-secondary btn-icon me-1" (click)="passwortZuruecksetzen(p)" title="Passwort zurücksetzen" aria-label="Passwort zurücksetzen"><i class="fa-solid fa-key"></i></button>
-                  @if (!istIch(p)) {
-                    <button class="btn btn-sm btn-outline-secondary btn-icon" (click)="loeschen(p)" title="Löschen" aria-label="Löschen"><i class="fa-regular fa-trash-can"></i></button>
-                  }
+                <button class="btn btn-sm btn-outline-secondary btn-icon me-1" (click)="bearbeiten(p)" title="Bearbeiten" aria-label="Bearbeiten"><i class="fa-solid fa-pen"></i></button>
+                <button class="btn btn-sm btn-outline-secondary btn-icon me-1" (click)="passwortZuruecksetzen(p)" title="Passwort zurücksetzen" aria-label="Passwort zurücksetzen"><i class="fa-solid fa-key"></i></button>
+                @if (!istIch(p)) {
+                  <button class="btn btn-sm btn-outline-secondary btn-icon" (click)="loeschen(p)" title="Löschen" aria-label="Löschen"><i class="fa-regular fa-trash-can"></i></button>
                 }
               </td>
             </tr>

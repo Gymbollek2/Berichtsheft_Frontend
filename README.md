@@ -71,8 +71,7 @@ Für das Backend gibt es dieselbe Möglichkeit, siehe Backend-README.
 | Benutzername | Passwort | Rolle |
 |---|---|---|
 | `azubi` | `azubi123` | Azubi mit Beispiel-Wochen |
-| `ausbilder` | `ausbilder123` | Ausbilder, eine Woche wartet auf Prüfung |
-| `admin` | `admin123` | Admin |
+| `ausbilder` | `ausbilder123` | Ausbilder (darf alles), eine Woche wartet auf Prüfung |
 | `azubi2` | `azubi123` | Azubi ohne Einträge |
 
 **Zum Ausprobieren:**
@@ -103,9 +102,9 @@ Ordner `Berichtsheft_Frontend/azubi-portal` öffnen, im Terminal `npm install` a
 - **Meine Lernziele**: Status je Lernziel mit Fortschrittsbalken
 - **Profil**: eigene Daten ansehen, Passwort ändern
 
-### Für Ausbilder und Admins
+### Für Ausbilder (dürfen alles)
 
-- **Übersicht**: offene Prüfungen und Lernfortschritt aller Azubis
+- **Übersicht**: offene Prüfungen, Anzahl der Azubis und Lernfortschritt je Azubi
 - **Prüfen**: Warteschlange der eingereichten Wochen, abzeichnen oder mit Kommentar zurückgeben
 - **Berichtshefte**: Berichtshefte aller Azubis durchsuchen
 - **Lernfortschritt**: Azubi wählen und den Status der Feinlernziele setzen. Grob- und Richtlernziele werden automatisch berechnet.
@@ -114,7 +113,7 @@ Ordner `Berichtsheft_Frontend/azubi-portal` öffnen, im Terminal `npm install` a
   - Ein Groblernziel wählt sein Richtlernziel, ein Feinlernziel sein Groblernziel. Die Auswahl zeigt nur passende Lernziele.
   - „+ Groblernziel“ bzw. „+ Feinlernziel“ in der Liste legt direkt ein Unterziel an.
   - Lernziele mit Unterzielen lassen sich nicht löschen.
-- **Personen**: anlegen (mit generiertem Startpasswort), bearbeiten, Passwort zurücksetzen, löschen. Ausbilder dürfen nur Azubis und Studierende verwalten, Admins alle.
+- **Personen**: anlegen (mit generiertem Startpasswort), bearbeiten, Passwort zurücksetzen, löschen – für alle Rollen, auch andere Ausbilder. Eine eigene Admin-Rolle gibt es nicht.
 
 Menü und Seiten passen sich automatisch der **Rolle** an. Die Rechte werden zusätzlich im Backend geprüft.
 
@@ -131,6 +130,21 @@ Alle im Ordner `azubi-portal`:
 | `npm run build` | Produktions-Build nach `dist/azubi-portal/browser` |
 | `npm test` | Unit-Tests (Vitest) |
 | `npx prettier --write src` | Code formatieren |
+
+## Auf einem Server betreiben
+
+Für den Betrieb wird das Frontend **nicht** mit `ng serve` gestartet. Es wird gebaut (`npm run build`,
+Ergebnis in `dist/azubi-portal/browser`) und vom Backend unter derselben Adresse mit ausgeliefert –
+API-Aufrufe gehen relativ an `/v1`, ein Proxy oder CORS ist nicht nötig.
+
+Das erledigt das Build-Skript im Backend-Projekt, das beide Projekte zu einem Windows-Dienst-Paket packt:
+
+```bat
+cd ..\Berichtsheft_Backend
+deploy\build-release.cmd
+```
+
+Installation auf dem Server, Updates und Zertifikate: `Berichtsheft_Backend/deploy/SERVER-ANLEITUNG.md`.
 
 ## Versionen und Releases
 

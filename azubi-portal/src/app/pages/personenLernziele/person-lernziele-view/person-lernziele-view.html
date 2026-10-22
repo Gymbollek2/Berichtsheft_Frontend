@@ -59,6 +59,14 @@
           <option [value]="s[0]">{{ s[1] }}</option>
         }
       </select>
+      @if (baumModus()) {
+        <div class="btn-group tree-levels ms-md-auto" role="group" aria-label="Ebenen anzeigen">
+          @for (e of ebenen; track e.wert) {
+            <button type="button" class="btn btn-outline-secondary" [class.active]="ebene() === e.wert" [attr.aria-pressed]="ebene() === e.wert"
+              (click)="zeigeEbene(e.wert)">{{ e.label }}</button>
+          }
+        </div>
+      }
     </div>
 
     <div class="panel panel-flush">
@@ -76,7 +84,22 @@
             <tr [class.tree-root]="row.depth === 0 && !search() && !statusFilter()">
               <td class="ps-4">
               <div class="tree-cell" [class.tree-child]="row.depth > 0" [style.margin-left.rem]="row.depth * 1.75">
-                <div [class.fw-medium]="row.pl.berechnet">{{ row.pl.lernziel.title }}</div>
+                <div>
+                  @if (baumModus()) {
+                    @if (row.hatKinder) {
+                      <button type="button" class="tree-toggle" (click)="toggleKinder(row.pl.lernziel.id)" [attr.aria-expanded]="!row.eingeklappt"
+                        [attr.aria-label]="(row.eingeklappt ? 'Unterziele anzeigen: ' : 'Unterziele ausblenden: ') + row.pl.lernziel.title">
+                        <i class="fa-solid" [class.fa-caret-right]="row.eingeklappt" [class.fa-caret-down]="!row.eingeklappt" aria-hidden="true"></i>
+                      </button>
+                    } @else {
+                      <span class="tree-toggle-spacer" aria-hidden="true"></span>
+                    }
+                  }
+                  <span [class.fw-medium]="row.pl.berechnet">{{ row.pl.lernziel.title }}</span>
+                  @if (row.eingeklappt) {
+                    <span class="tree-count" title="Eingeklappte Unterziele">{{ anzahlKinder(row.pl.lernziel.id) }}</span>
+                  }
+                </div>
                 @if (row.pl.lernziel.description && !row.pl.berechnet) {
                   <div class="hint">{{ row.pl.lernziel.description }}</div>
                 }

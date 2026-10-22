@@ -426,6 +426,73 @@ input::-ms-clear {
   display: none;
 }
 
+/* ---------- Formatierter Text (Markdown aus dem Berichtsheft) ---------- */
+
+.markdown > :first-child {
+  margin-top: 0;
+}
+
+.markdown > :last-child {
+  margin-bottom: 0;
+}
+
+.markdown p,
+.markdown ul,
+.markdown ol,
+.markdown blockquote,
+.markdown pre {
+  margin-bottom: 0.5rem;
+}
+
+.markdown ul,
+.markdown ol {
+  padding-left: 1.4rem;
+}
+
+.markdown h1,
+.markdown h2,
+.markdown h3,
+.markdown h4 {
+  font-size: 1rem;
+  font-weight: 600;
+  margin: 0.75rem 0 0.35rem;
+}
+
+.markdown h1 {
+  font-size: 1.15rem;
+}
+
+.markdown blockquote {
+  padding-left: 0.75rem;
+  border-left: 3px solid var(--line-strong);
+  color: var(--muted);
+}
+
+.markdown code {
+  background: #f1f0f7;
+  color: var(--navy-2);
+  padding: 0.1rem 0.3rem;
+  border-radius: 4px;
+  font-size: 0.875em;
+}
+
+.markdown pre code {
+  display: block;
+  padding: 0.5rem 0.75rem;
+  overflow-x: auto;
+}
+
+.markdown table {
+  border-collapse: collapse;
+  margin-bottom: 0.5rem;
+}
+
+.markdown th,
+.markdown td {
+  border: 1px solid var(--line);
+  padding: 0.25rem 0.5rem;
+}
+
 /* ---------- Druckansicht (Berichtsheft drucken / als PDF speichern) ---------- */
 
 .print-only {
@@ -612,4 +679,60 @@ fieldset legend.form-label {
 
 .tree-root .fw-medium {
   font-weight: 600;
+}
+
+/* Auf-/Zuklappen im Lernziel-Baum */
+.tree-toggle,
+.tree-toggle-spacer {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 1.4rem;
+  height: 1.4rem;
+  margin-right: 0.2rem;
+  vertical-align: -0.15rem;
+}
+
+.tree-toggle {
+  border: 0;
+  border-radius: var(--radius-sm);
+  background: transparent;
+  color: var(--navy-2);
+  padding: 0;
+}
+
+.tree-toggle:hover {
+  background: #ebeaf6;
+}
+
+.tree-toggle:focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: 1px;
+}
+
+/* Beschreibungen unter dem Titel bündig zum Titel, nicht zum Pfeil */
+.tree-cell > .hint {
+  margin-left: 1.6rem;
+}
+
+.tree-count {
+  display: inline-block;
+  margin-left: 0.4rem;
+  padding: 0 0.45rem;
+  border-radius: 999px;
+  background: #ebeaf6;
+  color: var(--navy-2);
+  font-size: 0.75rem;
+  font-weight: 500;
+  line-height: 1.4;
+}
+
+.tree-levels .btn {
+  font-size: 0.8125rem;
+}
+
+.tree-levels .btn.active {
+  background: var(--navy-2);
+  border-color: var(--navy-2);
+  color: #fff;
 }

@@ -30,7 +30,7 @@ export class PersonBearbeiten implements OnInit {
 
   readonly roleLabels = ROLE_LABELS;
   readonly roleFilterOptions = Object.entries(ROLE_LABELS) as [Role, string][];
-  readonly roles = assignableRoles(this.auth.isAdmin());
+  readonly roles = assignableRoles();
   readonly passwordHint = PASSWORD_HINT;
   readonly usernameHint = USERNAME_HINT;
 
@@ -69,11 +69,6 @@ export class PersonBearbeiten implements OnInit {
       next: (list) => this.personen.set(list),
       error: (err) => this.error.set(errorMessage(err)),
     });
-  }
-
-  /** Ausbilder dürfen nur Azubis und Studierende verwalten, Admins alle. */
-  darfVerwalten(p: Person): boolean {
-    return this.auth.isAdmin() || isLearner(p.role);
   }
 
   istIch(p: Person): boolean {

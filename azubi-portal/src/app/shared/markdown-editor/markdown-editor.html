@@ -1,0 +1,41 @@
+<div class="md-editor" [class.md-preview-mode]="vorschau()">
+  <div class="md-toolbar no-print" role="toolbar" aria-label="Textformatierung">
+    @for (gruppe of formate; track $index) {
+      <div class="md-group">
+        @for (f of gruppe; track f.label) {
+          <button type="button" class="md-btn" [title]="tooltip(f)" [attr.aria-label]="f.label"
+            [disabled]="vorschau()" (mousedown)="$event.preventDefault()" (click)="f.aktion()">
+            <i class="fa-solid {{ f.icon }}" aria-hidden="true"></i>
+          </button>
+        }
+      </div>
+    }
+    <div class="md-mode">
+      <button type="button" class="md-tab" [class.active]="!vorschau()" [attr.aria-pressed]="!vorschau()" (click)="vorschau.set(false)">
+        Schreiben
+      </button>
+      <button type="button" class="md-tab" [class.active]="vorschau()" [attr.aria-pressed]="vorschau()" (click)="vorschau.set(true)">
+        Vorschau
+      </button>
+      <span class="md-help" tabindex="0"
+        title="Markdown direkt tippen: **fett**, *kursiv*, ~~durchgestrichen~~, `Code`, - Aufzählung, 1. Nummerierung, ### Überschrift, > Zitat, [Text](https://…). Unterstrichen: <u>Text</u>">
+        <i class="fa-brands fa-markdown" aria-hidden="true"></i><span class="visually-hidden">Markdown-Hilfe</span>
+      </span>
+    </div>
+  </div>
+
+  <textarea #textarea class="form-control md-input" [id]="inputId()" [rows]="rows()" [attr.maxlength]="maxlength()"
+    [placeholder]="placeholder()" [value]="value()" [hidden]="vorschau()"
+    (input)="onInput($event)" (keydown)="onKeydown($event)"></textarea>
+
+  @if (vorschau()) {
+    @if (value().trim()) {
+      <div class="md-preview markdown" [innerHTML]="value() | markdown"></div>
+    } @else {
+      <p class="hint mb-0 md-preview md-preview-empty">Noch kein Text.</p>
+    }
+  }
+
+  <!-- Beim Drucken den formatierten Text statt der Eingabe zeigen -->
+  <div class="md-print markdown" [innerHTML]="value() | markdown"></div>
+</div>

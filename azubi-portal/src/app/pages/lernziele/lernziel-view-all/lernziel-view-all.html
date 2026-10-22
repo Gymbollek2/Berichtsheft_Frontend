@@ -47,6 +47,14 @@
         <option [value]="k[0]">{{ k[1] }}</option>
       }
     </select>
+    @if (baumModus()) {
+      <div class="btn-group tree-levels ms-md-auto" role="group" aria-label="Ebenen anzeigen">
+        @for (e of ebenen; track e.wert) {
+          <button type="button" class="btn btn-outline-secondary" [class.active]="ebene() === e.wert" [attr.aria-pressed]="ebene() === e.wert"
+            (click)="zeigeEbene(e.wert)">{{ e.label }}</button>
+        }
+      </div>
+    }
   </div>
 
   <div class="panel panel-flush">
@@ -63,7 +71,20 @@
           <tr [class.tree-root]="row.depth === 0 && !search() && !kindFilter()">
             <td class="ps-4">
               <div class="tree-cell" [class.tree-child]="row.depth > 0" [style.margin-left.rem]="row.depth * 1.75">
+              @if (baumModus()) {
+                @if (row.hatKinder) {
+                  <button type="button" class="tree-toggle" (click)="toggleKinder(row.lernziel.id)" [attr.aria-expanded]="!row.eingeklappt"
+                    [attr.aria-label]="(row.eingeklappt ? 'Unterziele anzeigen: ' : 'Unterziele ausblenden: ') + row.lernziel.title">
+                    <i class="fa-solid" [class.fa-caret-right]="row.eingeklappt" [class.fa-caret-down]="!row.eingeklappt" aria-hidden="true"></i>
+                  </button>
+                } @else {
+                  <span class="tree-toggle-spacer" aria-hidden="true"></span>
+                }
+              }
               <span class="clickable fw-medium" (click)="toggle(row.lernziel.id)">{{ row.lernziel.title }}</span>
+              @if (row.eingeklappt) {
+                <span class="tree-count" title="Eingeklappte Unterziele">{{ row.lernziel.anzahlUntergeordnet }}</span>
+              }
               @if (row.lernziel.description) {
                 <button type="button" class="btn btn-sm btn-link p-0 ms-1 align-baseline" (click)="toggle(row.lernziel.id)"
                   [attr.aria-label]="expanded().has(row.lernziel.id) ? 'Beschreibung ausblenden' : 'Beschreibung anzeigen'">

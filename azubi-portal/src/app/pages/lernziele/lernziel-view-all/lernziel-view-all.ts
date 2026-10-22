@@ -4,12 +4,26 @@ import { RouterLink } from '@angular/router';
 import { Auth } from '@app/services/auth';
 import { LernzielService } from '@app/services/lernziel.service';
 import { CHILD_KIND, CsvImportResult, KIND_LABELS, Kind, Lernziel } from '@app/core/models';
-import { errorMessage, normalizeSearch, treeOrder } from '@app/core/utils';
+import {
+  BAUM_EBENEN,
+  BaumEbene,
+  einklappenFuerEbene,
+  errorMessage,
+  ladeBaumEbene,
+  normalizeSearch,
+  sichtbarerBaum,
+  speichereBaumEbene,
+  treeOrder,
+} from '@app/core/utils';
 
 interface TreeRow {
   lernziel: Lernziel;
   depth: number;
+  hatKinder: boolean;
+  eingeklappt: boolean;
 }
+
+const EBENE_KEY = 'lernziele.ebene';
 
 /** Alle Lernziele als Baum (Richt → Grob → Fein), mit Suche, Bearbeiten, Löschen und CSV. */
 @Component({
@@ -33,6 +47,12 @@ export class LernzielViewAll implements OnInit {
   readonly importResult = signal<CsvImportResult | null>(null);
   readonly expanded = signal<Set<number>>(new Set());
 
+  /** Ein-/Ausklappen des Baums */
+  readonly ebenen = BAUM_EBENEN;
+  readonly ebene = signal<BaumEbene>(ladeBaumEbene(EBENE_KEY));
+  readonly eingeklappt = signal<Set<number>>(new Set());
+  readonly baumModus = computed(() => !normalizeSearch(this.search()) && !this.kindFilter());
+
   /** Baumdarstellung ohne Filter, flache Trefferliste mit Filter. */
   readonly rows = computed<TreeRow[]>(() => {
     const all = this.lernziele();
@@ -42,9 +62,15 @@ export class LernzielViewAll implements OnInit {
       return all
         .filter((l) => !kind || l.kind === kind)
         .filter((l) => !q || normalizeSearch(l.title + ' ' + (l.description ?? '')).includes(q))
-        .map((lernziel) => ({ lernziel, depth: 0 }));
+        .map((lernziel) => ({ lernziel, depth: 0, hatKinder: false, eingeklappt: false }));
     }
-    return treeOrder(all, (l) => l.id, (l) => l.parentId).map((r) => ({ lernziel: r.item, depth: r.depth }));
+    const geordnet = treeOrder(all, (l) => l.id, (l) => l.parentId);
+    return sichtbarerBaum(geordnet, (l) => l.id, this.eingeklappt()).map((r) => ({
+      lernziel: r.item,
+      depth: r.depth,
+      hatKinder: r.hatKinder,
+      eingeklappt: r.eingeklappt,
+    }));
   });
 
   readonly parentTitle = computed(() => {
@@ -58,9 +84,31 @@ export class LernzielViewAll implements OnInit {
   }
 
   load(): void {
+    const ersterLoad = this.lernziele().length === 0;
     this.service.getAll().subscribe({
-      next: (list) => this.lernziele.set(list),
+      next: (list) => {
+        this.lernziele.set(list);
+        if (ersterLoad) {
+          this.zeigeEbene(this.ebene());
+        }
+      },
       error: (err) => this.error.set(errorMessage(err)),
+    });
+  }
+
+  /** Klappt den Baum bis zur gewählten Ebene auf (z. B. nur Richt- und Groblernziele). */
+  zeigeEbene(ebene: BaumEbene): void {
+    this.ebene.set(ebene);
+    speichereBaumEbene(EBENE_KEY, ebene);
+    this.eingeklappt.set(einklappenFuerEbene(this.lernziele(), (l) => l.id, (l) => l.kind, ebene));
+  }
+
+  /** Klappt die Unterziele eines Lernziels auf oder zu. */
+  toggleKinder(id: number): void {
+    this.eingeklappt.update((set) => {
+      const next = new Set(set);
+      next.has(id) ? next.delete(id) : next.add(id);
+      return next;
     });
   }
 

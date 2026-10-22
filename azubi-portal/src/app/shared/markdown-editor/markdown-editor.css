@@ -1,0 +1,110 @@
+.md-editor {
+  border: 1px solid var(--bs-border-color);
+  border-radius: var(--radius-sm);
+  background: var(--surface);
+}
+
+.md-editor:focus-within {
+  border-color: var(--navy-2);
+  box-shadow: 0 0 0 0.2rem rgba(16, 2, 77, 0.12);
+}
+
+.md-toolbar {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.25rem 0.5rem;
+  padding: 0.3rem 0.4rem;
+  border-bottom: 1px solid var(--line);
+  background: #fbfbfd;
+  border-radius: var(--radius-sm) var(--radius-sm) 0 0;
+}
+
+.md-group {
+  display: flex;
+  gap: 0.1rem;
+  padding-right: 0.5rem;
+  border-right: 1px solid var(--line);
+}
+
+.md-btn {
+  width: 2rem;
+  height: 2rem;
+  border: 0;
+  border-radius: var(--radius-sm);
+  background: transparent;
+  color: var(--ink);
+  font-size: 0.875rem;
+}
+
+.md-btn:hover:not(:disabled),
+.md-btn:focus-visible {
+  background: #ebeaf6;
+  color: var(--navy-2);
+}
+
+.md-btn:disabled {
+  opacity: 0.4;
+}
+
+.md-mode {
+  display: flex;
+  align-items: center;
+  gap: 0.1rem;
+  margin-left: auto;
+}
+
+.md-tab {
+  border: 0;
+  border-radius: var(--radius-sm);
+  background: transparent;
+  color: var(--muted);
+  padding: 0.25rem 0.6rem;
+  font-size: 0.8125rem;
+}
+
+.md-tab.active {
+  background: #ebeaf6;
+  color: var(--navy-2);
+  font-weight: 600;
+}
+
+.md-help {
+  padding: 0.25rem 0.4rem;
+  color: var(--muted);
+  cursor: help;
+}
+
+/* Eingabe ohne eigenen Rahmen – der Rahmen gehört zum ganzen Editor */
+.md-input {
+  border: 0;
+  border-radius: 0 0 var(--radius-sm) var(--radius-sm);
+  box-shadow: none !important;
+  resize: vertical;
+}
+
+.md-preview,
+.md-preview-empty {
+  padding: 0.5rem 0.75rem;
+  min-height: 5.5rem;
+}
+
+.md-print {
+  display: none;
+}
+
+@media print {
+  .md-editor {
+    border: 0;
+  }
+
+  .md-input,
+  .md-preview,
+  .md-preview-empty {
+    display: none !important;
+  }
+
+  .md-print {
+    display: block;
+  }
+}

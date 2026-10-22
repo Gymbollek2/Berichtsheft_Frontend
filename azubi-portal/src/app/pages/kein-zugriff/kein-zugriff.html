@@ -1,0 +1,34 @@
+<div class="login">
+  <section class="intro" aria-hidden="true">
+    <img src="assets/fisp-logo.jpg.png" alt="" class="company" />
+    <div class="intro-text">
+      <img src="assets/logo-mark.png" alt="" class="login-mark" />
+      <h1>Azubi-Portal</h1>
+      <p>Ausbildungsnachweise digital führen, einreichen und abzeichnen.</p>
+    </div>
+  </section>
+
+  <section class="form-side">
+    <div class="login-form" role="alert">
+      <span class="denied-icon" aria-hidden="true"><i class="fa-solid fa-lock"></i></span>
+      <h2>Kein Zugriff</h2>
+      <p class="mt-3 mb-0">
+        Sie sind nicht berechtigt, auf diese Anwendung zuzugreifen. Sollte es sich hierbei um einen Fehler handeln,
+        wenden Sie sich bitte an das Ausbilderteam.
+      </p>
+
+      @if (konto) {
+        <div class="denied-konto">
+          <span class="hint d-block">Angemeldet bei Windows als</span>
+          <code>{{ konto }}</code>
+        </div>
+      } @else {
+        <div class="mb-4"></div>
+      }
+
+      <button type="button" class="btn btn-outline-secondary w-100" (click)="erneutVersuchen()">
+        <i class="fa-solid fa-rotate-right me-2" aria-hidden="true"></i>Erneut versuchen
+      </button>
+    </div>
+  </section>
+</div>

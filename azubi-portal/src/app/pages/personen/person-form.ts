@@ -16,7 +16,8 @@ export interface PersonForm {
 export const PASSWORD_PATTERN = /^(?=.*[A-Za-zÄÖÜäöüß])(?=.*\d).{8,100}$/;
 export const PASSWORD_HINT = 'Mindestens 8 Zeichen mit Buchstaben und Ziffern.';
 export const USERNAME_PATTERN = /^[a-z0-9._-]{3,50}$/;
-export const USERNAME_HINT = 'Kleinbuchstaben, Ziffern, Punkt, - und _ (3 bis 50 Zeichen).';
+export const USERNAME_HINT =
+  'Kleinbuchstaben, Ziffern, Punkt, - und _ (3 bis 50 Zeichen). Bei Windows-Anmeldung den Windows-Anmeldenamen (sAMAccountName) eintragen.';
 
 export function emptyPersonForm(): PersonForm {
   return {
@@ -31,11 +32,9 @@ export function emptyPersonForm(): PersonForm {
   };
 }
 
-/** Rollen, die der angemeldete Benutzer vergeben darf (Ausbilder: nur Azubis/Studierende). */
-export function assignableRoles(isAdmin: boolean): [Role, string][] {
-  const roles: Role[] = isAdmin
-    ? ['ROLE_TRAINEE', 'ROLE_STUDENT', 'ROLE_TRAINER', 'ROLE_ADMIN']
-    : ['ROLE_TRAINEE', 'ROLE_STUDENT'];
+/** Rollen, die vergeben werden können – Ausbilder dürfen alle Rollen verwalten. */
+export function assignableRoles(): [Role, string][] {
+  const roles: Role[] = ['ROLE_TRAINEE', 'ROLE_STUDENT', 'ROLE_TRAINER'];
   return roles.map((r) => [r, ROLE_LABELS[r]]);
 }
 

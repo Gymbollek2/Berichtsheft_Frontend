@@ -26,7 +26,7 @@ export class PersonAnlegen {
   private readonly auth = inject(Auth);
   private readonly service = inject(PersonService);
 
-  readonly roles = assignableRoles(this.auth.isAdmin());
+  readonly roles = assignableRoles();
   readonly passwordHint = PASSWORD_HINT;
   readonly usernameHint = USERNAME_HINT;
   readonly model = signal<PersonForm>(emptyPersonForm());

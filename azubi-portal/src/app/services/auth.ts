@@ -1,12 +1,14 @@
 import { Injectable, computed, inject, signal } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { Router } from '@angular/router';
-import { Observable, tap } from 'rxjs';
-import { LoginResponse, Person, Role, isLearner, isStaff } from '@app/core/models';
+import { Observable, catchError, of, shareReplay, tap } from 'rxjs';
+import { AnmeldeOptionen, LoginResponse, Person, Role, isLearner, isStaff } from '@app/core/models';
 
 const TOKEN_KEY = 'azubi-portal.token';
 const USER_KEY = 'azubi-portal.user';
 const EXPIRES_KEY = 'azubi-portal.expires';
+/** Nach „Abmelden“ nicht sofort wieder automatisch per Windows anmelden (gilt bis zum Schließen des Tabs). */
+const ABGEMELDET_KEY = 'azubi-portal.abgemeldet';
 
 /** Anmeldung, Token-Verwaltung und Infos zum angemeldeten Benutzer. */
 @Injectable({ providedIn: 'root' })
@@ -21,7 +23,26 @@ export class Auth {
   readonly role = computed<Role | null>(() => this.userSignal()?.role ?? null);
   readonly isStaff = computed(() => isStaff(this.role()));
   readonly isLearner = computed(() => isLearner(this.role()));
-  readonly isAdmin = computed(() => this.role() === 'ROLE_ADMIN');
+
+  /** Anmeldearten des Servers – einmal geladen und gemerkt. Ältere Server ohne Endpunkt: nur Passwort. */
+  readonly optionen$: Observable<AnmeldeOptionen> = this.http
+    .get<AnmeldeOptionen>(`${this.apiUrl}/optionen`)
+    .pipe(
+      catchError(() => of({ sso: false, passwortLogin: true })),
+      shareReplay(1),
+    );
+
+  /** Anmeldung mit dem Windows-Konto. Der Browser schickt die Windows-Anmeldung selbst mit (Kerberos/NTLM). */
+  ssoLogin(): Observable<LoginResponse> {
+    return this.http
+      .get<LoginResponse>(`${this.apiUrl}/sso`)
+      .pipe(tap((response) => this.storeSession(response)));
+  }
+
+  /** true, wenn der Benutzer in diesem Tab selbst abgemeldet hat. */
+  wurdeAbgemeldet(): boolean {
+    return sessionStorage.getItem(ABGEMELDET_KEY) === '1';
+  }
 
   login(username: string, password: string): Observable<LoginResponse> {
     return this.http
@@ -35,7 +56,7 @@ export class Auth {
       .pipe(tap((response) => this.storeSession(response)));
   }
 
-  /** Lädt die eigenen Daten neu (z. B. nach Änderungen durch einen Admin). */
+  /** Lädt die eigenen Daten neu (z. B. nach Änderungen durch einen Ausbilder). */
   refreshMe(): Observable<Person> {
     return this.http.get<Person>(`${this.apiUrl}/me`).pipe(
       tap((person) => {
@@ -45,7 +66,11 @@ export class Auth {
     );
   }
 
-  logout(redirect = true): void {
+  /** @param selbst vom Benutzer ausgelöst – dann keine automatische Windows-Anmeldung direkt danach */
+  logout(redirect = true, selbst = false): void {
+    if (selbst) {
+      sessionStorage.setItem(ABGEMELDET_KEY, '1');
+    }
     localStorage.removeItem(TOKEN_KEY);
     localStorage.removeItem(USER_KEY);
     localStorage.removeItem(EXPIRES_KEY);
@@ -78,6 +103,7 @@ export class Auth {
   }
 
   private storeSession(response: LoginResponse): void {
+    sessionStorage.removeItem(ABGEMELDET_KEY);
     localStorage.setItem(TOKEN_KEY, response.accessToken);
     localStorage.setItem(EXPIRES_KEY, response.expiresAt);
     localStorage.setItem(USER_KEY, JSON.stringify(response.user));

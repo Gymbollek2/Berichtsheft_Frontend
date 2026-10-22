@@ -1,5 +1,58 @@
 # Changelog
 
+## [1.6.0] – 2026-10-22
+
+### Neu
+- **Automatische Anmeldung mit dem Windows-Konto**, wenn der Server sie anbietet. Wer nicht in der
+  Personenliste steht, sieht die Seite „Kein Zugriff“ (mit dem erkannten Windows-Konto) und kommt an keine
+  andere Seite.
+- Nach „Abmelden“ wird nicht sofort wieder angemeldet; die Anmeldeseite bietet „Mit Windows-Konto anmelden“
+  und – falls erlaubt – Benutzername/Passwort.
+
+## [1.5.0] – 2026-10-22
+
+### Neu
+- **Formatierter Text im Berichtsheft**: Über dem Tätigkeiten-Feld gibt es eine Werkzeugleiste für
+  Fett, Kursiv, Unterstrichen, Durchgestrichen, Überschrift, Aufzählung, nummerierte Liste, Zitat, Code
+  und Link. Tastenkürzel Strg+B / Strg+I / Strg+U; Listen werden mit Enter fortgesetzt.
+- **Markdown direkt tippen** (z. B. `**fett**`, `- Punkt`) mit Umschalter „Schreiben / Vorschau“.
+  Gespeichert wird der Markdown-Text, die Wochenansicht und der Ausdruck zeigen ihn formatiert an.
+  Bestehende Einträge bleiben unverändert lesbar.
+
+## [1.4.0] – 2026-10-22
+
+### Neu
+- Serverbetrieb: Das gebaute Frontend wird vom Backend unter derselben Adresse ausgeliefert und mit
+  dem Backend als Windows-Dienst installiert (`Berichtsheft_Backend/deploy/build-release.cmd`).
+
+## [1.3.0] – 2026-10-22
+
+### Neu
+- **Lernziel-Baum ein- und ausklappen** (Lernziele und Lernfortschritt): Pfeil vor jedem Lernziel mit
+  Unterzielen, eingeklappte Zeilen zeigen die Anzahl der Unterziele.
+- **Ebenen-Auswahl**: „Nur Richtlernziele“, „Richt- und Groblernziele“ oder „Alle Ebenen“. Die Wahl wird
+  pro Seite im Browser gemerkt.
+
+### Geändert
+- **Rolle „Administrator/in“ entfernt**: Ausbilder dürfen alles, auch andere Ausbilder anlegen, bearbeiten
+  und löschen. Rollenauswahl beim Anlegen/Bearbeiten: Azubi, Student, Ausbilder.
+- Startseite für Ausbilder ohne die Kachel „Feinlernziele erreicht (Durchschnitt)“.
+- Berufsschultage im Berichtsheft haben keine Lernziel-Zuordnung mehr (Auswahl wird ausgeblendet).
+
+## [1.2.0] – 2026-10-22
+
+### Neu
+- **Automatisches Speichern im Berichtsheft**: Tageseinträge werden 1,5 Sekunden nach der letzten
+  Eingabe gespeichert, der Speichern-Button entfällt. Oben auf der Seite steht, dass automatisch
+  gespeichert wird, und wann die letzte automatische Speicherung war.
+- Status je Tag: „Speichert …“, „Gespeichert“, Hinweis bei fehlenden Pflichtfeldern, bei Fehlern
+  „Erneut versuchen“.
+- Beim Wochenwechsel, Verlassen der Seite und Einreichen werden offene Änderungen vorher gespeichert.
+- Warnung beim Verlassen der Seite (auch über die Seitenleiste), wenn Tage unvollständig sind oder
+  nicht gespeichert werden konnten.
+- Die Uhrzeit der letzten Speicherung kommt vom Backend (`updatedAt`) und bleibt nach dem Neuladen
+  sichtbar; ältere Speicherungen werden mit Datum angezeigt.
+
 ## [1.1.2] – 2026-10-21
 
 ### Behoben

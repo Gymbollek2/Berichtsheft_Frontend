@@ -13,7 +13,26 @@ import {
   PersonLernziel,
   STATUS_LABELS,
 } from '@app/core/models';
-import { errorMessage, normalizeSearch, treeOrder } from '@app/core/utils';
+import {
+  BAUM_EBENEN,
+  BaumEbene,
+  einklappenFuerEbene,
+  errorMessage,
+  ladeBaumEbene,
+  normalizeSearch,
+  sichtbarerBaum,
+  speichereBaumEbene,
+  treeOrder,
+} from '@app/core/utils';
+
+const EBENE_KEY = 'lernfortschritt.ebene';
+
+interface FortschrittZeile {
+  pl: PersonLernziel;
+  depth: number;
+  hatKinder: boolean;
+  eingeklappt: boolean;
+}
 
 /**
  * Lernfortschritt: Azubis sehen ihre eigenen Lernziele, Ausbilder wählen einen Azubi
@@ -46,14 +65,35 @@ export class PersonLernzieleView {
 
   readonly selectedId = computed(() => (this.personId() ? Number(this.personId()) : null));
 
+  /** Ein-/Ausklappen des Baums (Ids der Lernziele, deren Unterziele ausgeblendet sind). */
+  readonly ebenen = BAUM_EBENEN;
+  readonly ebene = signal<BaumEbene>(ladeBaumEbene(EBENE_KEY));
+  readonly eingeklappt = signal<Set<number>>(new Set());
+  readonly baumModus = computed(() => !normalizeSearch(this.search()) && !this.statusFilter());
+
+  /** Anzahl direkter Unterziele je Lernziel (für die Anzeige an eingeklappten Zeilen). */
+  private readonly kinderAnzahl = computed(() => {
+    const map = new Map<number, number>();
+    this.lernziele().forEach((pl) => {
+      const p = pl.lernziel.parentId;
+      if (p !== null) {
+        map.set(p, (map.get(p) ?? 0) + 1);
+      }
+    });
+    return map;
+  });
+
   /** Ohne Filter als Baum (Richt → Grob → Fein), mit Filter als flache Trefferliste. */
-  readonly gefiltert = computed<{ pl: PersonLernziel; depth: number }[]>(() => {
+  readonly gefiltert = computed<FortschrittZeile[]>(() => {
     const q = normalizeSearch(this.search());
     const status = this.statusFilter();
     if (!q && !status) {
-      return treeOrder(this.lernziele(), (pl) => pl.lernziel.id, (pl) => pl.lernziel.parentId).map((r) => ({
+      const geordnet = treeOrder(this.lernziele(), (pl) => pl.lernziel.id, (pl) => pl.lernziel.parentId);
+      return sichtbarerBaum(geordnet, (pl) => pl.lernziel.id, this.eingeklappt()).map((r) => ({
         pl: r.item,
         depth: r.depth,
+        hatKinder: r.hatKinder,
+        eingeklappt: r.eingeklappt,
       }));
     }
     return this.lernziele()
@@ -62,8 +102,28 @@ export class PersonLernzieleView {
           (!status || pl.status === status) &&
           (!q || normalizeSearch(pl.lernziel.title + ' ' + (pl.lernziel.description ?? '')).includes(q)),
       )
-      .map((pl) => ({ pl, depth: 0 }));
+      .map((pl) => ({ pl, depth: 0, hatKinder: false, eingeklappt: false }));
   });
+
+  anzahlKinder(lernzielId: number): number {
+    return this.kinderAnzahl().get(lernzielId) ?? 0;
+  }
+
+  /** Klappt den Baum bis zur gewählten Ebene auf (z. B. nur Richt- und Groblernziele). */
+  zeigeEbene(ebene: BaumEbene): void {
+    this.ebene.set(ebene);
+    speichereBaumEbene(EBENE_KEY, ebene);
+    this.eingeklappt.set(einklappenFuerEbene(this.lernziele(), (pl) => pl.lernziel.id, (pl) => pl.lernziel.kind, ebene));
+  }
+
+  /** Klappt die Unterziele eines Lernziels auf oder zu. */
+  toggleKinder(lernzielId: number): void {
+    this.eingeklappt.update((set) => {
+      const next = new Set(set);
+      next.has(lernzielId) ? next.delete(lernzielId) : next.add(lernzielId);
+      return next;
+    });
+  }
 
   constructor() {
     if (this.auth.isStaff()) {
@@ -94,6 +154,7 @@ export class PersonLernzieleView {
     list$.subscribe({
       next: (list) => {
         this.lernziele.set(list);
+        this.zeigeEbene(this.ebene());
         this.loading.set(false);
       },
       error: (err) => {

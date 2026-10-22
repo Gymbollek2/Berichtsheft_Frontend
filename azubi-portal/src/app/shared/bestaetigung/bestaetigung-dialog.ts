@@ -37,7 +37,7 @@ export class BestaetigungDialog {
 
   bestaetigen(): void {
     const frage = this.service.offen();
-    if (frage?.eingabe && !this.wert.trim()) {
+    if (frage?.eingabe && !frage.eingabe.optional && !this.wert.trim()) {
       return;
     }
     this.service.antworten(true, this.wert.trim());

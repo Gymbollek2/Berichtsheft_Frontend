@@ -124,6 +124,11 @@ export class BerichtsheftWoche implements OnDestroy, KannVerlassen {
     const w = this.woche();
     return this.auth.isStaff() && !!w && w.status === 'EINGEREICHT' && w.id !== null;
   });
+  /** Ausbilder: abgenommene Woche wieder zur Bearbeitung öffnen. */
+  readonly kannWiederOeffnen = computed(() => {
+    const w = this.woche();
+    return this.auth.isStaff() && !!w && w.status === 'ABGEZEICHNET' && w.id !== null;
+  });
   /** Eingereicht und mit Kommentar: Die Woche war zurückgegeben und wurde überarbeitet erneut abgegeben. */
   readonly erneutEingereicht = computed(() => {
     const w = this.woche();
@@ -582,6 +587,30 @@ export class BerichtsheftWoche implements OnDestroy, KannVerlassen {
     this.busy.set(true);
     this.service.ablehnen(w.id, this.kommentar.trim()).subscribe({
       next: (neu) => this.afterReview(neu, 'Woche zur Überarbeitung zurückgegeben'),
+      error: (err) => this.reviewError(err),
+    });
+  }
+
+  async wiederOeffnen(): Promise<void> {
+    const w = this.woche();
+    if (!w?.id) {
+      return;
+    }
+    const grund = await this.bestaetigung.eingabe({
+      titel: 'Berichtsheft wieder öffnen?',
+      text:
+        `KW ${w.kalenderwoche}/${w.jahr} ist bereits abgenommen. Nach dem Öffnen steht sie wieder auf ` +
+        `„Zur Überarbeitung“: ${w.personName} kann sie bearbeiten und erneut abgeben und wird benachrichtigt.`,
+      eingabe: { label: 'Grund (optional, sieht der Azubi)', wert: '', typ: 'textarea', optional: true },
+      bestaetigen: 'Wieder öffnen',
+      icon: 'fa-lock-open',
+    });
+    if (grund === null) {
+      return;
+    }
+    this.busy.set(true);
+    this.service.wiederOeffnen(w.id, grund || null).subscribe({
+      next: (neu) => this.afterReview(neu, 'Berichtsheft wieder zur Bearbeitung geöffnet'),
       error: (err) => this.reviewError(err),
     });
   }

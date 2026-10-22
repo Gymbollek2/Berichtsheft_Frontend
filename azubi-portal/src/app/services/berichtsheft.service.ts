@@ -51,4 +51,9 @@ export class BerichtsheftService {
   ablehnen(id: number, kommentar: string): Observable<Wochenbericht> {
     return this.http.post<Wochenbericht>(`${this.url}/woche/${id}/ablehnen`, { kommentar });
   }
+
+  /** Abgenommene Woche wieder zur Bearbeitung freigeben (Grund optional). */
+  wiederOeffnen(id: number, kommentar: string | null): Observable<Wochenbericht> {
+    return this.http.post<Wochenbericht>(`${this.url}/woche/${id}/wieder-oeffnen`, { kommentar });
+  }
 }

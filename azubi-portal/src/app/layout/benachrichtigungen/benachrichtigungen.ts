@@ -18,6 +18,7 @@ const DARSTELLUNG: Record<BenachrichtigungTyp, { icon: string; ton: string }> = 
   BERICHT_ABGEGEBEN: { icon: 'fa-file-import', ton: 'navy' },
   BERICHT_ABGEZEICHNET: { icon: 'fa-circle-check', ton: 'ok' },
   BERICHT_ZURUECKGEGEBEN: { icon: 'fa-pen-to-square', ton: 'warn' },
+  BERICHT_WIEDER_GEOEFFNET: { icon: 'fa-lock-open', ton: 'warn' },
   ERINNERUNG_ABGABE: { icon: 'fa-clock', ton: 'warn' },
   LERNZIEL_ERREICHT: { icon: 'fa-trophy', ton: 'accent' },
   WILLKOMMEN: { icon: 'fa-hand-sparkles', ton: 'accent' },

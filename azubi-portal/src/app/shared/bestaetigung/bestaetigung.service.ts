@@ -14,7 +14,7 @@ export interface Rueckfrage {
   /** „gefahr“ für Löschen u. Ä. (roter Button, Fokus auf Abbrechen). */
   ton?: 'brand' | 'gefahr';
   /** Optionales Eingabefeld (z. B. Link-Adresse). */
-  eingabe?: { label: string; wert: string; typ?: 'text' | 'url' };
+  eingabe?: { label: string; wert: string; typ?: 'text' | 'url' | 'textarea'; optional?: boolean };
 }
 
 export interface OffeneRueckfrage extends Rueckfrage {

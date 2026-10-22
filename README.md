@@ -105,7 +105,7 @@ Ordner `Berichtsheft_Frontend/azubi-portal` öffnen, im Terminal `npm install` a
 ### Für Ausbilder (dürfen alles)
 
 - **Übersicht**: offene Prüfungen, Anzahl der Azubis und Lernfortschritt je Azubi
-- **Prüfen**: Warteschlange der eingereichten Wochen, abnehmen oder mit Kommentar zurückgeben
+- **Prüfen**: Warteschlange der eingereichten Wochen, abnehmen oder mit Kommentar zurückgeben; abgenommene Wochen lassen sich wieder öffnen
 - **Berichtshefte**: Berichtshefte aller Azubis durchsuchen – sichtbar sind nur bereits abgegebene Wochen
 - **Lernfortschritt Azubis**: Azubi wählen und den Status der Feinlernziele setzen. Grob- und Richtlernziele werden automatisch berechnet.
 - **Lernziele**: Baumansicht mit Suche, anlegen, bearbeiten, löschen sowie **CSV-Import/-Export**. Die Hierarchie wird geführt:

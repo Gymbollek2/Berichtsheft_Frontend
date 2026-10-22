@@ -19,8 +19,12 @@
 
       @if (frage.eingabe; as eingabe) {
         <label class="form-label" for="rueckfrage-eingabe">{{ eingabe.label }}</label>
-        <input id="rueckfrage-eingabe" class="form-control mb-1" [type]="eingabe.typ ?? 'text'" name="wert"
-          [(ngModel)]="wert" autocomplete="off" autofocus />
+        @if (eingabe.typ === 'textarea') {
+          <textarea id="rueckfrage-eingabe" class="form-control mb-1" rows="3" name="wert" [(ngModel)]="wert" autofocus></textarea>
+        } @else {
+          <input id="rueckfrage-eingabe" class="form-control mb-1" [type]="eingabe.typ ?? 'text'" name="wert"
+            [(ngModel)]="wert" autocomplete="off" autofocus />
+        }
       }
 
       <div class="rueckfrage-aktionen">
@@ -29,7 +33,7 @@
           {{ frage.abbrechen ?? 'Abbrechen' }}
         </button>
         <button type="submit" class="btn" [class.btn-brand]="frage.ton !== 'gefahr'" [class.btn-danger]="frage.ton === 'gefahr'"
-          [attr.autofocus]="frage.ton !== 'gefahr' && !frage.eingabe ? '' : null" [disabled]="!!frage.eingabe && !wert.trim()">
+          [attr.autofocus]="frage.ton !== 'gefahr' && !frage.eingabe ? '' : null" [disabled]="!!frage.eingabe && !frage.eingabe.optional && !wert.trim()">
           {{ frage.bestaetigen }}
         </button>
       </div>

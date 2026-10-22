@@ -286,6 +286,19 @@
       </div>
     }
 
+    <!-- Ausbilder: abgenommene Woche wieder öffnen -->
+    @if (kannWiederOeffnen()) {
+      <div class="panel review mt-4 no-print d-flex flex-wrap align-items-center justify-content-between gap-3">
+        <div>
+          <h2 class="section-title mb-1">Abgenommen</h2>
+          <p class="hint mb-0">Muss noch etwas geändert werden? Öffne die Woche wieder – der Azubi kann sie dann bearbeiten und erneut abgeben.</p>
+        </div>
+        <button class="btn btn-outline-secondary" (click)="wiederOeffnen()" [disabled]="busy()">
+          <i class="fa-solid fa-lock-open me-1" aria-hidden="true"></i>Wieder öffnen
+        </button>
+      </div>
+    }
+
     <!-- Unterschriften für den Ausdruck -->
     <div class="print-only signatures">
       <div>Datum, Unterschrift Auszubildende/r</div>

@@ -3,6 +3,8 @@
 ## [Unveröffentlicht]
 
 ### Neu
+- Ausbilder können eine **abgenommene Woche wieder öffnen** (Button auf der Wochenseite, Rückfrage mit
+  optionalem Grund). Der Azubi kann sie dann bearbeiten und erneut abgeben und wird benachrichtigt.
 - „Kein Zugriff“: Button **Mit Benutzername und Passwort anmelden** (wenn der Server die Passwort-Anmeldung
   erlaubt). Die Anmeldeseite startet dann keine Windows-Anmeldung, bietet sie aber weiter als Button an.
 - Textfeld: Die **Vorschau ist bearbeitbar**. Die Formatierungsleiste wirkt dort direkt auf den sichtbaren Text

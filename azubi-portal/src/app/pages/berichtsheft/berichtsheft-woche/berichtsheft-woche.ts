@@ -122,6 +122,11 @@ export class BerichtsheftWoche implements OnDestroy, KannVerlassen {
     const w = this.woche();
     return this.auth.isStaff() && !!w && w.status === 'EINGEREICHT' && w.id !== null;
   });
+  /** Eingereicht und mit Kommentar: Die Woche war zurückgegeben und wurde überarbeitet erneut abgegeben. */
+  readonly erneutEingereicht = computed(() => {
+    const w = this.woche();
+    return !!w && w.status === 'EINGEREICHT' && !!w.kommentar;
+  });
 
   private readonly lernzielMap = computed(() => {
     const map = new Map<number, PersonLernziel>();

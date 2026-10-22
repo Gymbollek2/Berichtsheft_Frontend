@@ -24,6 +24,8 @@
 ### Behoben
 - Klick auf eine Benachrichtigung zeigte die Seite mit altem Stand, wenn man schon auf ihr war
   (z. B. „Zur Überarbeitung“ statt „Eingereicht“). Die Seite wird jetzt immer neu geladen.
+- Erneut abgegebene Wochen zeigen nicht mehr „Geprüft von … am …“ der letzten Rückgabe; der alte Kommentar
+  steht als „Kommentar der letzten Rückgabe“ da.
 - Windows-Anmeldung über `npm start` (Port 4200) blieb bei „Windows-Anmeldung läuft“ hängen: Der Proxy
   öffnete für jeden NTLM-Schritt eine neue Verbindung. Er hält jetzt eine Verbindung zum Backend offen.
 - Entwicklungsserver stürzte ab (`ERR_HTTP2_INVALID_CONNECTION_HEADERS`), wenn der Browser HTTP/2 nutzte

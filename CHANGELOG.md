@@ -5,9 +5,13 @@
 ### Neu
 - „Kein Zugriff“: Button **Mit Benutzername und Passwort anmelden** (wenn der Server die Passwort-Anmeldung
   erlaubt). Die Anmeldeseite startet dann keine Windows-Anmeldung, bietet sie aber weiter als Button an.
+- Textfeld: Die **Vorschau ist bearbeitbar**. Die Formatierungsleiste wirkt dort direkt auf den sichtbaren Text
+  (fett, kursiv, Listen, Überschrift, Zitat, Code, Link …); jede Änderung wird sofort als Markdown übernommen
+  und steht unter „Schreiben“ wieder als Markdown. Eingefügter Text kommt ohne fremde Formatierung.
 
 ### Geändert
 - Entwicklungs-Proxy zeigt auf das Backend unter https://localhost:5016 (`proxy.conf.mjs` statt `proxy.conf.json`).
+- Berufsschule schlägt jetzt 8 statt 6 Stunden vor.
 
 ### Behoben
 - Windows-Anmeldung über `npm start` (Port 4200) blieb bei „Windows-Anmeldung läuft“ hängen: Der Proxy

@@ -311,9 +311,9 @@ export class BerichtsheftWoche implements OnDestroy, KannVerlassen {
   onArtChange(date: string, art: EintragArt): void {
     const form = this.form(date);
     const patch: Partial<TagForm> = { art };
-    // sinnvolle Standardstunden vorschlagen
+    // sinnvolle Standardstunden vorschlagen (6 war früher die Vorgabe für die Berufsschule)
     if (form.hours === 0 || form.hours === 8 || form.hours === 6) {
-      patch.hours = art === 'SCHULE' ? 6 : art === 'BETRIEB' || art === 'SONSTIGES' ? 8 : 0;
+      patch.hours = art === 'SCHULE' || art === 'BETRIEB' || art === 'SONSTIGES' ? 8 : 0;
     }
     // In der Berufsschule und an Urlaubs-, Krankheits- und Feiertagen gibt es keine Lernziele
     if (!this.mitLernzielen(art)) {

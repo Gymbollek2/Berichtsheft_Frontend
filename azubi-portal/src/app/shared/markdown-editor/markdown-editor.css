@@ -83,10 +83,16 @@
   resize: vertical;
 }
 
-.md-preview,
-.md-preview-empty {
+.md-preview {
   padding: 0.5rem 0.75rem;
   min-height: 5.5rem;
+  outline: none;
+  cursor: text;
+}
+
+.md-preview:empty::before {
+  content: attr(data-placeholder);
+  color: var(--muted);
 }
 
 .md-print {
@@ -99,8 +105,7 @@
   }
 
   .md-input,
-  .md-preview,
-  .md-preview-empty {
+  .md-preview {
     display: none !important;
   }
 

@@ -19,8 +19,11 @@
 - Ausbilder sehen nicht abgegebene Wochen nicht mehr – stattdessen den Hinweis „Noch nicht abgegeben“.
 - Button „Woche zur Prüfung einreichen“ heißt jetzt **Berichtsheft abgeben**.
 - Menüpunkt „Azubi-Lernziele“ heißt jetzt **Lernfortschritt Azubis**.
+- Automatisches Speichern passiert **sofort** nach jeder Änderung statt nach 1,5 Sekunden.
 
 ### Behoben
+- Klick auf eine Benachrichtigung zeigte die Seite mit altem Stand, wenn man schon auf ihr war
+  (z. B. „Zur Überarbeitung“ statt „Eingereicht“). Die Seite wird jetzt immer neu geladen.
 - Windows-Anmeldung über `npm start` (Port 4200) blieb bei „Windows-Anmeldung läuft“ hängen: Der Proxy
   öffnete für jeden NTLM-Schritt eine neue Verbindung. Er hält jetzt eine Verbindung zum Backend offen.
 - Entwicklungsserver stürzte ab (`ERR_HTTP2_INVALID_CONNECTION_HEADERS`), wenn der Browser HTTP/2 nutzte

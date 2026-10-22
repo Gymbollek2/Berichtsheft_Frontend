@@ -26,7 +26,11 @@ export type TagSperre = 'zukunft' | 'vor-beginn' | null;
 export type SpeicherStatus = 'gespeichert' | 'ausstehend' | 'speichert' | 'unvollstaendig' | 'fehler';
 
 /** Wartezeit nach der letzten Eingabe, bevor automatisch gespeichert wird. */
-const AUTOSAVE_DELAY_MS = 1500;
+/**
+ * Gespeichert wird sofort nach jeder Änderung. Die 0 ms fassen nur Änderungen aus demselben Klick zusammen
+ * (z. B. Art und Stunden); pro Tag läuft immer nur ein Speichervorgang, weitere Änderungen folgen direkt danach.
+ */
+const AUTOSAVE_DELAY_MS = 0;
 
 interface TagForm {
   hours: number;

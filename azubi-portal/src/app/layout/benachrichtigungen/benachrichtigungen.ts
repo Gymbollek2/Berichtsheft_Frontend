@@ -110,11 +110,22 @@ export class BenachrichtigungenComponent implements OnInit, OnDestroy {
     this.angeheftet.set(false);
   }
 
-  oeffneNachricht(n: Benachrichtigung): void {
+  /**
+   * Öffnet die Seite zur Nachricht immer mit dem aktuellen Stand: Ist man schon dort (oder auf derselben Seite
+   * mit anderer Woche), würde Angular die Seite sonst nicht neu laden. Deshalb kurz über eine leere Zwischenseite –
+   * ohne Eintrag im Verlauf. Ungespeicherte Änderungen werden wie bei jedem Seitenwechsel abgefragt.
+   */
+  async oeffneNachricht(n: Benachrichtigung): Promise<void> {
     this.service.markiereGelesen(n);
     this.schliessen();
-    if (n.link) {
-      this.router.navigateByUrl(n.link);
+    if (!n.link) {
+      return;
+    }
+    const verlassen = await this.router.navigateByUrl('/aktualisieren', {
+      skipLocationChange: true,
+    });
+    if (verlassen) {
+      await this.router.navigateByUrl(n.link);
     }
   }
 

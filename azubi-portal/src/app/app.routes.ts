@@ -16,6 +16,7 @@ import { PersonBearbeiten } from './pages/personen/person-bearbeiten/person-bear
 import { LernzielAnlegen } from './pages/lernziele/lernziel-anlegen/lernziel-anlegen';
 import { LernzielViewAll } from './pages/lernziele/lernziel-view-all/lernziel-view-all';
 import { Profil } from './pages/profil/profil';
+import { Aktualisieren } from './layout/aktualisieren/aktualisieren';
 
 const STAFF: Role[] = ['ROLE_TRAINER'];
 const LEARNER: Role[] = ['ROLE_TRAINEE', 'ROLE_STUDENT'];
@@ -60,6 +61,9 @@ export const routes: Routes = [
       { path: 'lernziel-loeschen', redirectTo: 'lernziel-view-all' },
 
       { path: 'profil', component: Profil, title: 'Mein Profil' },
+
+      // Zwischenschritt, damit eine Seite beim Öffnen einer Benachrichtigung neu geladen wird
+      { path: 'aktualisieren', component: Aktualisieren },
     ],
   },
   { path: '**', redirectTo: '' },

@@ -31,6 +31,8 @@ export class Login {
   readonly ssoLaeuft = signal(false);
   /** Hinweis, warum die Windows-Anmeldung nicht geklappt hat. */
   readonly ssoHinweis = signal('');
+  /** Auf „Kein Zugriff“ wurde die Anmeldung mit Benutzername und Passwort gewählt – sie steht dann im Vordergrund. */
+  readonly passwortGewaehlt = signal(this.auth.passwortAnmeldungGewaehlt());
 
   constructor() {
     if (this.auth.isLoggedIn()) {
@@ -39,7 +41,7 @@ export class Login {
     }
     this.auth.optionen$.subscribe((optionen) => {
       this.optionen.set(optionen);
-      if (optionen.sso && !this.auth.wurdeAbgemeldet()) {
+      if (optionen.sso && !this.auth.ohneAutomatischeWindowsAnmeldung()) {
         this.windowsAnmeldung();
       }
     });
@@ -50,6 +52,7 @@ export class Login {
   }
 
   windowsAnmeldung(): void {
+    this.passwortGewaehlt.set(false);
     this.ssoLaeuft.set(true);
     this.ssoHinweis.set('');
     this.error.set('');

@@ -22,7 +22,9 @@
       <div class="login-form">
         <h2>Anmelden</h2>
 
-        @if (optionen()?.sso) {
+        @if (optionen()?.sso && passwortGewaehlt() && optionen()?.passwortLogin) {
+          <p class="hint mb-4">Mit deinem Benutzernamen und Passwort.</p>
+        } @else if (optionen()?.sso) {
           @if (ssoHinweis()) {
             <div class="alert alert-warning py-2" role="alert">{{ ssoHinweis() }}</div>
           } @else {
@@ -41,7 +43,7 @@
         @if (optionen()?.passwortLogin) {
           <form (ngSubmit)="login()" novalidate>
             <label class="form-label" for="user">Benutzername</label>
-            <input id="user" class="form-control mb-3" [(ngModel)]="user" name="user" autocomplete="username" [autofocus]="!optionen()?.sso" required />
+            <input id="user" class="form-control mb-3" [(ngModel)]="user" name="user" autocomplete="username" [autofocus]="!optionen()?.sso || passwortGewaehlt()" required />
 
             <label class="form-label" for="password">Passwort</label>
             <div class="input-group mb-4">
@@ -63,7 +65,7 @@
               <div class="alert alert-danger py-2" role="alert">{{ error() }}</div>
             }
 
-            <button class="btn w-100 py-2" [class.btn-brand]="!optionen()?.sso" [class.btn-outline-secondary]="optionen()?.sso" type="submit" [disabled]="loading()">
+            <button class="btn w-100 py-2" [class.btn-brand]="!optionen()?.sso || passwortGewaehlt()" [class.btn-outline-secondary]="optionen()?.sso && !passwortGewaehlt()" type="submit" [disabled]="loading()">
               @if (loading()) {
                 <span class="spinner-border spinner-border-sm me-2"></span>
               }
@@ -72,6 +74,13 @@
 
             <p class="hint mt-4 mb-0">Passwort vergessen? Wende dich an deine Ausbilderin oder deinen Ausbilder.</p>
           </form>
+
+          @if (optionen()?.sso && passwortGewaehlt()) {
+            <div class="login-divider"><span>oder</span></div>
+            <button type="button" class="btn btn-outline-secondary w-100" (click)="windowsAnmeldung()">
+              <i class="fa-brands fa-windows me-2" aria-hidden="true"></i>Mit Windows-Konto anmelden
+            </button>
+          }
         }
       </div>
     }

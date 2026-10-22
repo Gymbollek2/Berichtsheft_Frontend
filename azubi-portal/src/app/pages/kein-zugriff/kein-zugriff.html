@@ -26,8 +26,15 @@
         <div class="mb-4"></div>
       }
 
+      @if (passwortLogin()) {
+        <button type="button" class="btn btn-brand w-100 py-2" (click)="mitPasswortAnmelden()">
+          <i class="fa-solid fa-key me-2" aria-hidden="true"></i>Mit Benutzername und Passwort anmelden
+        </button>
+        <div class="login-divider"><span>oder</span></div>
+      }
+
       <button type="button" class="btn btn-outline-secondary w-100" (click)="erneutVersuchen()">
-        <i class="fa-solid fa-rotate-right me-2" aria-hidden="true"></i>Erneut versuchen
+        <i class="fa-solid fa-rotate-right me-2" aria-hidden="true"></i>Windows-Anmeldung erneut versuchen
       </button>
     </div>
   </section>

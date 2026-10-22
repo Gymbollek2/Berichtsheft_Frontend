@@ -2,12 +2,18 @@
 
 ## [Unveröffentlicht]
 
+### Neu
+- „Kein Zugriff“: Button **Mit Benutzername und Passwort anmelden** (wenn der Server die Passwort-Anmeldung
+  erlaubt). Die Anmeldeseite startet dann keine Windows-Anmeldung, bietet sie aber weiter als Button an.
+
 ### Geändert
 - Entwicklungs-Proxy zeigt auf das Backend unter https://localhost:5016 (`proxy.conf.mjs` statt `proxy.conf.json`).
 
 ### Behoben
 - Windows-Anmeldung über `npm start` (Port 4200) blieb bei „Windows-Anmeldung läuft“ hängen: Der Proxy
   öffnete für jeden NTLM-Schritt eine neue Verbindung. Er hält jetzt eine Verbindung zum Backend offen.
+- Entwicklungsserver stürzte ab (`ERR_HTTP2_INVALID_CONNECTION_HEADERS`), wenn der Browser HTTP/2 nutzte
+  (z. B. im Inkognito-Fenster): Der Proxy reicht die Verbindungsheader des Backends nicht mehr weiter.
 
 ## [1.6.0] – 2026-10-22
 

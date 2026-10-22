@@ -7,8 +7,13 @@ import { AnmeldeOptionen, LoginResponse, Person, Role, isLearner, isStaff } from
 const TOKEN_KEY = 'azubi-portal.token';
 const USER_KEY = 'azubi-portal.user';
 const EXPIRES_KEY = 'azubi-portal.expires';
-/** Nach „Abmelden“ nicht sofort wieder automatisch per Windows anmelden (gilt bis zum Schließen des Tabs). */
-const ABGEMELDET_KEY = 'azubi-portal.abgemeldet';
+/**
+ * Warum in diesem Tab nicht automatisch per Windows angemeldet wird (gilt bis zum Schließen des Tabs):
+ * nach „Abmelden“ oder wenn auf „Kein Zugriff“ die Anmeldung mit Benutzername und Passwort gewählt wurde.
+ */
+const OHNE_WINDOWS_KEY = 'azubi-portal.abgemeldet';
+const ABGEMELDET = '1';
+const PASSWORT_GEWAEHLT = 'passwort';
 
 /** Anmeldung, Token-Verwaltung und Infos zum angemeldeten Benutzer. */
 @Injectable({ providedIn: 'root' })
@@ -39,9 +44,19 @@ export class Auth {
       .pipe(tap((response) => this.storeSession(response)));
   }
 
-  /** true, wenn der Benutzer in diesem Tab selbst abgemeldet hat. */
-  wurdeAbgemeldet(): boolean {
-    return sessionStorage.getItem(ABGEMELDET_KEY) === '1';
+  /** true, wenn in diesem Tab nicht automatisch per Windows angemeldet werden soll. */
+  ohneAutomatischeWindowsAnmeldung(): boolean {
+    return sessionStorage.getItem(OHNE_WINDOWS_KEY) !== null;
+  }
+
+  /** true, wenn der Benutzer auf „Kein Zugriff“ die Anmeldung mit Benutzername und Passwort gewählt hat. */
+  passwortAnmeldungGewaehlt(): boolean {
+    return sessionStorage.getItem(OHNE_WINDOWS_KEY) === PASSWORT_GEWAEHLT;
+  }
+
+  /** Wechsel von „Kein Zugriff“ zur Anmeldung mit Benutzername und Passwort – ohne erneute Windows-Anmeldung. */
+  passwortAnmeldungWaehlen(): void {
+    sessionStorage.setItem(OHNE_WINDOWS_KEY, PASSWORT_GEWAEHLT);
   }
 
   login(username: string, password: string): Observable<LoginResponse> {
@@ -69,7 +84,7 @@ export class Auth {
   /** @param selbst vom Benutzer ausgelöst – dann keine automatische Windows-Anmeldung direkt danach */
   logout(redirect = true, selbst = false): void {
     if (selbst) {
-      sessionStorage.setItem(ABGEMELDET_KEY, '1');
+      sessionStorage.setItem(OHNE_WINDOWS_KEY, ABGEMELDET);
     }
     localStorage.removeItem(TOKEN_KEY);
     localStorage.removeItem(USER_KEY);
@@ -103,7 +118,7 @@ export class Auth {
   }
 
   private storeSession(response: LoginResponse): void {
-    sessionStorage.removeItem(ABGEMELDET_KEY);
+    sessionStorage.removeItem(OHNE_WINDOWS_KEY);
     localStorage.setItem(TOKEN_KEY, response.accessToken);
     localStorage.setItem(EXPIRES_KEY, response.expiresAt);
     localStorage.setItem(USER_KEY, JSON.stringify(response.user));

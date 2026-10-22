@@ -1,4 +1,5 @@
-import { Component, inject } from '@angular/core';
+import { Component, computed, inject } from '@angular/core';
+import { toSignal } from '@angular/core/rxjs-interop';
 import { Router } from '@angular/router';
 import { Auth } from '@app/services/auth';
 
@@ -19,11 +20,20 @@ export class KeinZugriff {
   private readonly router = inject(Router);
 
   readonly konto = sessionStorage.getItem(KONTO_KEY) ?? '';
+  private readonly optionen = toSignal(this.auth.optionen$);
+  /** Der Server erlaubt zusätzlich die Anmeldung mit Benutzername und Passwort. */
+  readonly passwortLogin = computed(() => this.optionen()?.passwortLogin ?? false);
 
   constructor() {
     if (this.auth.isLoggedIn()) {
       this.router.navigate(['/dashboard']);
     }
+  }
+
+  mitPasswortAnmelden(): void {
+    sessionStorage.removeItem(KONTO_KEY);
+    this.auth.passwortAnmeldungWaehlen();
+    this.router.navigate(['/login']);
   }
 
   erneutVersuchen(): void {

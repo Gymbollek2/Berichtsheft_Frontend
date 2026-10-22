@@ -193,6 +193,8 @@ export interface Wochenbericht {
   eingereichtAm: string | null;
   geprueftAm: string | null;
   gesamtStunden: number;
+  /** false: Ausbilder öffnet eine noch nicht abgegebene Woche – die Einträge werden nicht mitgeliefert. */
+  eintraegeSichtbar: boolean;
   tage: WochenTag[];
 }
 
@@ -227,4 +229,28 @@ export interface CsvImportResult {
 export interface ApiError {
   status: number;
   message: string;
+}
+
+export type BenachrichtigungTyp =
+  | 'BERICHT_ABGEGEBEN'
+  | 'BERICHT_ABGEZEICHNET'
+  | 'BERICHT_ZURUECKGEGEBEN'
+  | 'ERINNERUNG_ABGABE'
+  | 'LERNZIEL_ERREICHT'
+  | 'WILLKOMMEN';
+
+export interface Benachrichtigung {
+  id: number;
+  typ: BenachrichtigungTyp;
+  titel: string;
+  text: string | null;
+  /** Ziel in der Anwendung, z. B. /berichtsheft?datum=2026-10-19 */
+  link: string | null;
+  erstelltAm: string;
+  gelesen: boolean;
+}
+
+export interface Benachrichtigungen {
+  ungelesen: number;
+  eintraege: Benachrichtigung[];
 }

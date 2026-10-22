@@ -282,3 +282,17 @@
     grid-template-columns: 1fr 6rem;
   }
 }
+
+/* Ausbilder: Woche noch nicht abgegeben */
+.not-submitted-icon {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 3.5rem;
+  height: 3.5rem;
+  margin-bottom: 1rem;
+  border-radius: 50%;
+  background: #ebeaf6;
+  color: var(--navy-2);
+  font-size: 1.4rem;
+}

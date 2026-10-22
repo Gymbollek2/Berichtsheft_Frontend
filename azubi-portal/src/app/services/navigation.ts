@@ -47,7 +47,7 @@ export const NAV_SECTIONS: NavSection[] = [
     icon: 'fa-chart-line',
     links: [
       { label: 'Meine Lernziele', route: '/personen-lernziele-view', icon: 'fa-list-check', roles: LEARNER },
-      { label: 'Azubi-Lernziele', route: '/personen-lernziele-view', icon: 'fa-list-check', roles: STAFF },
+      { label: 'Lernfortschritt Azubis', route: '/personen-lernziele-view', icon: 'fa-list-check', roles: STAFF },
     ],
   },
   {

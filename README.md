@@ -76,7 +76,7 @@ Für das Backend gibt es dieselbe Möglichkeit, siehe Backend-README.
 
 **Zum Ausprobieren:**
 
-1. Als `azubi` anmelden, unter *Berichtsheft → Aktuelle Woche* Tage ausfüllen und Feinlernziele zuordnen. Eine vergangene, vollständige Woche **einreichen**.
+1. Als `azubi` anmelden, unter *Berichtsheft → Aktuelle Woche* Tage ausfüllen und Feinlernziele zuordnen. Eine vergangene, vollständige Woche mit **Berichtsheft abgeben** abgeben.
 2. Als `ausbilder` anmelden, unter *Berichtsheft → Zur Prüfung* die Woche öffnen und **abzeichnen** oder mit Kommentar **zurückgeben**.
 3. Unter *Lernfortschritt* den Status von Lernzielen setzen, unter *Personen* neue Azubis anlegen.
 
@@ -91,7 +91,7 @@ Ordner `Berichtsheft_Frontend/azubi-portal` öffnen, im Terminal `npm install` a
 ### Für Azubis und duale Studierende
 
 - **Übersicht**: Stand der aktuellen Woche, Lernfortschritt in Prozent, Hinweis auf zurückgegebene Wochen
-- **Aktuelle Woche**: Nachweisblatt Montag bis Freitag (Wochenende einblendbar) mit Art (Betrieb, Berufsschule, Urlaub, Krank …), Stunden, Tätigkeiten und Feinlernzielen. Speichern pro Tag, Woche einreichen.
+- **Aktuelle Woche**: Nachweisblatt Montag bis Freitag (Wochenende einblendbar) mit Art (Betrieb, Berufsschule, Urlaub, Krank …), Stunden, Tätigkeiten und Feinlernzielen. Speichern pro Tag, Berichtsheft abgeben.
   - Zukünftige Tage und Tage vor dem Ausbildungsbeginn sind gesperrt.
   - Höchstens 10 Stunden pro Tag.
   - An Urlaubs-, Krankheits- und Feiertagen gibt es keine Lernziele.
@@ -106,14 +106,21 @@ Ordner `Berichtsheft_Frontend/azubi-portal` öffnen, im Terminal `npm install` a
 
 - **Übersicht**: offene Prüfungen, Anzahl der Azubis und Lernfortschritt je Azubi
 - **Prüfen**: Warteschlange der eingereichten Wochen, abzeichnen oder mit Kommentar zurückgeben
-- **Berichtshefte**: Berichtshefte aller Azubis durchsuchen
-- **Lernfortschritt**: Azubi wählen und den Status der Feinlernziele setzen. Grob- und Richtlernziele werden automatisch berechnet.
+- **Berichtshefte**: Berichtshefte aller Azubis durchsuchen – sichtbar sind nur bereits abgegebene Wochen
+- **Lernfortschritt Azubis**: Azubi wählen und den Status der Feinlernziele setzen. Grob- und Richtlernziele werden automatisch berechnet.
 - **Lernziele**: Baumansicht mit Suche, anlegen, bearbeiten, löschen sowie **CSV-Import/-Export**. Die Hierarchie wird geführt:
   - Ein Richtlernziel hat kein übergeordnetes Lernziel.
   - Ein Groblernziel wählt sein Richtlernziel, ein Feinlernziel sein Groblernziel. Die Auswahl zeigt nur passende Lernziele.
   - „+ Groblernziel“ bzw. „+ Feinlernziel“ in der Liste legt direkt ein Unterziel an.
   - Lernziele mit Unterzielen lassen sich nicht löschen.
 - **Personen**: anlegen (mit generiertem Startpasswort), bearbeiten, Passwort zurücksetzen, löschen – für alle Rollen, auch andere Ausbilder. Eine eigene Admin-Rolle gibt es nicht.
+
+### Für alle
+
+- **Benachrichtigungen**: Glocke oben rechts mit der Anzahl ungelesener Nachrichten. Beim Darüberfahren oder Anklicken
+  öffnet sich das Fenster; ein Klick auf eine Nachricht führt zur passenden Seite. Nachrichten gibt es z. B. bei
+  abgegebenen, abgenommenen und zurückgegebenen Berichtsheften, als Erinnerung an die Abgabe der Vorwoche und
+  bei erreichten Lernzielen.
 
 Menü und Seiten passen sich automatisch der **Rolle** an. Die Rechte werden zusätzlich im Backend geprüft.
 

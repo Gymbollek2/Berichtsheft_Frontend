@@ -1,0 +1,53 @@
+<div class="bell-wrap" (mouseenter)="mausRein()" (mouseleave)="mausRaus()">
+  <button type="button" class="bell" [class.active]="offen()" [class.has-unread]="service.ungelesen() > 0"
+    (click)="umschalten()" [attr.aria-label]="bezeichnung()" [attr.aria-expanded]="offen()" aria-haspopup="dialog"
+    aria-controls="benachrichtigungen-fenster" [title]="bezeichnung()">
+    <i class="fa-regular fa-bell" aria-hidden="true"></i>
+    @if (service.ungelesen() > 0) {
+      <span class="bell-badge" aria-hidden="true">{{ badge() }}</span>
+    }
+  </button>
+
+  @if (offen()) {
+    <div id="benachrichtigungen-fenster" class="notify-panel" role="dialog" aria-label="Benachrichtigungen">
+      <div class="notify-head">
+        <span class="notify-title">Benachrichtigungen</span>
+        @if (service.ungelesen() > 0) {
+          <button type="button" class="notify-all" (click)="service.alleGelesen()">
+            <i class="fa-solid fa-check-double me-1" aria-hidden="true"></i>Alle als gelesen markieren
+          </button>
+        }
+      </div>
+
+      <ul class="notify-list">
+        @for (n of service.eintraege(); track n.id) {
+          <li>
+            <button type="button" class="notify-item" [class.unread]="!n.gelesen" (click)="oeffneNachricht(n)">
+              <span class="notify-icon ton-{{ darstellung(n).ton }}" aria-hidden="true">
+                <i class="fa-solid {{ darstellung(n).icon }}"></i>
+              </span>
+              <span class="notify-body">
+                <span class="notify-item-title">{{ n.titel }}</span>
+                @if (n.text) {
+                  <span class="notify-text">{{ n.text }}</span>
+                }
+                <span class="notify-time">{{ zeit(n) }}</span>
+              </span>
+              @if (!n.gelesen) {
+                <span class="notify-dot" aria-label="ungelesen"></span>
+              }
+            </button>
+          </li>
+        } @empty {
+          <li class="notify-empty">
+            @if (service.geladen()) {
+              <i class="fa-regular fa-bell-slash d-block mb-2" aria-hidden="true"></i>Keine Benachrichtigungen
+            } @else {
+              <span class="spinner-border spinner-border-sm" aria-hidden="true"></span>
+            }
+          </li>
+        }
+      </ul>
+    </div>
+  }
+</div>

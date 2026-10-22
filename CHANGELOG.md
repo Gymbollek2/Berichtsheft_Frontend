@@ -8,10 +8,17 @@
 - Textfeld: Die **Vorschau ist bearbeitbar**. Die Formatierungsleiste wirkt dort direkt auf den sichtbaren Text
   (fett, kursiv, Listen, Überschrift, Zitat, Code, Link …); jede Änderung wird sofort als Markdown übernommen
   und steht unter „Schreiben“ wieder als Markdown. Eingefügter Text kommt ohne fremde Formatierung.
+- **Benachrichtigungen**: Glocke oben rechts mit Anzahl der ungelesenen Nachrichten. Beim Darüberfahren oder
+  Anklicken öffnet sich das Fenster mit den Nachrichten (Berichtsheft abgegeben, abgenommen, Korrekturbedarf,
+  Erinnerung an die Abgabe, Lernziel erreicht, Willkommen); ein Klick führt zur passenden Seite.
+  „Alle als gelesen markieren“; neue Nachrichten werden jede Minute abgefragt.
 
 ### Geändert
 - Entwicklungs-Proxy zeigt auf das Backend unter https://localhost:5016 (`proxy.conf.mjs` statt `proxy.conf.json`).
 - Berufsschule schlägt jetzt 8 statt 6 Stunden vor.
+- Ausbilder sehen nicht abgegebene Wochen nicht mehr – stattdessen den Hinweis „Noch nicht abgegeben“.
+- Button „Woche zur Prüfung einreichen“ heißt jetzt **Berichtsheft abgeben**.
+- Menüpunkt „Azubi-Lernziele“ heißt jetzt **Lernfortschritt Azubis**.
 
 ### Behoben
 - Windows-Anmeldung über `npm start` (Port 4200) blieb bei „Windows-Anmeldung läuft“ hängen: Der Proxy

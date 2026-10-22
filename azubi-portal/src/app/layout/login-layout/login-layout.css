@@ -11,8 +11,16 @@
 }
 
 .shell-main {
-  padding: 2rem 2.5rem 3rem;
+  padding: 1.25rem 2.5rem 3rem;
   min-width: 0;
+}
+
+/* Leiste oben rechts (Benachrichtigungen) */
+.topbar {
+  display: flex;
+  justify-content: flex-end;
+  align-items: center;
+  margin-bottom: 0.25rem;
 }
 
 .mobile-bar {

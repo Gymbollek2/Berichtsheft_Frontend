@@ -156,7 +156,7 @@ export class BerichtsheftWoche implements OnDestroy, KannVerlassen {
     }
     const freitag = addDays(w.weekStart, 4);
     if (this.heute < freitag) {
-      return `Einreichen ist ab Freitag, ${this.formatDate(freitag)}, möglich.`;
+      return `Abgeben ist ab Freitag, ${this.formatDate(freitag)}, möglich.`;
     }
     if (this.fehlendeTage().length) {
       return `Es fehlen noch: ${this.fehlendeTage().join(', ')}. Urlaub, Krankheit und Feiertage bitte als solche eintragen.`;
@@ -497,7 +497,7 @@ export class BerichtsheftWoche implements OnDestroy, KannVerlassen {
       this.error.set(hinweis);
       return;
     }
-    if (!confirm(`KW ${w.kalenderwoche} jetzt zur Prüfung einreichen? Danach ist keine Bearbeitung mehr möglich.`)) {
+    if (!confirm(`Berichtsheft für KW ${w.kalenderwoche} jetzt abgeben? Danach ist keine Bearbeitung mehr möglich.`)) {
       return;
     }
     this.busy.set(true);
@@ -507,7 +507,7 @@ export class BerichtsheftWoche implements OnDestroy, KannVerlassen {
         this.error.set('');
         this.woche.set(neu);
         this.initForms(neu);
-        this.flash('Woche eingereicht – dein Ausbilder wurde benachrichtigt.');
+        this.flash('Berichtsheft abgegeben – deine Ausbilder wurden benachrichtigt.');
       },
       error: (err) => {
         this.busy.set(false);

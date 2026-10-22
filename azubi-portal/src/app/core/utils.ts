@@ -24,6 +24,31 @@ export function today(): string {
   return toIsoDate(new Date());
 }
 
+/** Zeitpunkt relativ zu jetzt, wie man es aus Benachrichtigungen kennt: „vor 5 Min.“, „gestern, 14:05“ … */
+export function zeitRelativ(iso: string, jetzt: Date = new Date()): string {
+  const zeit = new Date(iso);
+  const minuten = Math.floor((jetzt.getTime() - zeit.getTime()) / 60000);
+  const uhrzeit = `${String(zeit.getHours()).padStart(2, '0')}:${String(zeit.getMinutes()).padStart(2, '0')}`;
+  if (minuten < 1) {
+    return 'gerade eben';
+  }
+  if (minuten < 60) {
+    return `vor ${minuten} Min.`;
+  }
+  if (toIsoDate(zeit) === toIsoDate(jetzt)) {
+    return `vor ${Math.floor(minuten / 60)} Std.`;
+  }
+  const gestern = new Date(jetzt);
+  gestern.setDate(gestern.getDate() - 1);
+  if (toIsoDate(zeit) === toIsoDate(gestern)) {
+    return `gestern, ${uhrzeit}`;
+  }
+  const datum = `${String(zeit.getDate()).padStart(2, '0')}.${String(zeit.getMonth() + 1).padStart(2, '0')}.`;
+  return zeit.getFullYear() === jetzt.getFullYear()
+    ? `${datum}, ${uhrzeit}`
+    : `${datum}${zeit.getFullYear()}`;
+}
+
 /** Lesbare Fehlermeldung aus einer HTTP-Fehlerantwort des Backends. */
 export function errorMessage(err: unknown, fallback = 'Es ist ein Fehler aufgetreten'): string {
   if (err instanceof HttpErrorResponse) {
@@ -50,7 +75,11 @@ export function normalizeSearch(value: string | null | undefined): string {
 }
 
 /** Baut aus einer flachen Liste mit parentId eine Baum-Reihenfolge (Eltern vor Kindern) mit Tiefe. */
-export function treeOrder<T>(items: T[], id: (t: T) => number, parentId: (t: T) => number | null): { item: T; depth: number }[] {
+export function treeOrder<T>(
+  items: T[],
+  id: (t: T) => number,
+  parentId: (t: T) => number | null,
+): { item: T; depth: number }[] {
   const ids = new Set(items.map(id));
   const children = new Map<number | null, T[]>();
   for (const item of items) {
@@ -118,8 +147,14 @@ export const BAUM_EBENEN: { wert: BaumEbene; label: string }[] = [
  * Ids der Lernziele, die für eine Ebene eingeklappt werden:
  * „richt“ klappt alle Richtlernziele zu, „grob“ alle Groblernziele, „alle“ nichts.
  */
-export function einklappenFuerEbene<T>(items: T[], id: (t: T) => number, kind: (t: T) => Kind, ebene: BaumEbene): Set<number> {
-  const zu: Kind | null = ebene === 'richt' ? 'KIND_GENERAL' : ebene === 'grob' ? 'KIND_BROAD' : null;
+export function einklappenFuerEbene<T>(
+  items: T[],
+  id: (t: T) => number,
+  kind: (t: T) => Kind,
+  ebene: BaumEbene,
+): Set<number> {
+  const zu: Kind | null =
+    ebene === 'richt' ? 'KIND_GENERAL' : ebene === 'grob' ? 'KIND_BROAD' : null;
   return new Set(zu ? items.filter((t) => kind(t) === zu).map(id) : []);
 }
 

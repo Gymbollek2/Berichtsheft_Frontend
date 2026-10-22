@@ -1,5 +1,14 @@
 # Changelog
 
+## [Unveröffentlicht]
+
+### Geändert
+- Entwicklungs-Proxy zeigt auf das Backend unter https://localhost:5016 (`proxy.conf.mjs` statt `proxy.conf.json`).
+
+### Behoben
+- Windows-Anmeldung über `npm start` (Port 4200) blieb bei „Windows-Anmeldung läuft“ hängen: Der Proxy
+  öffnete für jeden NTLM-Schritt eine neue Verbindung. Er hält jetzt eine Verbindung zum Backend offen.
+
 ## [1.6.0] – 2026-10-22
 
 ### Neu

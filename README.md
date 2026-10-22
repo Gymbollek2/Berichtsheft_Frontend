@@ -10,7 +10,7 @@ Das Backend liegt in [`Berichtsheft_Backend`](https://github.com/Gymbollek2/Beri
 
 ## Lokal starten – Schritt für Schritt
 
-Ihr startet zwei Programme: zuerst das **Backend** (https://localhost:8443), dann das **Frontend** (https://localhost:4200). Beide laufen nur verschlüsselt.
+Ihr startet zwei Programme: zuerst das **Backend** (https://localhost:5016), dann das **Frontend** (https://localhost:4200). Beide laufen nur verschlüsselt.
 
 ### 1. Voraussetzungen installieren
 
@@ -56,7 +56,7 @@ Dann im Browser **<https://localhost:4200>** öffnen.
 
 Der Browser warnt beim ersten Aufruf vor dem selbstsignierten Zertifikat: *Erweitert → Weiter zu localhost (unsicher)*. Lokal ist das unbedenklich. Ohne Warnung geht es mit mkcert, siehe [Vertrauenswürdiges Zertifikat](#vertrauenswürdiges-zertifikat-optional).
 
-Der Entwicklungsserver leitet alle Aufrufe an `/v1/...` automatisch an `https://localhost:8443` weiter (`proxy.conf.json`). Der Browser spricht damit nur mit einer Adresse, weitere Konfiguration ist nicht nötig.
+Der Entwicklungsserver leitet alle Aufrufe an `/v1/...` automatisch an `https://localhost:5016` weiter (`proxy.conf.mjs`). Der Browser spricht damit nur mit einer Adresse, weitere Konfiguration ist nicht nötig.
 
 ### Vertrauenswürdiges Zertifikat (optional)
 
@@ -158,7 +158,7 @@ Tags und GitHub-Releases erstellt der Workflow `.github/workflows/release.yml` a
 
 ```
 azubi-portal/
-├── proxy.conf.json            Weiterleitung /v1 → Backend (localhost:8080)
+├── proxy.conf.mjs             Weiterleitung /v1 → Backend (localhost:5016)
 ├── public/assets/             Logos & Icons
 └── src/
     ├── styles.css             Design-System (Farben, Schrift, Tabellen, Status, Druckansicht)
@@ -176,7 +176,7 @@ azubi-portal/
 
 | Problem | Lösung |
 |---|---|
-| „Backend nicht erreichbar …“ | Das Backend ist nicht gestartet oder läuft auf einem anderen Port (`proxy.conf.json` prüfen). |
+| „Backend nicht erreichbar …“ | Das Backend ist nicht gestartet oder läuft auf einem anderen Port (`proxy.conf.mjs` prüfen). |
 | „Diese Verbindung ist nicht sicher“ | Erwartet beim selbstsignierten Zertifikat: einmal bestätigen oder mkcert verwenden. |
 | `http://localhost:4200` lädt nicht | Richtig so, das Portal läuft nur unter `https://`. |
 | Login schlägt fehl | Benutzername/Passwort prüfen. Nach einem DB-Reset im Backend gelten wieder die Demo-Passwörter. |

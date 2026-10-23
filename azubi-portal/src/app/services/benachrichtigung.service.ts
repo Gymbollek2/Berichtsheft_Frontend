@@ -1,17 +1,25 @@
 import { Injectable, inject, signal } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { Benachrichtigung, Benachrichtigungen } from '@app/core/models';
+import { Auth } from '@app/services/auth';
 
-/** Wie oft im Hintergrund nach neuen Benachrichtigungen gefragt wird. */
+/** Wie oft im Hintergrund nach neuen Benachrichtigungen gefragt wird (Absicherung, falls die Live-Verbindung fehlt). */
 const ABFRAGE_MS = 60_000;
+/** Wartezeit vor einem neuen Verbindungsversuch – verdoppelt sich bei jedem Fehlschlag bis zum Höchstwert. */
+const NEUVERBINDEN_MS = 2_000;
+const NEUVERBINDEN_MAX_MS = 60_000;
+/** Mehrere Meldungen kurz hintereinander (z. B. an mehrere Empfänger) nur einmal laden. */
+const SAMMELN_MS = 200;
 
 /**
- * Benachrichtigungen des angemeldeten Benutzers (Glocke oben rechts). Fragt im Hintergrund regelmäßig
- * die Anzahl der ungelesenen ab und lädt die Liste nur, wenn sich etwas geändert hat.
+ * Benachrichtigungen des angemeldeten Benutzers (Glocke oben rechts). Eine offene Live-Verbindung
+ * (Server-Sent Events) meldet jede Änderung sofort; zusätzlich wird regelmäßig die Anzahl der ungelesenen
+ * abgefragt und die Liste nur neu geladen, wenn sich etwas geändert hat.
  */
 @Injectable({ providedIn: 'root' })
 export class BenachrichtigungService {
   private readonly http = inject(HttpClient);
+  private readonly auth = inject(Auth);
   private readonly url = '/v1/benachrichtigung';
 
   readonly ungelesen = signal(0);
@@ -19,13 +27,17 @@ export class BenachrichtigungService {
   readonly geladen = signal(false);
 
   private timer: ReturnType<typeof setInterval> | null = null;
+  private live: AbortController | null = null;
+  private neuverbindenTimer: ReturnType<typeof setTimeout> | null = null;
+  private neuverbindenMs = NEUVERBINDEN_MS;
+  private sammelnTimer: ReturnType<typeof setTimeout> | null = null;
   private readonly beiRueckkehr = () => {
     if (document.visibilityState === 'visible') {
       this.anzahlPruefen();
     }
   };
 
-  /** Startet die Abfrage (jede Minute und beim Zurückkehren in den Tab). */
+  /** Startet Live-Verbindung und Abfrage (jede Minute und beim Zurückkehren in den Tab). */
   starten(): void {
     if (this.timer) {
       return;
@@ -33,6 +45,7 @@ export class BenachrichtigungService {
     this.laden();
     this.timer = setInterval(() => this.anzahlPruefen(), ABFRAGE_MS);
     document.addEventListener('visibilitychange', this.beiRueckkehr);
+    this.verbinden();
   }
 
   stoppen(): void {
@@ -40,6 +53,15 @@ export class BenachrichtigungService {
       clearInterval(this.timer);
       this.timer = null;
     }
+    this.live?.abort();
+    this.live = null;
+    for (const t of [this.neuverbindenTimer, this.sammelnTimer]) {
+      if (t) {
+        clearTimeout(t);
+      }
+    }
+    this.neuverbindenTimer = null;
+    this.sammelnTimer = null;
     document.removeEventListener('visibilitychange', this.beiRueckkehr);
     this.ungelesen.set(0);
     this.eintraege.set([]);
@@ -68,6 +90,79 @@ export class BenachrichtigungService {
       },
       error: () => undefined,
     });
+  }
+
+  /**
+   * Live-Verbindung zum Server. Über fetch statt EventSource, weil nur so das Token im Header mitgeht.
+   * Bricht sie ab (Server neu gestartet, Netzwerk weg), wird sie mit wachsendem Abstand neu aufgebaut.
+   */
+  private async verbinden(): Promise<void> {
+    const token = this.auth.getToken();
+    if (!token || !this.timer) {
+      return;
+    }
+    const steuerung = new AbortController();
+    this.live = steuerung;
+    try {
+      const antwort = await fetch(`${this.url}/live`, {
+        headers: { Authorization: `Bearer ${token}`, Accept: 'text/event-stream' },
+        cache: 'no-store',
+        signal: steuerung.signal,
+      });
+      if (antwort.status === 401) {
+        // Sitzung abgelaufen – die nächste normale Anfrage meldet ab
+        this.anzahlPruefen();
+        return;
+      }
+      if (!antwort.ok || !antwort.body) {
+        throw new Error(`Live-Verbindung: HTTP ${antwort.status}`);
+      }
+      // Was während der Unterbrechung passiert ist, nachholen
+      this.anzahlPruefen();
+      await this.ereignisseLesen(antwort.body, () => (this.neuverbindenMs = NEUVERBINDEN_MS));
+    } catch {
+      // Abbruch oder Netzwerkfehler – unten neu verbinden
+    }
+    if (this.live === steuerung && !steuerung.signal.aborted) {
+      this.live = null;
+      this.neuverbindenTimer = setTimeout(() => this.verbinden(), this.neuverbindenMs);
+      this.neuverbindenMs = Math.min(this.neuverbindenMs * 2, NEUVERBINDEN_MAX_MS);
+    }
+  }
+
+  /** Liest den Ereignisstrom; jedes Ereignis „benachrichtigung“ lädt die Liste neu. */
+  private async ereignisseLesen(body: ReadableStream<Uint8Array>, verbunden: () => void): Promise<void> {
+    const leser = body.getReader();
+    const decoder = new TextDecoder();
+    let puffer = '';
+    for (;;) {
+      const { value, done } = await leser.read();
+      if (done) {
+        return;
+      }
+      puffer += decoder.decode(value, { stream: true }).replace(/\r\n?/g, '\n');
+      let ende: number;
+      while ((ende = puffer.indexOf('\n\n')) >= 0) {
+        const block = puffer.slice(0, ende);
+        puffer = puffer.slice(ende + 2);
+        const name = /^event:\s*(.*)$/m.exec(block)?.[1];
+        if (name === 'verbunden') {
+          verbunden();
+        } else if (name === 'benachrichtigung') {
+          this.gesammeltLaden();
+        }
+      }
+    }
+  }
+
+  private gesammeltLaden(): void {
+    if (this.sammelnTimer) {
+      clearTimeout(this.sammelnTimer);
+    }
+    this.sammelnTimer = setTimeout(() => {
+      this.sammelnTimer = null;
+      this.laden();
+    }, SAMMELN_MS);
   }
 
   markiereGelesen(nachricht: Benachrichtigung): void {

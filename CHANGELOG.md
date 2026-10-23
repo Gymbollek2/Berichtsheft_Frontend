@@ -13,7 +13,9 @@
 - **Benachrichtigungen**: Glocke oben rechts mit Anzahl der ungelesenen Nachrichten. Beim Darüberfahren oder
   Anklicken öffnet sich das Fenster mit den Nachrichten (Berichtsheft abgegeben, abgenommen, Korrekturbedarf,
   Erinnerung an die Abgabe, Lernziel erreicht, Willkommen); ein Klick führt zur passenden Seite.
-  „Alle als gelesen markieren“; neue Nachrichten werden jede Minute abgefragt.
+  „Alle als gelesen markieren“. Neue Nachrichten und die Anzahl erscheinen **sofort** – ohne Neuladen und ohne
+  Darüberfahren – über eine Live-Verbindung zum Server, die nach Unterbrechungen von selbst neu aufgebaut wird;
+  zur Sicherheit wird zusätzlich jede Minute abgefragt.
 - **Eigene Rückfragen statt Browser-Fenster**: Berichtsheft abgeben (mit Zusammenfassung der Woche, „Weiter
   bearbeiten“ oder „Jetzt abgeben“), Löschen von Einträgen, Lernzielen und Personen, Seite mit ungespeicherten
   Änderungen verlassen und Link einfügen im Textfeld.

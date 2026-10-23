@@ -15,18 +15,28 @@ const VERBINDUNGS_HEADER = [
   'upgrade',
 ];
 
+const verbindungsHeaderEntfernen = (proxy) => {
+  proxy.on('proxyRes', (res) => {
+    for (const header of VERBINDUNGS_HEADER) {
+      delete res.headers[header];
+    }
+  });
+};
+
 export default {
+  // Live-Verbindung der Glocke: bleibt dauerhaft offen und braucht deshalb eine eigene Verbindung –
+  // über die gemeinsame (maxSockets: 1) würden sonst alle anderen Anfragen warten. Muss vor '/v1' stehen.
+  '/v1/benachrichtigung/live': {
+    target: 'https://localhost:5016',
+    secure: false,
+    changeOrigin: true,
+    configure: verbindungsHeaderEntfernen,
+  },
   '/v1': {
     target: 'https://localhost:5016',
     secure: false,
     changeOrigin: true,
     agent,
-    configure: (proxy) => {
-      proxy.on('proxyRes', (res) => {
-        for (const header of VERBINDUNGS_HEADER) {
-          delete res.headers[header];
-        }
-      });
-    },
+    configure: verbindungsHeaderEntfernen,
   },
 };

@@ -144,11 +144,11 @@ Für den Betrieb wird das Frontend **nicht** mit `ng serve` gestartet. Es wird g
 Ergebnis in `dist/azubi-portal/browser`) und vom Backend unter derselben Adresse mit ausgeliefert –
 API-Aufrufe gehen relativ an `/v1`, ein Proxy oder CORS ist nicht nötig.
 
-Das erledigt das Build-Skript im Backend-Projekt, das beide Projekte zu einem Windows-Dienst-Paket packt:
+Das erledigt das Build-Skript im Backend-Projekt, das beide Projekte zu einem Setup-ZIP für den Server packt:
 
 ```bat
 cd ..\Berichtsheft_Backend
-deploy\build-release.cmd
+deploy\build-setup.cmd
 ```
 
 Installation auf dem Server, Updates und Zertifikate: `Berichtsheft_Backend/deploy/SERVER-ANLEITUNG.md`.

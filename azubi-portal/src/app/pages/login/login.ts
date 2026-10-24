@@ -1,5 +1,5 @@
 import { Component, inject, signal } from '@angular/core';
-import { Router } from '@angular/router';
+import { ActivatedRoute, Router } from '@angular/router';
 import { FormsModule } from '@angular/forms';
 import { HttpErrorResponse } from '@angular/common/http';
 import { Auth } from '@app/services/auth';
@@ -22,6 +22,7 @@ import { KONTO_KEY } from '@app/pages/kein-zugriff/kein-zugriff';
 export class Login {
   private readonly auth = inject(Auth);
   private readonly router = inject(Router);
+  private readonly route = inject(ActivatedRoute);
 
   user = '';
   password = '';
@@ -39,7 +40,7 @@ export class Login {
 
   constructor() {
     if (this.auth.isLoggedIn()) {
-      this.router.navigate(['/dashboard']);
+      this.weiter();
       return;
     }
     this.auth.optionen$.subscribe((optionen) => {
@@ -54,6 +55,16 @@ export class Login {
     });
   }
 
+  /**
+   * Nach der Anmeldung zur ursprünglich aufgerufenen Seite (z. B. Button aus einer E-Mail), sonst zur Übersicht.
+   * Nur Pfade innerhalb des Portals – kein Weiterleiten auf fremde Adressen.
+   */
+  private weiter(): void {
+    const ziel = this.route.snapshot.queryParamMap.get('ziel');
+    const erlaubt = !!ziel && ziel.startsWith('/') && !ziel.startsWith('//') && !ziel.startsWith('/login');
+    this.router.navigateByUrl(erlaubt ? ziel : '/dashboard');
+  }
+
   togglePassword(): void {
     this.isPasswordVisible.update((v) => !v);
   }
@@ -66,7 +77,7 @@ export class Login {
     this.auth.ssoLogin().subscribe({
       next: () => {
         sessionStorage.removeItem(KONTO_KEY);
-        this.router.navigate(['/dashboard']);
+        this.weiter();
       },
       error: (err: unknown) => {
         this.ssoLaeuft.set(false);
@@ -98,7 +109,7 @@ export class Login {
     this.auth.login(this.user.trim(), this.password).subscribe({
       next: () => {
         this.loading.set(false);
-        this.router.navigate(['/dashboard']);
+        this.weiter();
       },
       error: (err) => {
         this.loading.set(false);

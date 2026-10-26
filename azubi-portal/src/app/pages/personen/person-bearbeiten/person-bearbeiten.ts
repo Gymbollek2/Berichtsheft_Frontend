@@ -5,7 +5,7 @@ import { RouterLink } from '@angular/router';
 import { Auth } from '@app/services/auth';
 import { PersonService } from '@app/services/person.service';
 import { BestaetigungService } from '@app/shared/bestaetigung/bestaetigung.service';
-import { Person, ROLE_LABELS, Role, isLearner } from '@app/core/models';
+import { ANREDEN, Anrede, Person, Role, isLearner, rollenMehrzahl } from '@app/core/models';
 import { errorMessage, normalizeSearch } from '@app/core/utils';
 import {
   PASSWORD_HINT,
@@ -13,9 +13,11 @@ import {
   PersonForm,
   USERNAME_HINT,
   assignableRoles,
+  berufFuer,
   ausbildungsjahr,
   emptyToNull,
   generatePassword,
+  MIDDLE_NAME_HINT,
   validatePersonForm,
 } from '../person-form';
 
@@ -30,11 +32,15 @@ export class PersonBearbeiten implements OnInit {
   private readonly service = inject(PersonService);
   private readonly bestaetigung = inject(BestaetigungService);
 
-  readonly roleLabels = ROLE_LABELS;
-  readonly roleFilterOptions = Object.entries(ROLE_LABELS) as [Role, string][];
-  readonly roles = assignableRoles();
+  readonly anreden = ANREDEN;
+  readonly roleFilterOptions = (['ROLE_TRAINEE', 'ROLE_STUDENT', 'ROLE_TRAINER'] as Role[]).map(
+    (r) => [r, rollenMehrzahl(r)] as [Role, string],
+  );
+  /** Rollen im Dialog passend zur Anrede (Ausbilder/Ausbilderin) */
+  readonly roles = computed(() => assignableRoles(this.model()?.anrede ?? ''));
   readonly passwordHint = PASSWORD_HINT;
   readonly usernameHint = USERNAME_HINT;
+  readonly middleNameHint = MIDDLE_NAME_HINT;
 
   readonly personen = signal<Person[]>([]);
   readonly search = signal('');
@@ -46,6 +52,8 @@ export class PersonBearbeiten implements OnInit {
   readonly model = signal<PersonForm | null>(null);
   readonly modalError = signal('');
   readonly saving = signal(false);
+  /** Zweitname-Feld im Dialog eingeblendet (automatisch, wenn die Person einen hat). */
+  readonly zweitnameOffen = signal(false);
 
   readonly resetFor = signal<Person | null>(null);
   readonly resetPassword = signal('');
@@ -82,8 +90,11 @@ export class PersonBearbeiten implements OnInit {
   bearbeiten(p: Person): void {
     this.modalError.set('');
     this.editing.set(p);
+    this.zweitnameOffen.set(!!p.middleName);
     this.model.set({
+      anrede: p.anrede ?? '',
       firstName: p.firstName,
+      middleName: p.middleName ?? '',
       lastName: p.lastName,
       role: p.role,
       username: p.username,
@@ -94,8 +105,28 @@ export class PersonBearbeiten implements OnInit {
     });
   }
 
+  zweitnameOeffnen(): void {
+    this.zweitnameOffen.set(true);
+    setTimeout(() => document.getElementById('e-middle')?.focus());
+  }
+
+  zweitnameEntfernen(): void {
+    this.set('middleName', '');
+    this.zweitnameOffen.set(false);
+  }
+
   set<K extends keyof PersonForm>(key: K, value: PersonForm[K]): void {
-    this.model.update((m) => (m ? { ...m, [key]: value } : m));
+    this.model.update((m) => {
+      if (!m) {
+        return m;
+      }
+      const neu = { ...m, [key]: value };
+      if (key === 'anrede') {
+        // Kein Gendern: Beruf passend zur Anrede (Fachinformatiker ↔ Fachinformatikerin)
+        neu.beruf = berufFuer(neu.beruf, neu.anrede);
+      }
+      return neu;
+    });
   }
 
   speichern(): void {
@@ -114,7 +145,9 @@ export class PersonBearbeiten implements OnInit {
     this.modalError.set('');
     this.service
       .update(p.id, {
+        anrede: m.anrede as Anrede,
         firstName: m.firstName.trim(),
+        middleName: emptyToNull(m.middleName),
         lastName: m.lastName.trim(),
         role: m.role,
         username,

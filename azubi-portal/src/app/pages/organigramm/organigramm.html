@@ -1,0 +1,83 @@
+<div class="page seite">
+  <div class="page-header">
+    <div>
+      <h1 class="page-title">Ausbildungsorganigramm</h1>
+      <p class="page-subtitle">
+        Alle, die gerade zur Ausbildung gehören – nach Ausbildungsjahr. Wechselt jemand ins nächste Jahr, rückt er hier
+        automatisch auf.
+      </p>
+    </div>
+    @if (daten(); as d) {
+      <div class="kennzahlen" aria-label="Übersicht">
+        <span><strong class="num">{{ d.ausbilder.length }}</strong> Ausbilder</span>
+        <span><strong class="num">{{ anzahlLernende() }}</strong> Azubis &amp; duale Studenten</span>
+      </div>
+    }
+  </div>
+
+  @if (error()) {
+    <div class="alert alert-danger" role="alert">{{ error() }}</div>
+  }
+
+  @if (daten(); as d) {
+    <div class="panel organigramm">
+      <section class="ebene ebene-ausbildung" aria-labelledby="ebene-ausbildung">
+        <h2 class="ebene-titel" id="ebene-ausbildung">
+          <i class="fa-solid fa-chalkboard-user" aria-hidden="true"></i>Ausbildung
+          <span class="ebene-anzahl">{{ anzahl(d.ausbilder.length) }}</span>
+        </h2>
+        <ul class="karten">
+          @for (m of d.ausbilder; track m.id) {
+            <li class="karte" [class]="'rolle-' + m.role" [class.ich]="istIch(m)">
+              <ng-container *ngTemplateOutlet="inhalt; context: { $implicit: m }" />
+            </li>
+          }
+        </ul>
+        <div class="verbinder" aria-hidden="true"></div>
+      </section>
+
+      @for (j of d.jahrgaenge; track j.ausbildungsjahr; let letzter = $last) {
+        <section class="ebene" [attr.aria-labelledby]="'ebene-' + j.ausbildungsjahr">
+          <h2 class="ebene-titel" [id]="'ebene-' + j.ausbildungsjahr">
+            <i class="fa-solid fa-graduation-cap" aria-hidden="true"></i>{{ j.ausbildungsjahr }}. Ausbildungsjahr
+            <span class="ebene-anzahl">{{ anzahl(j.mitglieder.length) }}</span>
+          </h2>
+          <ul class="karten">
+            @for (m of j.mitglieder; track m.id) {
+              <li class="karte" [class]="'rolle-' + m.role" [class.ich]="istIch(m)">
+                @if (istAusbilder()) {
+                  <a class="karte-link" [routerLink]="['/berichtsheft/azubis', m.id]" [attr.aria-label]="'Berichtsheft von ' + m.fullName">
+                    <ng-container *ngTemplateOutlet="inhalt; context: { $implicit: m }" />
+                  </a>
+                } @else {
+                  <ng-container *ngTemplateOutlet="inhalt; context: { $implicit: m }" />
+                }
+              </li>
+            }
+          </ul>
+          @if (!letzter) {
+            <div class="verbinder" aria-hidden="true"></div>
+          }
+        </section>
+      } @empty {
+        <section class="ebene">
+          <p class="leer">Gerade ist niemand in Ausbildung. Neue Azubis und duale Studenten erscheinen hier ab ihrem Ausbildungsbeginn.</p>
+        </section>
+      }
+    </div>
+  } @else if (!error()) {
+    <div class="panel organigramm laden hint"><span class="spinner-border spinner-border-sm me-2"></span>Organigramm wird geladen …</div>
+  }
+</div>
+
+<ng-template #inhalt let-m>
+  <span class="avatar" aria-hidden="true">{{ initialen(m) }}</span>
+  <span class="karte-text">
+    <span class="karte-name">
+      {{ m.fullName }}
+      @if (istIch(m)) { <span class="du">Du</span> }
+    </span>
+    <span class="karte-rolle">{{ m.roleLabel }}</span>
+    @if (m.beruf) { <span class="karte-beruf">{{ m.beruf }}</span> }
+  </span>
+</ng-template>

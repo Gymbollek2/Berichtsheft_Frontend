@@ -4,6 +4,7 @@ import { filter } from 'rxjs';
 import { SidebarComponent } from '../sidebar/sidebar';
 import { BenachrichtigungenComponent } from '../benachrichtigungen/benachrichtigungen';
 import { BestaetigungDialog } from '@app/shared/bestaetigung/bestaetigung-dialog';
+import { Auth } from '@app/services/auth';
 
 /** Rahmen für alle Seiten nach dem Login: Seitenleiste (mobil ausklappbar), Glocke oben rechts und Inhalt. */
 @Component({
@@ -16,6 +17,10 @@ export class LoginLayout {
   readonly menuOpen = signal(false);
 
   constructor() {
+    // Gespeicherte Benutzerdaten einmal auffrischen – sonst stünden geänderte Angaben (z. B. die Rollenbezeichnung
+    // passend zur Anrede) erst nach der nächsten Anmeldung in der Seitenleiste
+    inject(Auth).refreshMe().subscribe({ error: () => {} });
+
     // Nach jedem Seitenwechsel das mobile Menü schließen
     inject(Router)
       .events.pipe(filter((e) => e instanceof NavigationEnd))

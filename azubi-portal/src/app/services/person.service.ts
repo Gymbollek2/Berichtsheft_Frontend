@@ -1,7 +1,7 @@
 import { Injectable, inject } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { Observable } from 'rxjs';
-import { Person, PersonCreateRequest, PersonUpdateRequest, Role } from '@app/core/models';
+import { Organigramm, Person, PersonCreateRequest, PersonUpdateRequest, Role } from '@app/core/models';
 
 @Injectable({ providedIn: 'root' })
 export class PersonService {
@@ -14,6 +14,11 @@ export class PersonService {
 
   getAzubis(): Observable<Person[]> {
     return this.http.get<Person[]>(`${this.url}/azubis`);
+  }
+
+  /** Ausbildungsorganigramm – für alle angemeldeten Personen. */
+  getOrganigramm(): Observable<Organigramm> {
+    return this.http.get<Organigramm>(`${this.url}/organigramm`);
   }
 
   getById(id: number): Observable<Person> {

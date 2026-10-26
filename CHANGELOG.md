@@ -3,6 +3,30 @@
 ## [Unveröffentlicht]
 
 ### Neu
+- Personen anlegen und bearbeiten: Feld **Anrede** (Herr/Frau, Pflicht). Rollen, Beruf und Studiengang passen sich an
+  (Ausbilderin, Fachinformatikerin, Informatikerin …) – im Portal wird nicht mehr gegendert.
+
+### Geändert
+- Überall ohne Gendern: Rollen und Berufe in der Form passend zur Person, Filter in der Mehrzahl („Duale Studenten“),
+  „Azubis und duale Studenten“ statt „Studierende“, Anmeldeseite „Wende dich an deinen Ausbilder“, Unterschriftszeile
+  im Ausdruck „Auszubildender“ bzw. „Auszubildende“.
+- Die Benutzerdaten in der Seitenleiste werden beim Öffnen des Portals aufgefrischt (nicht erst nach der nächsten
+  Anmeldung).
+
+## [1.7.0] – 2026-10-26
+
+### Neu
+- Neue Seite **Ausbildungsorganigramm** (Menü, für alle): oben die Ausbilder, darunter die Azubis und Studierenden
+  nach Ausbildungsjahr – das 3. Jahr oben, dann das 2. usw. Wechselt jemand ins nächste Ausbildungsjahr, rückt er
+  automatisch auf; wer erst noch anfängt, erscheint ab seinem Ausbildungsbeginn. Die eigene Karte ist mit „Du“
+  markiert, Ausbilder kommen per Klick ins Berichtsheft der Person. Die Seite nutzt die ganze Fläche neben der
+  Seitenleiste, Karten und Schrift wachsen mit der Fenstergröße.
+- Person anlegen: Für **Duale Studierende** gibt es statt des Textfelds eine Auswahl des Studiengangs
+  (Informatiker oder Wirtschaftsinformatiker).
+
+## [1.6.2] – 2026-10-26
+
+### Neu
 - Ausbilder können eine **abgenommene Woche wieder öffnen** (Button auf der Wochenseite, Rückfrage mit
   optionalem Grund). Der Azubi kann sie dann bearbeiten und erneut abgeben und wird benachrichtigt.
 - „Kein Zugriff“: Button **Mit Benutzername und Passwort anmelden** (wenn der Server die Passwort-Anmeldung
@@ -19,6 +43,8 @@
 - **Eigene Rückfragen statt Browser-Fenster**: Berichtsheft abgeben (mit Zusammenfassung der Woche, „Weiter
   bearbeiten“ oder „Jetzt abgeben“), Löschen von Einträgen, Lernzielen und Personen, Seite mit ungespeicherten
   Änderungen verlassen und Link einfügen im Textfeld.
+- **Zweitname** beim Anlegen und Bearbeiten von Personen: Button „+ Zweitname“ im Vornamen-Feld blendet ein
+  eigenes Feld ein (mit × wieder entfernbar). E-Mails gehen dann an `Vorname-Zweitname.Nachname@…`.
 
 ### Geändert
 - Die Windows-Anmeldung startet beim Öffnen nur noch automatisch, wenn sie in diesem Browser schon einmal geklappt

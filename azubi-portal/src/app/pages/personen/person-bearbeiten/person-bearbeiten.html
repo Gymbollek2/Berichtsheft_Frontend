@@ -85,11 +85,30 @@
       }
       <form (ngSubmit)="speichern()" novalidate>
         <div class="row g-3">
-          <div class="col-md-6">
+          <div [class.col-md-6]="!zweitnameOffen()" [class.col-md-4]="zweitnameOffen()">
             <label class="form-label" for="e-first">Vorname</label>
-            <input id="e-first" class="form-control" name="firstName" [ngModel]="m.firstName" (ngModelChange)="set('firstName', $event)" required />
+            <div class="input-group">
+              <input id="e-first" class="form-control" name="firstName" [ngModel]="m.firstName" (ngModelChange)="set('firstName', $event)" required />
+              @if (!zweitnameOffen()) {
+                <button type="button" class="btn btn-outline-secondary" (click)="zweitnameOeffnen()" title="Zweitnamen hinzufügen">
+                  <i class="fa-solid fa-plus me-1"></i>Zweitname
+                </button>
+              }
+            </div>
           </div>
-          <div class="col-md-6">
+          @if (zweitnameOffen()) {
+            <div class="col-md-4">
+              <label class="form-label" for="e-middle">Zweitname</label>
+              <div class="input-group">
+                <input id="e-middle" class="form-control" name="middleName" [ngModel]="m.middleName" (ngModelChange)="set('middleName', $event)" />
+                <button type="button" class="btn btn-outline-secondary" (click)="zweitnameEntfernen()" title="Zweitnamen entfernen" aria-label="Zweitnamen entfernen">
+                  <i class="fa-solid fa-xmark"></i>
+                </button>
+              </div>
+              <div class="form-text">{{ middleNameHint }}</div>
+            </div>
+          }
+          <div [class.col-md-6]="!zweitnameOffen()" [class.col-md-4]="zweitnameOffen()">
             <label class="form-label" for="e-last">Nachname</label>
             <input id="e-last" class="form-control" name="lastName" [ngModel]="m.lastName" (ngModelChange)="set('lastName', $event)" required />
           </div>

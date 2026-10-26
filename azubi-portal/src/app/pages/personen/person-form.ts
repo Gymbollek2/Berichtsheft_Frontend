@@ -4,6 +4,7 @@ import { today } from '@app/core/utils';
 /** Formularmodell für Personen (anlegen & bearbeiten). */
 export interface PersonForm {
   firstName: string;
+  middleName: string;
   lastName: string;
   role: Role;
   username: string;
@@ -22,6 +23,7 @@ export const USERNAME_HINT =
 export function emptyPersonForm(): PersonForm {
   return {
     firstName: '',
+    middleName: '',
     lastName: '',
     role: 'ROLE_TRAINEE',
     username: '',
@@ -91,6 +93,12 @@ export function validatePersonForm(m: PersonForm, learner: boolean, checkPasswor
   }
   return null;
 }
+
+/** Studiengänge, aus denen beim Anlegen eines Dualen Studenten gewählt wird. */
+export const STUDIENGAENGE = ['Informatiker', 'Wirtschaftsinformatiker'];
+
+/** Hinweis unter dem Zweitnamen: so wird die Adresse fuer E-Mail-Benachrichtigungen gebildet. */
+export const MIDDLE_NAME_HINT = 'E-Mails gehen dann an Vorname-Zweitname.Nachname.';
 
 export function emptyToNull(value: string | null | undefined): string | null {
   return value && value.trim() ? value.trim() : null;

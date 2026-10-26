@@ -73,6 +73,7 @@ export interface Person {
   id: number;
   firstName: string;
   lastName: string;
+  middleName: string | null;
   fullName: string;
   role: Role;
   roleLabel: string;
@@ -84,9 +85,27 @@ export interface Person {
   lastLogin: string | null;
 }
 
+/** Eine Person im Ausbildungsorganigramm (nur öffentliche Angaben). */
+export interface OrganigrammMitglied {
+  id: number;
+  firstName: string;
+  lastName: string;
+  fullName: string;
+  role: Role;
+  roleLabel: string;
+  beruf: string | null;
+}
+
+/** GET /v1/person/organigramm: Ausbilder oben, darunter die Lernenden nach Ausbildungsjahr (höchstes zuerst). */
+export interface Organigramm {
+  ausbilder: OrganigrammMitglied[];
+  jahrgaenge: { ausbildungsjahr: number; mitglieder: OrganigrammMitglied[] }[];
+}
+
 export interface PersonCreateRequest {
   firstName: string;
   lastName: string;
+  middleName?: string | null;
   role: Role;
   username?: string | null;
   password: string;
@@ -98,6 +117,7 @@ export interface PersonCreateRequest {
 export interface PersonUpdateRequest {
   firstName: string;
   lastName: string;
+  middleName?: string | null;
   role: Role;
   username: string;
   beruf?: string | null;

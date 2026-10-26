@@ -14,6 +14,8 @@ import {
   emptyPersonForm,
   emptyToNull,
   generatePassword,
+  MIDDLE_NAME_HINT,
+  STUDIENGAENGE,
   validatePersonForm,
 } from '../person-form';
 
@@ -29,6 +31,10 @@ export class PersonAnlegen {
   readonly roles = assignableRoles();
   readonly passwordHint = PASSWORD_HINT;
   readonly usernameHint = USERNAME_HINT;
+  readonly middleNameHint = MIDDLE_NAME_HINT;
+  readonly studiengaenge = STUDIENGAENGE;
+  /** Zweitname-Feld eingeblendet – standardmaessig nur der Button im Vornamen-Feld. */
+  readonly zweitnameOffen = signal(false);
   readonly model = signal<PersonForm>(emptyPersonForm());
   readonly error = signal('');
   readonly saving = signal(false);
@@ -37,7 +43,29 @@ export class PersonAnlegen {
   readonly jahr = computed(() => ausbildungsjahr(this.model().dateOfTrainingStart));
 
   set<K extends keyof PersonForm>(key: K, value: PersonForm[K]): void {
-    this.model.update((m) => ({ ...m, [key]: value }));
+    this.model.update((m) => {
+      const neu = { ...m, [key]: value };
+      if (key === 'role') {
+        // Duale Studierende wählen ihren Studiengang aus, alle anderen tragen den Ausbildungsberuf frei ein
+        const studiengang = STUDIENGAENGE.includes(neu.beruf);
+        if (neu.role === 'ROLE_STUDENT' && !studiengang) {
+          neu.beruf = STUDIENGAENGE[0];
+        } else if (neu.role !== 'ROLE_STUDENT' && studiengang) {
+          neu.beruf = emptyPersonForm().beruf;
+        }
+      }
+      return neu;
+    });
+  }
+
+  zweitnameOeffnen(): void {
+    this.zweitnameOffen.set(true);
+    setTimeout(() => document.getElementById('middleName')?.focus());
+  }
+
+  zweitnameEntfernen(): void {
+    this.set('middleName', '');
+    this.zweitnameOffen.set(false);
   }
 
   neuesPasswort(): void {
@@ -56,6 +84,7 @@ export class PersonAnlegen {
     this.service
       .create({
         firstName: m.firstName.trim(),
+        middleName: emptyToNull(m.middleName),
         lastName: m.lastName.trim(),
         role: m.role,
         username: emptyToNull(m.username),
@@ -69,6 +98,7 @@ export class PersonAnlegen {
           this.saving.set(false);
           this.created.set({ person, password: m.password });
           this.model.set(emptyPersonForm());
+          this.zweitnameOffen.set(false);
         },
         error: (err) => {
           this.saving.set(false);

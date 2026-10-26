@@ -16,6 +16,7 @@ import {
   ausbildungsjahr,
   emptyToNull,
   generatePassword,
+  MIDDLE_NAME_HINT,
   validatePersonForm,
 } from '../person-form';
 
@@ -35,6 +36,7 @@ export class PersonBearbeiten implements OnInit {
   readonly roles = assignableRoles();
   readonly passwordHint = PASSWORD_HINT;
   readonly usernameHint = USERNAME_HINT;
+  readonly middleNameHint = MIDDLE_NAME_HINT;
 
   readonly personen = signal<Person[]>([]);
   readonly search = signal('');
@@ -46,6 +48,8 @@ export class PersonBearbeiten implements OnInit {
   readonly model = signal<PersonForm | null>(null);
   readonly modalError = signal('');
   readonly saving = signal(false);
+  /** Zweitname-Feld im Dialog eingeblendet (automatisch, wenn die Person einen hat). */
+  readonly zweitnameOffen = signal(false);
 
   readonly resetFor = signal<Person | null>(null);
   readonly resetPassword = signal('');
@@ -82,8 +86,10 @@ export class PersonBearbeiten implements OnInit {
   bearbeiten(p: Person): void {
     this.modalError.set('');
     this.editing.set(p);
+    this.zweitnameOffen.set(!!p.middleName);
     this.model.set({
       firstName: p.firstName,
+      middleName: p.middleName ?? '',
       lastName: p.lastName,
       role: p.role,
       username: p.username,
@@ -92,6 +98,16 @@ export class PersonBearbeiten implements OnInit {
       dateOfTrainingStart: p.dateOfTrainingStart ?? '',
       dateOfBirth: p.dateOfBirth ?? '',
     });
+  }
+
+  zweitnameOeffnen(): void {
+    this.zweitnameOffen.set(true);
+    setTimeout(() => document.getElementById('e-middle')?.focus());
+  }
+
+  zweitnameEntfernen(): void {
+    this.set('middleName', '');
+    this.zweitnameOffen.set(false);
   }
 
   set<K extends keyof PersonForm>(key: K, value: PersonForm[K]): void {
@@ -115,6 +131,7 @@ export class PersonBearbeiten implements OnInit {
     this.service
       .update(p.id, {
         firstName: m.firstName.trim(),
+        middleName: emptyToNull(m.middleName),
         lastName: m.lastName.trim(),
         role: m.role,
         username,

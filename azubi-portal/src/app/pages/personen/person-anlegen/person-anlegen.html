@@ -22,11 +22,30 @@
   <form class="panel" (ngSubmit)="speichern()" novalidate>
     <h2 class="section-title">Person</h2>
     <div class="row g-3 mb-4">
-      <div class="col-md-6">
+      <div [class.col-md-6]="!zweitnameOffen()" [class.col-md-4]="zweitnameOffen()">
         <label class="form-label" for="firstName">Vorname *</label>
-        <input id="firstName" class="form-control" name="firstName" required [ngModel]="model().firstName" (ngModelChange)="set('firstName', $event)" />
+        <div class="input-group">
+          <input id="firstName" class="form-control" name="firstName" required [ngModel]="model().firstName" (ngModelChange)="set('firstName', $event)" />
+          @if (!zweitnameOffen()) {
+            <button type="button" class="btn btn-outline-secondary" (click)="zweitnameOeffnen()" title="Zweitnamen hinzufügen">
+              <i class="fa-solid fa-plus me-1"></i>Zweitname
+            </button>
+          }
+        </div>
       </div>
-      <div class="col-md-6">
+      @if (zweitnameOffen()) {
+        <div class="col-md-4">
+          <label class="form-label" for="middleName">Zweitname</label>
+          <div class="input-group">
+            <input id="middleName" class="form-control" name="middleName" [ngModel]="model().middleName" (ngModelChange)="set('middleName', $event)" />
+            <button type="button" class="btn btn-outline-secondary" (click)="zweitnameEntfernen()" title="Zweitnamen entfernen" aria-label="Zweitnamen entfernen">
+              <i class="fa-solid fa-xmark"></i>
+            </button>
+          </div>
+          <div class="form-text">{{ middleNameHint }}</div>
+        </div>
+      }
+      <div [class.col-md-6]="!zweitnameOffen()" [class.col-md-4]="zweitnameOffen()">
         <label class="form-label" for="lastName">Nachname *</label>
         <input id="lastName" class="form-control" name="lastName" required [ngModel]="model().lastName" (ngModelChange)="set('lastName', $event)" />
       </div>
@@ -48,8 +67,17 @@
       <h2 class="section-title">Ausbildung</h2>
       <div class="row g-3 mb-4">
         <div class="col-md-6">
-          <label class="form-label" for="beruf">Ausbildungsberuf oder Studiengang</label>
-          <input id="beruf" class="form-control" name="beruf" [ngModel]="model().beruf" (ngModelChange)="set('beruf', $event)" />
+          @if (model().role === 'ROLE_STUDENT') {
+            <label class="form-label" for="beruf">Studiengang</label>
+            <select id="beruf" class="form-select" name="beruf" [ngModel]="model().beruf" (ngModelChange)="set('beruf', $event)">
+              @for (s of studiengaenge; track s) {
+                <option [value]="s">{{ s }}</option>
+              }
+            </select>
+          } @else {
+            <label class="form-label" for="beruf">Ausbildungsberuf oder Studiengang</label>
+            <input id="beruf" class="form-control" name="beruf" [ngModel]="model().beruf" (ngModelChange)="set('beruf', $event)" />
+          }
         </div>
         <div class="col-md-3">
           <label class="form-label" for="start">Ausbildungsbeginn *</label>

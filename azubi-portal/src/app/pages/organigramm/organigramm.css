@@ -1,0 +1,271 @@
+/*
+ * Das Organigramm nutzt die ganze Inhaltsflaeche neben der Seitenleiste: volle Breite und mindestens die
+ * Fensterhoehe. Karten und Schrift wachsen mit der Fensterbreite mit (clamp), der freie Platz zwischen den
+ * Ebenen wird zur Verbindungslinie.
+ */
+:host {
+  display: block;
+}
+
+.seite {
+  max-width: none;
+  display: flex;
+  flex-direction: column;
+  /* Fensterhoehe abzueglich Abstaende des Inhaltsbereichs und der Leiste mit der Glocke */
+  min-height: calc(100vh - 7.5rem);
+}
+
+/* Kennzahlen rechts im Seitenkopf */
+.kennzahlen {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+}
+
+.kennzahlen span {
+  background: var(--surface);
+  border: 1px solid var(--line);
+  border-radius: 999px;
+  padding: 0.3rem 0.85rem;
+  font-size: 0.8125rem;
+  color: var(--muted);
+}
+
+.kennzahlen strong {
+  color: var(--ink);
+  font-weight: 600;
+  margin-right: 0.2rem;
+}
+
+/* ---------- Organigramm: Ebenen untereinander, verbunden durch eine Linie ---------- */
+
+.organigramm {
+  --karte-breite: clamp(220px, 15vw, 300px);
+  --abstand: clamp(0.75rem, 1.1vw, 1.5rem);
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  margin-bottom: 0;
+  padding: clamp(1.5rem, 2.5vw, 3rem) clamp(1rem, 2vw, 2.5rem);
+  /* zarte Rasterflaeche wie auf einem Planungsboard */
+  background-image: radial-gradient(var(--line) 1px, transparent 1px);
+  background-size: 18px 18px;
+}
+
+.laden {
+  align-items: center;
+  justify-content: center;
+}
+
+.ebene {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  /* Jede Ebene ausser der letzten waechst – der Zuwachs geht in die Verbindungslinie darunter */
+  flex: 1 0 auto;
+}
+
+.ebene:last-child {
+  flex-grow: 0;
+}
+
+.verbinder {
+  flex: 1 0 clamp(2rem, 3vw, 3rem);
+  width: 0;
+  border-left: 2px solid var(--line-strong);
+}
+
+.ebene-titel {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.6rem;
+  margin: 0;
+  padding: 0.5em 1.1em;
+  background: var(--surface);
+  border: 1px solid var(--line-strong);
+  border-radius: 999px;
+  font-size: clamp(0.875rem, 0.95vw, 1.0625rem);
+  font-weight: 600;
+  color: var(--ink);
+  letter-spacing: 0.01em;
+}
+
+.ebene-titel i {
+  color: var(--accent);
+}
+
+.ebene-ausbildung .ebene-titel {
+  background: var(--navy);
+  border-color: var(--navy);
+  color: #fff;
+}
+
+.ebene-ausbildung .ebene-titel i {
+  color: #ffc400;
+}
+
+.ebene-anzahl {
+  font-weight: 400;
+  color: var(--muted);
+  padding-left: 0.6rem;
+  border-left: 1px solid var(--line);
+}
+
+.ebene-ausbildung .ebene-anzahl {
+  color: #cfcde0;
+  border-left-color: rgba(255, 255, 255, 0.25);
+}
+
+/* Karten einer Ebene, mittig unter der Ueberschrift und mit ihr verbunden */
+.karten {
+  position: relative;
+  list-style: none;
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: var(--abstand);
+  width: 100%;
+  margin: 0;
+  padding: var(--abstand) 0 0;
+}
+
+.karten::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 50%;
+  height: var(--abstand);
+  border-left: 2px solid var(--line-strong);
+}
+
+/* ---------- Karten ---------- */
+
+.karte {
+  --rolle: var(--accent);
+  --rolle-weich: var(--accent-soft);
+  position: relative;
+  /* so viele Karten nebeneinander wie passen, die Reihe fuellen sie dann bis zur Hoechstbreite aus */
+  flex: 1 1 var(--karte-breite);
+  max-width: calc(var(--karte-breite) * 1.35);
+  display: flex;
+  align-items: center;
+  gap: 0.9rem;
+  padding: clamp(0.85rem, 1vw, 1.25rem) clamp(0.9rem, 1.1vw, 1.4rem);
+  background: var(--surface);
+  border: 1px solid var(--line);
+  border-top: 4px solid var(--rolle);
+  border-radius: var(--radius);
+  box-shadow: 0 1px 3px rgba(1, 0, 70, 0.06);
+}
+
+.karte.rolle-ROLE_TRAINER {
+  --rolle: var(--navy);
+  --rolle-weich: #e6e5f2;
+}
+
+.karte.rolle-ROLE_STUDENT {
+  --rolle: #7a2bd6;
+  --rolle-weich: #f0e8fb;
+}
+
+.karte.ich {
+  border-color: var(--rolle);
+  box-shadow: 0 0 0 3px var(--rolle-weich);
+}
+
+.karte-link {
+  display: flex;
+  align-items: center;
+  gap: 0.9rem;
+  /* Link fuellt die ganze Karte aus */
+  width: calc(100% + 2 * clamp(0.9rem, 1.1vw, 1.4rem));
+  margin: calc(-1 * clamp(0.85rem, 1vw, 1.25rem)) calc(-1 * clamp(0.9rem, 1.1vw, 1.4rem));
+  padding: clamp(0.85rem, 1vw, 1.25rem) clamp(0.9rem, 1.1vw, 1.4rem);
+  color: inherit;
+  text-decoration: none;
+  border-radius: var(--radius);
+}
+
+.karte:has(.karte-link):hover {
+  border-color: var(--rolle);
+  box-shadow: 0 6px 18px rgba(1, 0, 70, 0.12);
+}
+
+.karte-link:hover .karte-name {
+  color: var(--accent);
+}
+
+.avatar {
+  flex: none;
+  width: clamp(44px, 3.4vw, 64px);
+  height: clamp(44px, 3.4vw, 64px);
+  border-radius: 50%;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  background: var(--rolle-weich);
+  color: var(--rolle);
+  font-size: clamp(0.9375rem, 1.05vw, 1.25rem);
+  font-weight: 600;
+}
+
+.karte-text {
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+  line-height: 1.3;
+}
+
+.karte-name {
+  font-size: clamp(0.9375rem, 1.05vw, 1.25rem);
+  font-weight: 600;
+  color: var(--ink);
+  overflow-wrap: anywhere;
+}
+
+.karte-rolle,
+.karte-beruf {
+  font-size: clamp(0.75rem, 0.82vw, 0.9375rem);
+  color: var(--muted);
+}
+
+.karte-beruf {
+  overflow-wrap: anywhere;
+}
+
+.du {
+  display: inline-block;
+  margin-left: 0.3rem;
+  padding: 0 0.45em;
+  border-radius: 999px;
+  background: var(--rolle);
+  color: #fff;
+  font-size: 0.7em;
+  font-weight: 600;
+  vertical-align: 0.15em;
+}
+
+.leer {
+  margin: var(--abstand) 0 0;
+  max-width: 46ch;
+  text-align: center;
+  color: var(--muted);
+}
+
+/* ---------- Unterhalb der Desktop-Breite: Leiste oben statt Seitenleiste ---------- */
+
+@media (max-width: 991.98px) {
+  .seite {
+    /* zusaetzlich die Menueleiste oben (56px) */
+    min-height: calc(100vh - 56px - 6.25rem);
+  }
+}
+
+/* ---------- Schmale Bildschirme: Karten untereinander ---------- */
+
+@media (max-width: 575.98px) {
+  .karte {
+    flex-basis: 100%;
+    max-width: none;
+  }
+}

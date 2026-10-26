@@ -60,6 +60,12 @@ export const NAV_SECTIONS: NavSection[] = [
     ],
   },
   {
+    key: 'organigramm',
+    label: 'Ausbildungsorganigramm',
+    icon: 'fa-sitemap',
+    links: [{ label: 'Ausbildungsorganigramm', route: '/organigramm', icon: 'fa-sitemap' }],
+  },
+  {
     key: 'personen',
     label: 'Personen',
     icon: 'fa-users',

@@ -2,6 +2,8 @@
 
 ## [Unveröffentlicht]
 
+## [1.7.0] – 2026-10-26
+
 ### Neu
 - Neue Seite **Ausbildungsorganigramm** (Menü, für alle): oben die Ausbilder, darunter die Azubis und Studierenden
   nach Ausbildungsjahr – das 3. Jahr oben, dann das 2. usw. Wechselt jemand ins nächste Ausbildungsjahr, rückt er

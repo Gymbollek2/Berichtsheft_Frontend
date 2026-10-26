@@ -2,6 +2,17 @@
 
 ## [Unveröffentlicht]
 
+### Neu
+- Personen anlegen und bearbeiten: Feld **Anrede** (Herr/Frau, Pflicht). Rollen, Beruf und Studiengang passen sich an
+  (Ausbilderin, Fachinformatikerin, Informatikerin …) – im Portal wird nicht mehr gegendert.
+
+### Geändert
+- Überall ohne Gendern: Rollen und Berufe in der Form passend zur Person, Filter in der Mehrzahl („Duale Studenten“),
+  „Azubis und duale Studenten“ statt „Studierende“, Anmeldeseite „Wende dich an deinen Ausbilder“, Unterschriftszeile
+  im Ausdruck „Auszubildender“ bzw. „Auszubildende“.
+- Die Benutzerdaten in der Seitenleiste werden beim Öffnen des Portals aufgefrischt (nicht erst nach der nächsten
+  Anmeldung).
+
 ## [1.7.0] – 2026-10-26
 
 ### Neu

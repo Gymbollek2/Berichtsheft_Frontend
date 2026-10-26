@@ -85,7 +85,16 @@
       }
       <form (ngSubmit)="speichern()" novalidate>
         <div class="row g-3">
-          <div [class.col-md-6]="!zweitnameOffen()" [class.col-md-4]="zweitnameOffen()">
+          <div class="col-md-2">
+            <label class="form-label" for="e-anrede">Anrede</label>
+            <select id="e-anrede" class="form-select" name="anrede" required [ngModel]="m.anrede" (ngModelChange)="set('anrede', $event)">
+              <option value="" disabled>Bitte wählen</option>
+              @for (a of anreden; track a[0]) {
+                <option [value]="a[0]">{{ a[1] }}</option>
+              }
+            </select>
+          </div>
+          <div [class.col-md-5]="!zweitnameOffen()" [class.col-md-4]="zweitnameOffen()">
             <label class="form-label" for="e-first">Vorname</label>
             <div class="input-group">
               <input id="e-first" class="form-control" name="firstName" [ngModel]="m.firstName" (ngModelChange)="set('firstName', $event)" required />
@@ -97,7 +106,7 @@
             </div>
           </div>
           @if (zweitnameOffen()) {
-            <div class="col-md-4">
+            <div class="col-md-3">
               <label class="form-label" for="e-middle">Zweitname</label>
               <div class="input-group">
                 <input id="e-middle" class="form-control" name="middleName" [ngModel]="m.middleName" (ngModelChange)="set('middleName', $event)" />
@@ -108,7 +117,7 @@
               <div class="form-text">{{ middleNameHint }}</div>
             </div>
           }
-          <div [class.col-md-6]="!zweitnameOffen()" [class.col-md-4]="zweitnameOffen()">
+          <div [class.col-md-5]="!zweitnameOffen()" [class.col-md-3]="zweitnameOffen()">
             <label class="form-label" for="e-last">Nachname</label>
             <input id="e-last" class="form-control" name="lastName" [ngModel]="m.lastName" (ngModelChange)="set('lastName', $event)" required />
           </div>
@@ -120,7 +129,7 @@
           <div class="col-md-6">
             <label class="form-label" for="e-role">Rolle</label>
             <select id="e-role" class="form-select" name="role" [ngModel]="m.role" (ngModelChange)="set('role', $event)" [disabled]="istIch(editing()!)">
-              @for (r of roles; track r[0]) {
+              @for (r of roles(); track r[0]) {
                 <option [value]="r[0]">{{ r[1] }}</option>
               }
             </select>

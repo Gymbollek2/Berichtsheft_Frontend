@@ -5,7 +5,7 @@ import { RouterLink } from '@angular/router';
 import { Auth } from '@app/services/auth';
 import { PersonService } from '@app/services/person.service';
 import { BestaetigungService } from '@app/shared/bestaetigung/bestaetigung.service';
-import { Person, ROLE_LABELS, Role, isLearner } from '@app/core/models';
+import { ANREDEN, Anrede, Person, Role, isLearner, rollenMehrzahl } from '@app/core/models';
 import { errorMessage, normalizeSearch } from '@app/core/utils';
 import {
   PASSWORD_HINT,
@@ -13,6 +13,7 @@ import {
   PersonForm,
   USERNAME_HINT,
   assignableRoles,
+  berufFuer,
   ausbildungsjahr,
   emptyToNull,
   generatePassword,
@@ -31,9 +32,12 @@ export class PersonBearbeiten implements OnInit {
   private readonly service = inject(PersonService);
   private readonly bestaetigung = inject(BestaetigungService);
 
-  readonly roleLabels = ROLE_LABELS;
-  readonly roleFilterOptions = Object.entries(ROLE_LABELS) as [Role, string][];
-  readonly roles = assignableRoles();
+  readonly anreden = ANREDEN;
+  readonly roleFilterOptions = (['ROLE_TRAINEE', 'ROLE_STUDENT', 'ROLE_TRAINER'] as Role[]).map(
+    (r) => [r, rollenMehrzahl(r)] as [Role, string],
+  );
+  /** Rollen im Dialog passend zur Anrede (Ausbilder/Ausbilderin) */
+  readonly roles = computed(() => assignableRoles(this.model()?.anrede ?? ''));
   readonly passwordHint = PASSWORD_HINT;
   readonly usernameHint = USERNAME_HINT;
   readonly middleNameHint = MIDDLE_NAME_HINT;
@@ -88,6 +92,7 @@ export class PersonBearbeiten implements OnInit {
     this.editing.set(p);
     this.zweitnameOffen.set(!!p.middleName);
     this.model.set({
+      anrede: p.anrede ?? '',
       firstName: p.firstName,
       middleName: p.middleName ?? '',
       lastName: p.lastName,
@@ -111,7 +116,17 @@ export class PersonBearbeiten implements OnInit {
   }
 
   set<K extends keyof PersonForm>(key: K, value: PersonForm[K]): void {
-    this.model.update((m) => (m ? { ...m, [key]: value } : m));
+    this.model.update((m) => {
+      if (!m) {
+        return m;
+      }
+      const neu = { ...m, [key]: value };
+      if (key === 'anrede') {
+        // Kein Gendern: Beruf passend zur Anrede (Fachinformatiker ↔ Fachinformatikerin)
+        neu.beruf = berufFuer(neu.beruf, neu.anrede);
+      }
+      return neu;
+    });
   }
 
   speichern(): void {
@@ -130,6 +145,7 @@ export class PersonBearbeiten implements OnInit {
     this.modalError.set('');
     this.service
       .update(p.id, {
+        anrede: m.anrede as Anrede,
         firstName: m.firstName.trim(),
         middleName: emptyToNull(m.middleName),
         lastName: m.lastName.trim(),

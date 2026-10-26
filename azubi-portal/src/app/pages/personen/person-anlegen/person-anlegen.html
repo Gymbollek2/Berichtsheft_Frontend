@@ -3,7 +3,7 @@
     <div>
       <a routerLink="/person-bearbeiten" class="small d-inline-block mb-2"><i class="fa-solid fa-arrow-left me-1"></i>Alle Personen</a>
       <h1 class="page-title">Person anlegen</h1>
-      <p class="page-subtitle">Legt eine Person mit Zugang an. Azubis und Studierende bekommen automatisch alle Lernziele zugewiesen.</p>
+      <p class="page-subtitle">Legt eine Person mit Zugang an. Azubis und duale Studenten bekommen automatisch alle Lernziele zugewiesen.</p>
     </div>
   </div>
 
@@ -22,7 +22,16 @@
   <form class="panel" (ngSubmit)="speichern()" novalidate>
     <h2 class="section-title">Person</h2>
     <div class="row g-3 mb-4">
-      <div [class.col-md-6]="!zweitnameOffen()" [class.col-md-4]="zweitnameOffen()">
+      <div class="col-md-2">
+        <label class="form-label" for="anrede">Anrede *</label>
+        <select id="anrede" class="form-select" name="anrede" required [ngModel]="model().anrede" (ngModelChange)="set('anrede', $event)">
+          <option value="" disabled>Bitte wählen</option>
+          @for (a of anreden; track a[0]) {
+            <option [value]="a[0]">{{ a[1] }}</option>
+          }
+        </select>
+      </div>
+      <div [class.col-md-5]="!zweitnameOffen()" [class.col-md-4]="zweitnameOffen()">
         <label class="form-label" for="firstName">Vorname *</label>
         <div class="input-group">
           <input id="firstName" class="form-control" name="firstName" required [ngModel]="model().firstName" (ngModelChange)="set('firstName', $event)" />
@@ -34,7 +43,7 @@
         </div>
       </div>
       @if (zweitnameOffen()) {
-        <div class="col-md-4">
+        <div class="col-md-3">
           <label class="form-label" for="middleName">Zweitname</label>
           <div class="input-group">
             <input id="middleName" class="form-control" name="middleName" [ngModel]="model().middleName" (ngModelChange)="set('middleName', $event)" />
@@ -45,14 +54,14 @@
           <div class="form-text">{{ middleNameHint }}</div>
         </div>
       }
-      <div [class.col-md-6]="!zweitnameOffen()" [class.col-md-4]="zweitnameOffen()">
+      <div [class.col-md-5]="!zweitnameOffen()" [class.col-md-3]="zweitnameOffen()">
         <label class="form-label" for="lastName">Nachname *</label>
         <input id="lastName" class="form-control" name="lastName" required [ngModel]="model().lastName" (ngModelChange)="set('lastName', $event)" />
       </div>
       <div class="col-md-6">
         <label class="form-label" for="role">Rolle *</label>
         <select id="role" class="form-select" name="role" [ngModel]="model().role" (ngModelChange)="set('role', $event)">
-          @for (r of roles; track r[0]) {
+          @for (r of roles(); track r[0]) {
             <option [value]="r[0]">{{ r[1] }}</option>
           }
         </select>
@@ -70,7 +79,7 @@
           @if (model().role === 'ROLE_STUDENT') {
             <label class="form-label" for="beruf">Studiengang</label>
             <select id="beruf" class="form-select" name="beruf" [ngModel]="model().beruf" (ngModelChange)="set('beruf', $event)">
-              @for (s of studiengaenge; track s) {
+              @for (s of studiengaenge(); track s) {
                 <option [value]="s">{{ s }}</option>
               }
             </select>

@@ -7,7 +7,7 @@ import { Organigramm as OrganigrammDaten, OrganigrammMitglied } from '@app/core/
 import { errorMessage } from '@app/core/utils';
 
 /**
- * Ausbildungsorganigramm für alle: oben die Ausbilder, darunter die Azubis und Studierenden nach Ausbildungsjahr
+ * Ausbildungsorganigramm für alle: oben die Ausbilder, darunter die Azubis und dualen Studenten nach Ausbildungsjahr
  * (höchstes zuerst). Das Jahr berechnet der Server bei jedem Abruf aus dem Ausbildungsbeginn – wer ins nächste
  * Jahr wechselt, rückt automatisch auf; wer erst noch anfängt, erscheint ab dem Ausbildungsbeginn.
  */

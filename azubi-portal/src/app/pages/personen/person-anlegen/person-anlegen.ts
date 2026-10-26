@@ -3,7 +3,7 @@ import { FormsModule } from '@angular/forms';
 import { RouterLink } from '@angular/router';
 import { Auth } from '@app/services/auth';
 import { PersonService } from '@app/services/person.service';
-import { Person, isLearner } from '@app/core/models';
+import { ANREDEN, Anrede, Person, isLearner } from '@app/core/models';
 import { errorMessage } from '@app/core/utils';
 import {
   PASSWORD_HINT,
@@ -15,7 +15,8 @@ import {
   emptyToNull,
   generatePassword,
   MIDDLE_NAME_HINT,
-  STUDIENGAENGE,
+  berufFuer,
+  studiengaenge,
   validatePersonForm,
 } from '../person-form';
 
@@ -28,11 +29,13 @@ export class PersonAnlegen {
   private readonly auth = inject(Auth);
   private readonly service = inject(PersonService);
 
-  readonly roles = assignableRoles();
+  readonly anreden = ANREDEN;
   readonly passwordHint = PASSWORD_HINT;
   readonly usernameHint = USERNAME_HINT;
   readonly middleNameHint = MIDDLE_NAME_HINT;
-  readonly studiengaenge = STUDIENGAENGE;
+  /** Rollen und Studiengänge passend zur gewählten Anrede (Ausbilder/Ausbilderin, Informatiker/Informatikerin) */
+  readonly roles = computed(() => assignableRoles(this.model().anrede));
+  readonly studiengaenge = computed(() => studiengaenge(this.model().anrede));
   /** Zweitname-Feld eingeblendet – standardmaessig nur der Button im Vornamen-Feld. */
   readonly zweitnameOffen = signal(false);
   readonly model = signal<PersonForm>(emptyPersonForm());
@@ -45,13 +48,17 @@ export class PersonAnlegen {
   set<K extends keyof PersonForm>(key: K, value: PersonForm[K]): void {
     this.model.update((m) => {
       const neu = { ...m, [key]: value };
+      if (key === 'anrede') {
+        // Kein Gendern: Beruf bzw. Studiengang passend zur Anrede (Fachinformatiker ↔ Fachinformatikerin)
+        neu.beruf = berufFuer(neu.beruf, neu.anrede);
+      }
       if (key === 'role') {
-        // Duale Studierende wählen ihren Studiengang aus, alle anderen tragen den Ausbildungsberuf frei ein
-        const studiengang = STUDIENGAENGE.includes(neu.beruf);
+        // Duale Studenten wählen ihren Studiengang aus, alle anderen tragen den Ausbildungsberuf frei ein
+        const studiengang = [...studiengaenge('HERR'), ...studiengaenge('FRAU')].includes(neu.beruf);
         if (neu.role === 'ROLE_STUDENT' && !studiengang) {
-          neu.beruf = STUDIENGAENGE[0];
+          neu.beruf = studiengaenge(neu.anrede)[0];
         } else if (neu.role !== 'ROLE_STUDENT' && studiengang) {
-          neu.beruf = emptyPersonForm().beruf;
+          neu.beruf = berufFuer(emptyPersonForm().beruf, neu.anrede);
         }
       }
       return neu;
@@ -83,6 +90,7 @@ export class PersonAnlegen {
     this.error.set('');
     this.service
       .create({
+        anrede: m.anrede as Anrede,
         firstName: m.firstName.trim(),
         middleName: emptyToNull(m.middleName),
         lastName: m.lastName.trim(),

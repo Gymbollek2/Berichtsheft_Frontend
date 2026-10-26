@@ -6,11 +6,29 @@ export type LernzielStatus = 'STATUS_UNFINISHED' | 'STATUS_IN_PROGRESS' | 'STATU
 export type EintragArt = 'BETRIEB' | 'SCHULE' | 'URLAUB' | 'KRANK' | 'FEIERTAG' | 'SONSTIGES';
 export type BerichtStatus = 'ENTWURF' | 'EINGEREICHT' | 'ABGEZEICHNET' | 'ABGELEHNT';
 
-export const ROLE_LABELS: Record<Role, string> = {
-  ROLE_TRAINEE: 'Auszubildende/r',
-  ROLE_STUDENT: 'Duale/r Student/in',
-  ROLE_TRAINER: 'Ausbilder/in',
+/** Herr oder Frau – danach richten sich Rollen- und Berufsbezeichnungen (im Portal wird nicht gegendert). */
+export type Anrede = 'HERR' | 'FRAU';
+
+export const ANREDEN: [Anrede, string][] = [
+  ['HERR', 'Herr'],
+  ['FRAU', 'Frau'],
+];
+
+const ROLLEN: Record<Role, { herr: string; frau: string; mehrzahl: string }> = {
+  ROLE_TRAINEE: { herr: 'Auszubildender', frau: 'Auszubildende', mehrzahl: 'Auszubildende' },
+  ROLE_STUDENT: { herr: 'Dualer Student', frau: 'Duale Studentin', mehrzahl: 'Duale Studenten' },
+  ROLE_TRAINER: { herr: 'Ausbilder', frau: 'Ausbilderin', mehrzahl: 'Ausbilder' },
 };
+
+/** Rollenbezeichnung passend zur Anrede, z. B. "Ausbilderin"; ohne Anrede die männliche Form. */
+export function rollenLabel(role: Role, anrede?: Anrede | '' | null): string {
+  return anrede === 'FRAU' ? ROLLEN[role].frau : ROLLEN[role].herr;
+}
+
+/** Mehrzahl für Filter und Überschriften, z. B. "Duale Studenten". */
+export function rollenMehrzahl(role: Role): string {
+  return ROLLEN[role].mehrzahl;
+}
 
 export const KIND_LABELS: Record<Kind, string> = {
   KIND_GENERAL: 'Richtlernziel',
@@ -60,7 +78,7 @@ export const ANWESEND: EintragArt[] = ['BETRIEB', 'SCHULE', 'SONSTIGES'];
 export const ABWESEND: EintragArt[] = ['URLAUB', 'KRANK', 'FEIERTAG'];
 export const MAX_STUNDEN = 10;
 
-/** Ausbilder/innen dürfen alles (eine eigene Admin-Rolle gibt es nicht). */
+/** Ausbilder dürfen alles (eine eigene Admin-Rolle gibt es nicht). */
 export function isStaff(role: Role | undefined | null): boolean {
   return role === 'ROLE_TRAINER';
 }
@@ -74,6 +92,7 @@ export interface Person {
   firstName: string;
   lastName: string;
   middleName: string | null;
+  anrede: Anrede | null;
   fullName: string;
   role: Role;
   roleLabel: string;
@@ -106,6 +125,7 @@ export interface PersonCreateRequest {
   firstName: string;
   lastName: string;
   middleName?: string | null;
+  anrede?: Anrede | null;
   role: Role;
   username?: string | null;
   password: string;
@@ -118,6 +138,7 @@ export interface PersonUpdateRequest {
   firstName: string;
   lastName: string;
   middleName?: string | null;
+  anrede?: Anrede | null;
   role: Role;
   username: string;
   beruf?: string | null;
@@ -199,6 +220,8 @@ export interface Wochenbericht {
   id: number | null;
   personId: number;
   personName: string;
+  /** Rolle passend zur Anrede, z. B. "Auszubildende" (für die Unterschriftszeile im Ausdruck). */
+  rolle: string;
   beruf: string | null;
   ausbildungsjahr: number;
   weekStart: string;

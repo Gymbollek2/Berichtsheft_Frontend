@@ -10,7 +10,7 @@
     @if (daten(); as d) {
       <div class="kennzahlen" aria-label="Übersicht">
         <span><strong class="num">{{ d.ausbilder.length }}</strong> Ausbilder</span>
-        <span><strong class="num">{{ anzahlLernende() }}</strong> Azubis &amp; Studierende</span>
+        <span><strong class="num">{{ anzahlLernende() }}</strong> Azubis &amp; duale Studenten</span>
       </div>
     }
   </div>
@@ -61,7 +61,7 @@
         </section>
       } @empty {
         <section class="ebene">
-          <p class="leer">Gerade ist niemand in Ausbildung. Neue Azubis und Studierende erscheinen hier ab ihrem Ausbildungsbeginn.</p>
+          <p class="leer">Gerade ist niemand in Ausbildung. Neue Azubis und duale Studenten erscheinen hier ab ihrem Ausbildungsbeginn.</p>
         </section>
       }
     </div>
